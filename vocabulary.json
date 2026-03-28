@@ -2,7 +2,7 @@
   {"id": 1, "word": "a, an", "translation": "անորոշ հոդ", "audio": "audio/a_an.mp3"},
   {"id": 2, "word": "about", "translation": "մոտ, մասին", "audio": "audio/about.mp3"},
   {"id": 3, "word": "above", "translation": "վերևում", "audio": "audio/above.mp3"},
-  {"id": 4, "word": "across", "translation": "미ջով, հակառակ կողմում", "audio": "audio/across.mp3"},
+  {"id": 4, "word": "across", "translation": "միջով, հակառակ կողմում", "audio": "audio/across.mp3"},
   {"id": 5, "word": "action", "translation": "գործողություն", "audio": "audio/action.mp3"},
   {"id": 6, "word": "activity", "translation": "գործունեություն", "audio": "audio/activity.mp3"},
   {"id": 7, "word": "actor", "translation": "դերասան", "audio": "audio/actor.mp3"},
@@ -298,7 +298,7 @@
   {"id": 297, "word": "football", "translation": "ֆուտբոլ", "audio": "audio/football.mp3"},
   {"id": 298, "word": "for", "translation": "համար", "audio": "audio/for.mp3"},
   {"id": 299, "word": "forget", "translation": "մոռանալ", "audio": "audio/forget.mp3"},
-  {"id": 300, "word": "form", "translation": "ձև / ձևաթուղթ", "audio": "audio/form.  ,
+  {"id": 300, "word": "form", "translation": "ձև / ձևաթուղթ", "audio": "audio/form.mp3"},
   {"id": 301, "word": "four", "translation": "չորս", "audio": "audio/four.mp3"},
   {"id": 302, "word": "fourteen", "translation": "տասնչորս", "audio": "audio/fourteen.mp3"},
   {"id": 303, "word": "fourth", "translation": "չորրորդ", "audio": "audio/fourth.mp3"},
@@ -598,7 +598,7 @@
   {"id": 597, "word": "potato", "translation": "կարտոֆիլ", "audio": "audio/potato.mp3"},
   {"id": 598, "word": "pound", "translation": "ֆունտ", "audio": "audio/pound.mp3"},
   {"id": 599, "word": "practice", "translation": "պրակտիկա", "audio": "audio/practice.mp3"},
-  {"id": 600, "word": "prefer", "translation": "նախընտրել", "audio": "audio/prefer.  ,
+  {"id": 600, "word": "prefer", "translation": "նախընտրել", "audio": "audio/prefer.mp3"},
   {"id": 601, "word": "prepare", "translation": "պատրաստել", "audio": "audio/prepare.mp3"},
   {"id": 602, "word": "present", "translation": "ներկա / նվեր", "audio": "audio/present.mp3"},
   {"id": 603, "word": "pretty", "translation": "սիրուն", "audio": "audio/pretty.mp3"},
@@ -896,4 +896,3 @@
   {"id": 895, "word": "zero", "translation": "զրո", "audio": "audio/zero.mp3"},
   {"id": 896, "word": "zoo", "translation": "կենդանաբանական այգի", "audio": "audio/zoo.mp3"}
 ]
- 
