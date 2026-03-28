@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Usanim - English A1</title>
+    <title>Usanim - English A1 (895 Words)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #f8fafc; user-select: none; touch-action: manipulation; }
@@ -94,12 +94,12 @@
 
         async function initApp() {
             try {
-                // Փորձում ենք բեռնել JSON-ը, եթե չկա՝ ստեղծում ենք դատարկ զանգված
-                const response = await fetch('./vocabulary.json').catch(() => null);
-                const data = response ? await response.json() : [];
+                const response = await fetch('./vocabulary.json');
+                if (!response.ok) throw new Error("File not found");
+                const data = await response.json();
                 
                 words = data.map((item, index) => ({
-                    id: index,
+                    id: item.id || index,
                     en: item.word,
                     hy: item.translation,
                     tr: item.transcription || "",
@@ -111,7 +111,7 @@
                 updateOverallProgress();
             } catch (error) {
                 console.error("Init Error:", error);
-                document.getElementById('progress-text').innerText = "Տվյալները բացակայում են";
+                document.getElementById('progress-text').innerText = "Տվյալները բացակայում են կամ սխալ են";
             }
         }
 
@@ -139,16 +139,6 @@
 
         function speak(text) {
             window.speechSynthesis.cancel();
-            const wordObj = words.find(w => w.en === text);
-            if (wordObj && wordObj.audio && wordObj.audio.trim() !== "") {
-                const audio = new Audio(wordObj.audio);
-                audio.play().catch(() => playFallbackTTS(text));
-            } else {
-                playFallbackTTS(text);
-            }
-        }
-
-        function playFallbackTTS(text) {
             const msg = new SpeechSynthesisUtterance(text);
             msg.lang = 'en-US';
             msg.rate = 0.9;
@@ -189,7 +179,6 @@
             }
         }
 
-        // --- STAGES RENDER LOGIC (Optimized) ---
         function renderStage1() {
             const container = document.getElementById('content');
             if(activeList.length === 0 || activeIndex >= activeList.length) {
@@ -223,12 +212,9 @@
         function renderLearningStages() {
             const container = document.getElementById('content');
             if (activeStage === 3) { renderMatch5(); return; }
-            
-            // Եթե ցուցակը դատարկվեց, թարմացնել ակտիվ ցուցակը հաջորդ 10 բառով
             if (activeList.length === 0) {
                 activeList = words.filter(w => w.score < 10).slice(0, 10);
             }
-
             if (activeList.length === 0) {
                 container.innerHTML = `<div class='text-center p-10'><h2 class='text-xl font-bold mb-4 text-emerald-600'>Այս փուլն ավարտված է: 🎉</h2><button onclick='exitToMenu()' class='bg-indigo-600 text-white px-6 py-2 rounded-xl'>Մենյու</button></div>`;
                 return;
@@ -251,7 +237,7 @@
                 speak(word.en);
             } else {
                 const isListen = activeStage === 6;
-                const isTrans = activeStage === 5; // En -> Hy
+                const isTrans = activeStage === 5;
                 const correctVal = isTrans ? word.hy : word.en;
 
                 area.innerHTML = `
@@ -291,15 +277,12 @@
             }
         }
 
-        // --- MATCHING 5-5 ---
         function renderMatch5() {
             const container = document.getElementById('content');
             const batch = activeList.slice(0, 5);
             if(batch.length === 0) { exitToMenu(); return; }
-
             const enL = [...batch].sort(() => 0.5 - Math.random());
             const hyL = [...batch].sort(() => 0.5 - Math.random());
-            
             container.innerHTML = `
                 <p class="mb-4 text-xs font-bold text-gray-400">ԳՏԻՐ ԶՈՒՅԳԵՐԸ</p>
                 <div class="grid grid-cols-2 gap-3 w-full">
@@ -310,43 +293,24 @@
 
         function handleM(el) {
             if(el.classList.contains('match-correct') || el === matchSelected) return;
-            
-            if(!matchSelected) {
-                matchSelected = el;
-                el.classList.add('match-selected');
-            } else {
+            if(!matchSelected) { matchSelected = el; el.classList.add('match-selected'); }
+            else {
                 if(matchSelected.dataset.id === el.dataset.id && matchSelected.dataset.type !== el.dataset.type) {
                     el.classList.add('match-correct');
                     matchSelected.classList.add('match-correct');
-                    speak(words[el.dataset.id].en);
+                    speak(words.find(w => w.id == el.dataset.id).en);
                     matchSelected = null;
-                    
                     if(document.querySelectorAll('.match-correct').length === (activeList.slice(0, 5).length * 2)) {
                         activeList.slice(0, 5).forEach(w => w.score++);
                         saveProgress();
-                        setTimeout(() => { 
-                            activeList = words.filter(w => w.score < 10).slice(0, 10);
-                            renderMatch5(); 
-                        }, 800);
+                        setTimeout(() => { activeList = words.filter(w => w.score < 10).slice(0, 10); renderMatch5(); }, 800);
                     }
                 } else {
-                    el.classList.add('match-wrong');
-                    matchSelected.classList.add('match-wrong');
+                    el.classList.add('match-wrong'); matchSelected.classList.add('match-wrong');
                     const prev = matchSelected;
-                    setTimeout(() => {
-                        el.classList.remove('match-wrong', 'match-selected');
-                        prev.classList.remove('match-wrong', 'match-selected');
-                    }, 500);
+                    setTimeout(() => { el.classList.remove('match-wrong', 'match-selected'); prev.classList.remove('match-wrong', 'match-selected'); }, 500);
                     matchSelected = null;
                 }
-            }
-        }
-
-        // --- EXAM & RESET ---
-        function resetData() {
-            if(confirm("Ջնջե՞լ ամբողջ առաջընթացը:")) {
-                localStorage.removeItem('usanim_data');
-                location.reload();
             }
         }
 
@@ -383,12 +347,8 @@
         }
 
         function handleExamAns(btn, chosen, correct) {
-            if(chosen === correct) {
-                examScore++;
-                btn.classList.add('bg-emerald-500', 'text-white');
-            } else {
-                btn.classList.add('bg-rose-500', 'text-white');
-            }
+            if(chosen === correct) { examScore++; btn.classList.add('bg-emerald-500', 'text-white'); }
+            else { btn.classList.add('bg-rose-500', 'text-white'); }
             setTimeout(() => { activeIndex++; renderExam(); }, 300);
         }
 
@@ -408,6 +368,13 @@
                     </div>
                 </div>
             `).join('') + `</div>`;
+        }
+
+        function resetData() {
+            if(confirm("Ջնջե՞լ ամբողջ առաջընթացը:")) {
+                localStorage.removeItem('usanim_data');
+                location.reload();
+            }
         }
 
         initApp();
