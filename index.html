@@ -38,12 +38,18 @@
                 <h1 class="font-bold text-xl">Usanim A1</h1>
                 <p id="progress-text" class="text-xs opacity-80">Բեռնվում է...</p>
             </div>
-            <button onclick="resetData()" class="text-xs bg-indigo-700 hover:bg-indigo-800 px-3 py-1.5 rounded-lg transition">Reset</button>
+            <div class="flex gap-2">
+                <button onclick="exportData()" class="text-[10px] bg-indigo-500 hover:bg-indigo-400 px-2 py-1 rounded-md transition">Save 💾</button>
+                <button onclick="importData()" class="text-[10px] bg-indigo-500 hover:bg-indigo-400 px-2 py-1 rounded-md transition">Load 📂</button>
+                <button onclick="resetData()" class="text-[10px] bg-rose-600 hover:bg-rose-700 px-2 py-1 rounded-md transition">Reset 🗑️</button>
+            </div>
         </div>
         <div class="max-w-4xl mx-auto w-full bg-indigo-900 rounded-full h-2">
             <div id="progress-bar" class="bg-emerald-400 h-2 rounded-full" style="width: 0%"></div>
         </div>
     </div>
+
+    <input type="file" id="fileInput" class="hidden" accept=".json" onchange="handleFileUpload(event)">
 
     <div id="menu" class="max-w-4xl mx-auto p-4 grid grid-cols-2 md:grid-cols-4 gap-4">
         <button onclick="openStage(1)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center border">
@@ -117,7 +123,7 @@
                     hy: item.translation,
                     tr: item.transcription || "",
                     score: 0,
-                    isInstant: false // Նշում՝ արդյոք սեղմվել է "ԳԻՏԵՄ"
+                    isInstant: false 
                 }));
                 loadProgress();
                 updateOverallProgress();
@@ -148,6 +154,43 @@
             localStorage.setItem('usanim_data', JSON.stringify(progress));
             localStorage.setItem('usanim_skipped', JSON.stringify(skippedList.map(w => w.id)));
             updateOverallProgress();
+        }
+
+        // --- BACKUP ՖՈՒՆԿՑԻԱՆԵՐ ---
+        function exportData() {
+            const data = {
+                progress: JSON.parse(localStorage.getItem('usanim_data')),
+                skipped: JSON.parse(localStorage.getItem('usanim_skipped')),
+                date: new Date().toLocaleDateString()
+            };
+            const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `usanim_backup_${data.date}.json`;
+            a.click();
+        }
+
+        function importData() {
+            document.getElementById('fileInput').click();
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.progress) {
+                        localStorage.setItem('usanim_data', JSON.stringify(data.progress));
+                        localStorage.setItem('usanim_skipped', JSON.stringify(data.skipped || []));
+                        alert("Առաջընթացը հաջողությամբ վերականգնվեց։");
+                        location.reload();
+                    }
+                } catch (err) { alert("Սխալ ֆայլի ձևաչափ։"); }
+            };
+            reader.readAsText(file);
         }
 
         function updateOverallProgress() {
@@ -201,7 +244,6 @@
                 if (activeList.length === 0) { skippedList.length > 0 ? renderRetryOption() : renderFinishedAll(); return; }
                 renderStage1();
             } else if (activeStage >= 2 && activeStage <= 6) {
-                // Այս փուլերում բերում ենք այն բառերը, որոնք դեռ 10 միավոր չունեն
                 activeList = words.filter(w => w.score < 10);
                 if (activeList.length === 0) { renderFinishedAll(); return; }
                 if (activeStage === 3) renderMatch5();
@@ -248,7 +290,7 @@
             const currentWord = activeList[activeIndex];
             if(known) { 
                 currentWord.score = 10; 
-                currentWord.isInstant = true; // Նշում ենք որպես միանգամից իմացած
+                currentWord.isInstant = true; 
                 skippedList = skippedList.filter(w => w.id !== currentWord.id); 
             } else { 
                 if (!skippedList.some(w => w.id === currentWord.id)) skippedList.push(currentWord); 
@@ -319,7 +361,7 @@
             const word = activeList.slice(0, 10)[activeIndex % 10];
             if(chosen === correct) { 
                 btn.classList.add('bg-emerald-500', 'text-white', 'border-emerald-600'); 
-                word.score = Math.min(10, word.score + 2); // Ավելացնում ենք 2 միավոր (1 աստղ)
+                word.score = Math.min(10, word.score + 2); 
             } else { 
                 btn.classList.add('bg-rose-500', 'text-white', 'border-rose-600'); 
                 document.querySelectorAll('#options-grid button').forEach(b => { if(b.innerText === correct) b.classList.add('border-emerald-500', 'bg-emerald-50'); });
@@ -334,7 +376,7 @@
             const word = activeList.slice(0, 10)[activeIndex % 10];
             if(input.value.trim().toLowerCase() === correct.toLowerCase()) { 
                 input.classList.add('bg-emerald-500', 'text-white', 'border-emerald-600'); 
-                word.score = Math.min(10, word.score + 2); // Ավելացնում ենք 2 միավոր
+                word.score = Math.min(10, word.score + 2); 
             } else { 
                 input.classList.add('bg-rose-500', 'text-white', 'border-rose-600'); 
                 feedback.innerHTML = `<span class="text-rose-600">Ճիշտը՝</span> <span class="text-emerald-600 underline">${correct}</span>`; 
