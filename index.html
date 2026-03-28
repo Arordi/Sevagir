@@ -2,382 +2,542 @@
 <html lang="hy">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Usanim - English A1 (895 Words)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Usanim A1 – 896 բառ | JSON տարբերակ</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f8fafc; user-select: none; touch-action: manipulation; }
-        .stage-card { transition: all 0.2s ease; border: 2px solid transparent; cursor: pointer; }
-        .stage-card:active { transform: scale(0.95); background-color: #f1f5f9; }
-        .match-box { border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px; text-align: center; cursor: pointer; min-height: 60px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; }
-        .match-selected { border-color: #3b82f6; background-color: #eff6ff; }
-        .match-correct { border-color: #22c55e; background-color: #f0fdf4; pointer-events: none; opacity: 0.6; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: #f8fafc; user-select: none; }
+        .stage-card {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            cursor: pointer;
+            animation: fadeInUp 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1) backwards;
+            animation-delay: calc(var(--order, 0) * 0.05s);
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .stage-card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -12px rgba(0,0,0,0.2); }
+        .stage-card:active { transform: scale(0.98); }
+        .learned-badge { background: #22c55e; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; }
+        .match-box { border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px; text-align: center; cursor: pointer; min-height: 60px; display: flex; align-items: center; justify-content: center; font-weight: 600; transition: all 0.1s; }
+        .match-selected { border-color: #3b82f6; background-color: #eff6ff; transform: scale(0.98); }
+        .match-correct { border-color: #22c55e; background-color: #f0fdf4; pointer-events: none; opacity: 0.7; text-decoration: line-through; }
         .match-wrong { border-color: #ef4444; background-color: #fef2f2; animation: shake 0.3s; }
-        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
-        input { font-size: 16px !important; }
-        #progress-bar { transition: width 0.5s ease-in-out; }
+        @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-5px);} 75%{transform:translateX(5px);} }
+        .flashcard-btn { transition: all 0.2s; }
+        .flashcard-btn:active { transform: translateY(2px); }
+        .dict-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(3px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.2s;
+        }
+        .dict-modal.show { opacity: 1; visibility: visible; }
+        .dict-card {
+            background: white; max-width: 90%; width: 500px; border-radius: 32px;
+            padding: 24px; box-shadow: 0 25px 40px rgba(0,0,0,0.3);
+            transform: scale(0.95); transition: transform 0.2s;
+        }
+        .dict-modal.show .dict-card { transform: scale(1); }
+        .dict-word { font-size: 2rem; font-weight: 800; color: #4f46e5; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 16px; }
+        .dict-pronounce { font-family: monospace; background: #f1f5f9; display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.9rem; }
+        .dict-def { margin: 16px 0; color: #1e293b; }
+        .dict-example { font-style: italic; color: #475569; background: #f8fafc; padding: 10px; border-radius: 16px; margin-top: 12px; }
+        .error-banner { background: #fee2e2; border-left: 4px solid #ef4444; padding: 12px; margin-bottom: 16px; border-radius: 12px; color: #b91c1c; font-size: 0.9rem; }
     </style>
 </head>
 <body class="max-w-md mx-auto bg-white min-h-screen shadow-2xl relative">
 
-    <div class="bg-indigo-600 p-4 text-white sticky top-0 z-50 shadow-md">
-        <div class="flex justify-between items-center mb-2">
-            <div onclick="exitToMenu()" class="cursor-pointer">
-                <h1 class="font-bold text-lg">Usanim A1</h1>
-                <p id="progress-text" class="text-[10px] opacity-80">Բեռնվում է...</p>
-            </div>
-            <button onclick="resetData()" class="text-[10px] bg-indigo-700 hover:bg-indigo-800 px-2 py-1 rounded transition">Reset</button>
-        </div>
-        <div class="w-full bg-indigo-900 rounded-full h-1.5">
-            <div id="progress-bar" class="bg-emerald-400 h-1.5 rounded-full" style="width: 0%"></div>
-        </div>
+<div class="bg-indigo-600 p-4 text-white sticky top-0 z-50 flex justify-between items-center shadow-md">
+    <div>
+        <h1 class="font-bold text-lg hover:cursor-pointer" onclick="exitToMenu()">Usanim A1</h1>
+        <p id="progress-text" class="text-[10px] opacity-80">Բեռնվում է...</p>
     </div>
+    <button onclick="resetData()" class="text-[10px] bg-indigo-700 px-2 py-1 rounded">Reset</button>
+</div>
 
-    <div id="menu" class="p-4 grid grid-cols-2 gap-4">
-        <button onclick="openStage(1)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center">
-            <span class="text-3xl block mb-2">🗂️</span>
-            <span class="font-bold text-sm">Փուլ 1</span>
-            <p class="text-[10px] text-gray-400">Flashcards</p>
-        </button>
-        <button onclick="openStage(2)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center">
-            <span class="text-3xl block mb-2">🔘</span>
-            <span class="font-bold text-sm">Փուլ 2</span>
-            <p class="text-[10px] text-gray-400">Ընտրություն</p>
-        </button>
-        <button onclick="openStage(3)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center">
-            <span class="text-3xl block mb-2">🧩</span>
-            <span class="font-bold text-sm">Փուլ 3</span>
-            <p class="text-[10px] text-gray-400">Match 5-5</p>
-        </button>
-        <button onclick="openStage(4)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center">
-            <span class="text-3xl block mb-2">⌨️</span>
-            <span class="font-bold text-sm">Փուլ 4</span>
-            <p class="text-[10px] text-gray-400">Ուղղագրություն</p>
-        </button>
-        <button onclick="openStage(5)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center">
-            <span class="text-3xl block mb-2">🔄</span>
-            <span class="font-bold text-sm">Փուլ 5</span>
-            <p class="text-[10px] text-gray-400">Թարգմանություն</p>
-        </button>
-        <button onclick="openStage(6)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center">
-            <span class="text-3xl block mb-2">🎧</span>
-            <span class="font-bold text-sm">Փուլ 6</span>
-            <p class="text-[10px] text-gray-400">Լսողություն</p>
-        </button>
-        <button onclick="openStage(7)" class="stage-card p-6 bg-indigo-50 border-indigo-200 rounded-2xl col-span-2 shadow-inner flex flex-col items-center">
-            <span class="text-3xl block mb-1">🎓</span>
-            <span class="font-bold text-indigo-700">Փուլ 7: Քննություն (100)</span>
-        </button>
-        <button onclick="openStage(8)" class="stage-card p-6 bg-emerald-50 border-emerald-200 rounded-2xl col-span-2 shadow-inner flex flex-col items-center">
-            <span class="text-3xl block mb-1">📊</span>
-            <span class="font-bold text-emerald-700">Փուլ 8: Արդյունքներ</span>
-        </button>
+<div id="menu" class="p-4 grid grid-cols-2 gap-4">
+    <button onclick="openStage(1)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center" style="--order:1"><span class="text-3xl">🗂️</span><span class="font-bold text-sm">Փուլ 1</span><p class="text-[10px] text-gray-400">Flashcards</p></button>
+    <button onclick="openStage(2)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center" style="--order:2"><span class="text-3xl">🔘</span><span class="font-bold text-sm">Փուլ 2</span><p class="text-[10px] text-gray-400">Ընտրություն</p></button>
+    <button onclick="openStage(3)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center" style="--order:3"><span class="text-3xl">🧩</span><span class="font-bold text-sm">Փուլ 3</span><p class="text-[10px] text-gray-400">Match 5-5</p></button>
+    <button onclick="openStage(4)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center" style="--order:4"><span class="text-3xl">⌨️</span><span class="font-bold text-sm">Փուլ 4</span><p class="text-[10px] text-gray-400">Ուղղագրություն</p></button>
+    <button onclick="openStage(5)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center" style="--order:5"><span class="text-3xl">🔄</span><span class="font-bold text-sm">Փուլ 5</span><p class="text-[10px] text-gray-400">Թարգմանություն</p></button>
+    <button onclick="openStage(6)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center" style="--order:6"><span class="text-3xl">🎧</span><span class="font-bold text-sm">Փուլ 6</span><p class="text-[10px] text-gray-400">Լսողություն</p></button>
+    <button onclick="openStage(7)" class="stage-card p-4 bg-indigo-50 border-indigo-200 rounded-2xl flex flex-col items-center" style="--order:7"><span class="text-3xl">🎓</span><span class="font-bold text-indigo-700">Փուլ 7</span><p class="text-[10px] text-indigo-400 font-medium">Քննություն (100)</p></button>
+    <button onclick="openStage(8)" class="stage-card p-4 bg-emerald-50 border-emerald-200 rounded-2xl flex flex-col items-center" style="--order:8"><span class="text-3xl">📊</span><span class="font-bold text-emerald-700">Փուլ 8</span><p class="text-[10px] text-emerald-400 font-medium">Բառացանկ</p></button>
+</div>
+
+<div id="view" class="hidden p-4 min-h-[80vh]">
+    <div class="flex justify-between items-center mb-6">
+        <button onclick="exitToMenu()" class="text-indigo-600 font-bold flex items-center"><span class="mr-1">🏠</span> Մենյու</button>
+        <div id="view-title" class="text-xs font-bold text-gray-400 uppercase tracking-widest"></div>
     </div>
+    <div id="content" class="flex flex-col items-center"></div>
+</div>
 
-    <div id="view" class="hidden p-4 min-h-[80vh]">
-        <div class="flex justify-between items-center mb-6">
-            <button onclick="exitToMenu()" class="text-indigo-600 font-bold flex items-center">
-                <span class="mr-1">🏠</span> Մենյու
-            </button>
-            <div id="view-title" class="text-xs font-bold text-gray-400 uppercase tracking-widest"></div>
-        </div>
-        <div id="content" class="flex flex-col items-center w-full"></div>
+<div id="dictModal" class="dict-modal" onclick="closeDictionary()">
+    <div class="dict-card" onclick="event.stopPropagation()">
+        <div id="dictContent"><div class="dict-word">Loading...</div></div>
+        <button onclick="closeDictionary()" class="mt-4 bg-gray-200 px-4 py-2 rounded-full text-sm font-semibold w-full">Փակել</button>
     </div>
+</div>
 
-    <script>
-        let words = [];
-        let activeStage = 1;
-        let activeIndex = 0;
-        let activeList = [];
-        let matchSelected = null;
-        let examScore = 0;
+<script>
+    // ---------- Գլոբալ փոփոխականներ ----------
+    let words = [];            // կլցվի JSON-ից
+    let activeStage = 1;
+    let activeIndex = 0;
+    let activeList = [];
+    let examScore = 0;
+    let matchSelected = null;
+    let dataLoaded = false;
 
-        async function initApp() {
-            try {
-                const response = await fetch('./vocabulary.json');
-                if (!response.ok) throw new Error("File not found");
-                const data = await response.json();
-                
-                words = data.map((item, index) => ({
-                    id: item.id || index,
-                    en: item.word,
-                    hy: item.translation,
-                    tr: item.transcription || "",
-                    audio: item.audio || "",
-                    score: 0
-                }));
-
-                loadProgress();
-                updateOverallProgress();
-            } catch (error) {
-                console.error("Init Error:", error);
-                document.getElementById('progress-text').innerText = "Տվյալները բացակայում են կամ սխալ են";
-            }
+    // ---------- Save & Load ----------
+    function save() {
+        if (!dataLoaded) return;
+        const progress = {};
+        words.forEach(w => progress[w.id] = w.score);
+        localStorage.setItem('usanim_data', JSON.stringify(progress));
+        updateOverallProgress();
+    }
+    function loadProgress() {
+        if (!dataLoaded) return;
+        const saved = localStorage.getItem('usanim_data');
+        if(saved) {
+            const parsed = JSON.parse(saved);
+            words.forEach(w => { if(parsed[w.id] !== undefined) w.score = parsed[w.id]; });
         }
-
-        function loadProgress() {
-            const saved = localStorage.getItem('usanim_data');
-            if(saved) {
-                const parsed = JSON.parse(saved);
-                words.forEach(w => { if(parsed[w.id] !== undefined) w.score = parsed[w.id]; });
-            }
+        updateOverallProgress();
+    }
+    function resetData() {
+        if(confirm("Ջնջե՞լ ամբողջ առաջընթացը:")) {
+            localStorage.removeItem('usanim_data');
+            location.reload();
         }
+    }
+    function updateOverallProgress() {
+        if (!dataLoaded) return;
+        const learned = words.filter(w => w.score >= 10).length;
+        const progressText = document.getElementById('progress-text');
+        if(progressText) progressText.innerText = `Յուրացված: ${learned} / ${words.length}`;
+    }
+    function exitToMenu() {
+        document.getElementById('view').classList.add('hidden');
+        document.getElementById('menu').classList.remove('hidden');
+        window.speechSynthesis.cancel();
+    }
+    function openStage(num) {
+        if (!dataLoaded) {
+            alert("Տվյալները դեռ չեն բեռնվել։ Սպասեք կամ վերաբեռնեք էջը։");
+            return;
+        }
+        activeStage = num;
+        document.getElementById('menu').classList.add('hidden');
+        document.getElementById('view').classList.remove('hidden');
+        document.getElementById('view-title').innerText = num === 8 ? "ԲԱՌԱՐԱՆ" : `Փուլ ${num}`;
+        initStageLogic();
+    }
+    function speak(text) {
+        window.speechSynthesis.cancel();
+        const msg = new SpeechSynthesisUtterance();
+        msg.text = text;
+        msg.lang = 'en-US';
+        window.speechSynthesis.speak(msg);
+    }
 
-        function saveProgress() {
-            const progress = {};
-            words.forEach(w => progress[w.id] = w.score);
-            localStorage.setItem('usanim_data', JSON.stringify(progress));
+    // ---------- Dictionary (Free Dictionary API) ----------
+    async function lookupWord(word) {
+        const modal = document.getElementById('dictModal');
+        const contentDiv = document.getElementById('dictContent');
+        contentDiv.innerHTML = `<div class="dict-word">🔍 Բեռնվում է...</div><p class="text-gray-500">Ստուգում ենք բառարանը՝ <strong>${word}</strong></p>`;
+        modal.classList.add('show');
+        try {
+            const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
+            if (!response.ok) throw new Error('not found');
+            const data = await response.json();
+            const entry = data[0];
+            const meanings = entry.meanings;
+            let html = `<div class="dict-word">${entry.word} <span class="dict-pronounce">${entry.phonetic || ''}</span></div>`;
+            meanings.forEach(mean => {
+                const part = mean.partOfSpeech;
+                mean.definitions.slice(0, 2).forEach(def => {
+                    html += `<div class="dict-def"><span class="font-bold">${part}</span> — ${def.definition}</div>`;
+                    if (def.example) html += `<div class="dict-example">📌 ${def.example}</div>`;
+                });
+            });
+            if (meanings.length === 0) html += `<p>Սահմանում չի գտնվել:</p>`;
+            contentDiv.innerHTML = html;
+        } catch (err) {
+            contentDiv.innerHTML = `<div class="dict-word">⚠️ Չգտնվեց</div><p>«${word}» բառի համար բառարանում սահմանում չկա կամ ցանցի սխալ է:</p>`;
+        }
+    }
+    function closeDictionary() { document.getElementById('dictModal').classList.remove('show'); }
+
+    // ---------- Բեռնում JSON ----------
+    async function loadWordsFromJSON() {
+        try {
+            const response = await fetch('words.json');
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const jsonData = await response.json();
+            // JSON-ն ունի {id, word, translation, audio} – վերափոխում ենք ներքին ձևաչափի (en, hy, tr)
+            words = jsonData.map(item => ({
+                id: item.id,
+                en: item.word,
+                hy: item.translation,
+                tr: "",            // արտասանությունը կարող ենք դատարկ թողնել կամ ավելացնել առանձին
+                score: 0
+            }));
+            dataLoaded = true;
+            loadProgress();       // վերականգնել առաջընթացը localStorage-ից
             updateOverallProgress();
+            document.getElementById('progress-text').innerText = `Յուրացված: ${words.filter(w=>w.score>=10).length} / ${words.length}`;
+        } catch (err) {
+            console.error('JSON բեռնման սխալ:', err);
+            document.getElementById('progress-text').innerHTML = '<span class="text-red-300">Չհաջողվեց բեռնել words.json</span>';
+            const menuDiv = document.getElementById('menu');
+            menuDiv.innerHTML = `<div class="col-span-2 text-center p-6 bg-red-50 rounded-2xl border border-red-200"><p class="text-red-700">❌ Չհաջողվեց բեռնել բառերի ցանկը (words.json):</p><p class="text-sm text-red-600 mt-2">Ստուգեք ֆայլի առկայությունը կամ կոնսոլի սխալները:</p><button onclick="location.reload()" class="mt-4 bg-indigo-600 text-white px-4 py-2 rounded-xl">Վերաբեռնել</button></div>`;
         }
+    }
 
-        function updateOverallProgress() {
-            const learned = words.filter(w => w.score >= 10).length;
-            const percent = words.length > 0 ? (learned / words.length) * 100 : 0;
-            document.getElementById('progress-text').innerText = `Յուրացված: ${learned} / ${words.length}`;
-            document.getElementById('progress-bar').style.width = percent + "%";
+    // ---------- Stage Logic ----------
+    function initStageLogic() {
+        activeIndex = 0;
+        examScore = 0;
+        const container = document.getElementById('content');
+        container.innerHTML = "";
+        if(activeStage === 1) {
+            activeList = words.filter(w => w.score < 10);
+            renderStage1();
+        } else if (activeStage >= 2 && activeStage <= 6) {
+            activeList = words.filter(w => w.score < 10).slice(0, 10);
+            renderLearningStages();
+        } else if (activeStage === 7) {
+            activeList = [...words].sort(() => 0.5 - Math.random()).slice(0, 100);
+            renderExam();
+        } else if (activeStage === 8) {
+            renderStage8();
         }
+    }
 
-        function speak(text) {
-            window.speechSynthesis.cancel();
-            const msg = new SpeechSynthesisUtterance(text);
-            msg.lang = 'en-US';
-            msg.rate = 0.9;
-            window.speechSynthesis.speak(msg);
+    // STAGE 1
+    function renderStage1() {
+        const container = document.getElementById('content');
+        if(activeList.length === 0 || activeIndex >= activeList.length) {
+            container.innerHTML = `<div class='text-center p-10 flex flex-col items-center'><h2 class='text-xl font-bold mb-4 text-emerald-600'>Շնորհավոր: 🎉</h2><p class='mb-6'>Բոլոր բառերը յուրացված են:</p><button onclick='exitToMenu()' class='bg-indigo-600 text-white px-6 py-2 rounded-xl'>Հետ դեպի Մենյու</button></div>`;
+            return;
         }
+        const word = activeList[activeIndex];
+        container.innerHTML = `
+            <div class="mb-4 text-xs font-bold text-gray-400">ԲԱՌ ${activeIndex+1} / ${activeList.length}</div>
+            <div class="w-full max-w-sm bg-white border-2 border-indigo-100 rounded-3xl p-8 text-center shadow-lg mb-8 relative cursor-pointer" onclick="speak('${word.en}')">
+                <button class="absolute top-4 right-4 text-2xl" onclick="event.stopPropagation(); speak('${word.en}')">🔊</button>
+                <h2 class="text-6xl font-black text-indigo-600 mb-2 tracking-tight" onclick="event.stopPropagation(); lookupWord('${word.en}')" style="cursor:pointer" title="Սեղմեք բառարանը տեսնելու համար">${word.en}</h2>
+                <p class="text-blue-400 font-medium mb-6 text-xl">[${word.tr || '...'}]</p>
+                <hr class="mb-6 border-indigo-50">
+                <h3 class="text-4xl font-bold text-slate-800">${word.hy}</h3>
+            </div>
+            <div class="grid grid-cols-2 gap-4 w-full max-w-sm mb-6">
+                <button onclick="flashcardAction(true)" class="flashcard-btn flex items-center justify-center gap-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold py-4 rounded-2xl text-lg shadow"><span class="text-2xl">✅</span> ԳԻՏԵՄ</button>
+                <button onclick="flashcardAction(false)" class="flashcard-btn flex items-center justify-center gap-2 bg-rose-100 hover:bg-rose-200 text-rose-800 font-bold py-4 rounded-2xl text-lg shadow"><span class="text-2xl">❌</span> ՉԳԻՏԵՄ</button>
+            </div>
+            <button onclick="nextFlashcard()" class="w-full max-w-sm bg-slate-600 hover:bg-slate-700 text-white font-bold py-3 rounded-xl text-md transition active:scale-95 shadow-md">ԲԱՑ ԹՈՂՆԵԼ (ՀԱՋՈՐԴԸ)</button>
+        `;
+        speak(word.en);
+    }
+    function flashcardAction(known) {
+        const word = activeList[activeIndex];
+        if(known) word.score = 10;
+        else word.score = 0;
+        save();
+        activeList.splice(activeIndex, 1);
+        renderStage1();
+    }
+    function nextFlashcard() { activeIndex++; renderStage1(); }
 
-        function openStage(num) {
-            activeStage = num;
-            document.getElementById('menu').classList.add('hidden');
-            document.getElementById('view').classList.remove('hidden');
-            document.getElementById('view-title').innerText = num === 8 ? "ԱՐԴՅՈՒՆՔՆԵՐ" : `ՓՈՒԼ ${num}`;
-            initStageLogic();
+    // STAGES 2-6
+    function renderLearningStages() {
+        const container = document.getElementById('content');
+        if(activeStage === 3) { renderMatch5(); return; }
+        if(activeList.length === 0) {
+            container.innerHTML = `<div class='text-center p-10'><h2 class='text-xl font-bold mb-4 text-emerald-600'>Փուլն ավարտված է! 🎉</h2><button onclick='exitToMenu()' class='bg-indigo-600 text-white px-6 py-2 rounded-xl'>Հետ դեպի Մենյու</button></div>`;
+            return;
         }
+        const word = activeList[activeIndex % activeList.length];
+        container.innerHTML = `<div id="task-area" class="w-full flex flex-col items-center"></div>`;
+        const taskArea = document.getElementById('task-area');
 
-        function exitToMenu() {
-            document.getElementById('view').classList.add('hidden');
-            document.getElementById('menu').classList.remove('hidden');
-            window.speechSynthesis.cancel();
-        }
-
-        function initStageLogic() {
-            activeIndex = 0;
-            const container = document.getElementById('content');
-            container.innerHTML = "";
-
-            if(activeStage === 1) {
-                activeList = words.filter(w => w.score < 10);
-                renderStage1();
-            } else if (activeStage >= 2 && activeStage <= 6) {
-                activeList = words.filter(w => w.score < 10).slice(0, 10);
-                renderLearningStages();
-            } else if (activeStage === 7) {
-                examScore = 0;
-                activeList = [...words].sort(() => 0.5 - Math.random()).slice(0, 100);
-                renderExam();
-            } else if (activeStage === 8) {
-                renderStage8();
-            }
-        }
-
-        function renderStage1() {
-            const container = document.getElementById('content');
-            if(activeList.length === 0 || activeIndex >= activeList.length) {
-                container.innerHTML = `<div class='text-center p-10'><h2 class='text-xl font-bold mb-4 text-emerald-600'>🎉 Բոլորը յուրացված են</h2><button onclick='exitToMenu()' class='bg-indigo-600 text-white px-6 py-2 rounded-xl'>Մենյու</button></div>`;
-                return;
-            }
-            const word = activeList[activeIndex];
-            container.innerHTML = `
-                <div class="mb-4 text-[10px] font-bold text-gray-400 uppercase">Բառ ${activeIndex + 1} / ${activeList.length}</div>
-                <div class="w-full bg-white border-2 border-indigo-100 rounded-3xl p-8 text-center shadow-lg mb-6 cursor-pointer active:bg-indigo-50" onclick="speak('${word.en}')">
-                    <h2 class="text-5xl font-black text-indigo-600 mb-2">${word.en}</h2>
-                    <p class="text-blue-400 text-lg mb-4">${word.tr}</p>
-                    <hr class="mb-4 border-indigo-50">
-                    <h3 class="text-3xl font-bold text-slate-800">${word.hy}</h3>
-                </div>
-                <div class="grid grid-cols-2 gap-4 w-full">
-                    <button onclick="flashcardAction(true)" class="bg-emerald-500 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition">ԳԻՏԵՄ</button>
-                    <button onclick="flashcardAction(false)" class="bg-rose-500 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition">ՉԳԻՏԵՄ</button>
-                </div>
+        if(activeStage === 2) { // Multiple Choice
+            const otherOptions = words.filter(w => w.id !== word.id).sort(() => 0.5 - Math.random()).slice(0,3).map(w=>w.hy);
+            const options = [word.hy, ...otherOptions].sort(()=>0.5-Math.random());
+            taskArea.innerHTML = `
+                <div class="text-center mb-10 cursor-pointer" onclick="speak('${word.en}')"><p class="text-6xl font-black text-indigo-600 tracking-tight" onclick="event.stopPropagation(); lookupWord('${word.en}')" style="cursor:pointer">${word.en}</p><p class="text-blue-400 font-medium text-xl">[${word.tr}]</p></div>
+                <div class="grid grid-cols-1 gap-4 w-full max-w-sm">${options.map(opt => `<button onclick="checkAnswer(this, '${opt}', '${word.hy}')" class="bg-white border-2 border-gray-100 p-5 rounded-2xl font-semibold text-lg hover:border-indigo-200">${opt}</button>`).join('')}</div>
             `;
             speak(word.en);
         }
-
-        function flashcardAction(known) {
-            const word = activeList[activeIndex];
-            if(known) { word.score = 10; saveProgress(); }
-            activeIndex++; 
-            renderStage1();
+        if(activeStage === 4) { // Spelling
+            taskArea.innerHTML = `
+                <div class="text-center mb-8"><p class="text-4xl font-bold text-slate-800">${word.hy}</p></div>
+                <input type="text" id="spell-input" class="w-full max-w-sm p-5 border-2 border-gray-200 rounded-2xl text-center text-3xl font-black mb-5 uppercase tracking-wider focus:border-indigo-400 outline-none shadow-inner" autofocus autocomplete="off">
+                <button onclick="checkSpelling('${word.en}')" class="w-full max-w-sm bg-indigo-600 hover:bg-indigo-700 text-white p-5 rounded-2xl font-bold text-lg">ՍՏՈՒԳԵԼ</button>
+            `;
+            setTimeout(()=>document.getElementById('spell-input').focus(),100);
         }
-
-        function renderLearningStages() {
-            const container = document.getElementById('content');
-            if (activeStage === 3) { renderMatch5(); return; }
-            if (activeList.length === 0) {
-                activeList = words.filter(w => w.score < 10).slice(0, 10);
-            }
-            if (activeList.length === 0) {
-                container.innerHTML = `<div class='text-center p-10'><h2 class='text-xl font-bold mb-4 text-emerald-600'>Այս փուլն ավարտված է: 🎉</h2><button onclick='exitToMenu()' class='bg-indigo-600 text-white px-6 py-2 rounded-xl'>Մենյու</button></div>`;
-                return;
-            }
-
-            const word = activeList[activeIndex % activeList.length];
-            container.innerHTML = `<div id="task-area" class="w-full flex flex-col items-center"></div>`;
-            const area = document.getElementById('task-area');
-
-            if(activeStage === 2) {
-                const opts = [word.hy, ...words.filter(w => w.id !== word.id).sort(() => 0.5 - Math.random()).slice(0, 3).map(w => w.hy)].sort(() => 0.5 - Math.random());
-                area.innerHTML = `
-                    <div class="text-center mb-8" onclick="speak('${word.en}')">
-                        <p class="text-5xl font-black text-indigo-600">${word.en}</p>
-                        <p class="text-gray-400">${word.tr}</p>
-                    </div>
-                    <div class="grid grid-cols-1 gap-3 w-full">
-                        ${opts.map(o => `<button onclick="checkAns(this, '${o}', '${word.hy}')" class="bg-white border-2 p-4 rounded-xl font-bold shadow-sm active:bg-indigo-50">${o}</button>`).join('')}
-                    </div>`;
-                speak(word.en);
-            } else {
-                const isListen = activeStage === 6;
-                const isTrans = activeStage === 5;
-                const correctVal = isTrans ? word.hy : word.en;
-
-                area.innerHTML = `
-                    <div class="text-center mb-6">
-                        ${isListen ? `<button onclick="speak('${word.en}')" class="text-6xl p-6 bg-indigo-50 rounded-full active:scale-90 transition">🔊</button>` : `<p class="text-4xl font-bold text-slate-700">${isTrans ? word.en : word.hy}</p>`}
-                    </div>
-                    <input type="text" id="userInput" class="w-full p-4 border-2 rounded-xl text-center text-2xl mb-4 outline-none focus:border-indigo-500" placeholder="..." autocomplete="off">
-                    <button id="checkBtn" class="w-full bg-indigo-600 text-white p-4 rounded-xl font-bold active:bg-indigo-700">ՍՏՈՒԳԵԼ</button>
-                `;
-                
-                const input = document.getElementById('userInput');
-                const btn = document.getElementById('checkBtn');
-
-                const validate = () => {
-                    if(input.value.trim().toLowerCase() === correctVal.toLowerCase()) {
-                        input.classList.add('bg-emerald-100', 'border-emerald-500');
-                        word.score++;
-                        saveProgress();
-                        setTimeout(() => {
-                            if(word.score >= 10) activeList = activeList.filter(w => w.id !== word.id);
-                            activeIndex++;
-                            renderLearningStages();
-                        }, 600);
-                    } else {
-                        input.classList.add('match-wrong');
-                        input.value = correctVal;
-                        word.score = Math.max(0, word.score - 1);
-                        saveProgress();
-                        setTimeout(() => renderLearningStages(), 1500);
-                    }
-                };
-
-                btn.onclick = validate;
-                input.onkeydown = (e) => { if(e.key === 'Enter') validate(); };
-                if(!isListen) speak(word.en);
-                setTimeout(() => input.focus(), 200);
-            }
-        }
-
-        function renderMatch5() {
-            const container = document.getElementById('content');
-            const batch = activeList.slice(0, 5);
-            if(batch.length === 0) { exitToMenu(); return; }
-            const enL = [...batch].sort(() => 0.5 - Math.random());
-            const hyL = [...batch].sort(() => 0.5 - Math.random());
-            container.innerHTML = `
-                <p class="mb-4 text-xs font-bold text-gray-400">ԳՏԻՐ ԶՈՒՅԳԵՐԸ</p>
-                <div class="grid grid-cols-2 gap-3 w-full">
-                    <div class="flex flex-col gap-2">${enL.map(w => `<div class="match-box bg-white shadow-sm" data-type="en" data-id="${w.id}" onclick="handleM(this)">${w.en}</div>`).join('')}</div>
-                    <div class="flex flex-col gap-2">${hyL.map(w => `<div class="match-box bg-white shadow-sm" data-type="hy" data-id="${w.id}" onclick="handleM(this)">${w.hy}</div>`).join('')}</div>
-                </div>`;
-        }
-
-        function handleM(el) {
-            if(el.classList.contains('match-correct') || el === matchSelected) return;
-            if(!matchSelected) { matchSelected = el; el.classList.add('match-selected'); }
-            else {
-                if(matchSelected.dataset.id === el.dataset.id && matchSelected.dataset.type !== el.dataset.type) {
-                    el.classList.add('match-correct');
-                    matchSelected.classList.add('match-correct');
-                    speak(words.find(w => w.id == el.dataset.id).en);
-                    matchSelected = null;
-                    if(document.querySelectorAll('.match-correct').length === (activeList.slice(0, 5).length * 2)) {
-                        activeList.slice(0, 5).forEach(w => w.score++);
-                        saveProgress();
-                        setTimeout(() => { activeList = words.filter(w => w.score < 10).slice(0, 10); renderMatch5(); }, 800);
-                    }
-                } else {
-                    el.classList.add('match-wrong'); matchSelected.classList.add('match-wrong');
-                    const prev = matchSelected;
-                    setTimeout(() => { el.classList.remove('match-wrong', 'match-selected'); prev.classList.remove('match-wrong', 'match-selected'); }, 500);
-                    matchSelected = null;
-                }
-            }
-        }
-
-        function checkAns(btn, chosen, correct) {
-            const word = activeList[activeIndex % activeList.length];
-            if(chosen === correct) {
-                btn.classList.add('bg-emerald-500', 'text-white');
-                word.score++;
-                saveProgress();
-                setTimeout(() => {
-                    if(word.score >= 10) activeList = activeList.filter(w => w.id !== word.id);
-                    activeIndex++;
-                    renderLearningStages();
-                }, 600);
-            } else {
-                btn.classList.add('match-wrong');
-                word.score = Math.max(0, word.score - 1);
-                saveProgress();
-                setTimeout(() => renderLearningStages(), 1000);
-            }
-        }
-
-        function renderExam() {
-            const container = document.getElementById('content');
-            if(activeIndex >= activeList.length) {
-                container.innerHTML = `<div class='text-center p-8 bg-indigo-50 rounded-3xl w-full'><h2 class='text-2xl font-black mb-4 uppercase'>Արդյունք</h2><p class='text-6xl font-black text-indigo-600 mb-6'>${examScore}/100</p><button onclick='exitToMenu()' class='bg-indigo-600 text-white px-8 py-3 rounded-2xl font-bold'>ՎԵՐԱԴԱՌՆԱԼ</button></div>`;
-                return;
-            }
-            const word = activeList[activeIndex];
-            const opts = [word.hy, ...words.filter(w => w.id !== word.id).sort(() => 0.5 - Math.random()).slice(0, 3).map(w => w.hy)].sort(() => 0.5 - Math.random());
-            container.innerHTML = `<div class="mb-4 text-xs font-bold text-gray-400">ՀԱՐՑ ${activeIndex+1}/100</div><div class="text-center mb-8"><p class="text-5xl font-black text-indigo-600">${word.en}</p></div>
-            <div class="grid grid-cols-1 gap-3 w-full">${opts.map(o => `<button onclick="handleExamAns(this, '${o}', '${word.hy}')" class="bg-white border-2 p-4 rounded-xl font-bold shadow-sm active:bg-indigo-50">${o}</button>`).join('')}</div>`;
+        if(activeStage === 5) { // Translation
+            taskArea.innerHTML = `
+                <div class="text-center mb-8 cursor-pointer" onclick="speak('${word.en}')"><p class="text-6xl font-black text-indigo-600 tracking-tight" onclick="event.stopPropagation(); lookupWord('${word.en}')" style="cursor:pointer">${word.en}</p></div>
+                <input type="text" id="trans-input" class="w-full max-w-sm p-5 border-2 border-gray-200 rounded-2xl text-center text-2xl font-bold mb-5 focus:border-indigo-400 outline-none" placeholder="Հայերեն թարգմանությունը">
+                <button onclick="checkTranslation('${word.hy}')" class="w-full max-w-sm bg-indigo-600 hover:bg-indigo-700 text-white p-5 rounded-2xl font-bold text-lg">ՍՏՈՒԳԵԼ</button>
+            `;
             speak(word.en);
+            setTimeout(()=>document.getElementById('trans-input').focus(),100);
         }
-
-        function handleExamAns(btn, chosen, correct) {
-            if(chosen === correct) { examScore++; btn.classList.add('bg-emerald-500', 'text-white'); }
-            else { btn.classList.add('bg-rose-500', 'text-white'); }
-            setTimeout(() => { activeIndex++; renderExam(); }, 300);
+        if(activeStage === 6) { // Listening
+            taskArea.innerHTML = `
+                <div class="text-center mb-10"><button onclick="speak('${word.en}')" class="text-8xl p-8 bg-indigo-100 hover:bg-indigo-200 rounded-full shadow-lg">🔊</button></div>
+                <input type="text" id="list-input" class="w-full max-w-sm p-5 border-2 border-gray-200 rounded-2xl text-center text-3xl font-black mb-5 uppercase tracking-wider focus:border-indigo-400 outline-none" placeholder="Ի՞նչ լսեցիր">
+                <button onclick="checkListening('${word.en}')" class="w-full max-w-sm bg-indigo-600 hover:bg-indigo-700 text-white p-5 rounded-2xl font-bold text-lg">ԳՐԵԼ</button>
+            `;
+            speak(word.en);
+            setTimeout(()=>document.getElementById('list-input').focus(),100);
         }
+    }
 
-        function renderStage8() {
-            const container = document.getElementById('content');
-            container.innerHTML = `<div class="w-full space-y-2 pb-10">` + words.map((w, i) => `
-                <div class="flex justify-between items-center bg-white p-3 rounded-xl border ${w.score >= 10 ? 'border-emerald-200 bg-emerald-50' : 'border-gray-100'}">
-                    <div onclick="speak('${w.en}')" class="cursor-pointer">
-                        <p class="font-bold text-indigo-700 text-sm">${i+1}. ${w.en}</p>
-                        <p class="text-[10px] text-gray-500">${w.hy}</p>
+    function checkAnswer(clickedBtn, chosen, correct) {
+        const word = activeList[activeIndex % activeList.length];
+        const buttons = document.querySelectorAll('#task-area button');
+        buttons.forEach(btn => btn.style.pointerEvents = 'none');
+        if(chosen === correct) {
+            if(clickedBtn) clickedBtn.classList.add('!border-emerald-500', '!bg-emerald-50', '!text-emerald-900');
+            word.score++; if(word.score > 10) word.score = 10;
+            save();
+            setTimeout(() => {
+                activeIndex++;
+                if (word.score >= 10) activeList = activeList.filter(w => w.id !== word.id);
+                if (activeList.length < 5) activeList = words.filter(w => w.score < 10).slice(0, 10);
+                renderLearningStages();
+            }, 600);
+        } else {
+            if(clickedBtn) clickedBtn.classList.add('!border-rose-500', '!bg-rose-50', '!text-rose-900', 'match-wrong');
+            buttons.forEach(btn => { if (btn.innerText === correct) btn.classList.add('!border-emerald-500', '!bg-emerald-50'); });
+            word.score = Math.max(0, word.score - 1);
+            save();
+            setTimeout(() => {
+                buttons.forEach(btn => {
+                    btn.style.pointerEvents = 'auto';
+                    btn.classList.remove('!border-rose-500', '!bg-rose-50', '!text-rose-900', 'match-wrong', '!border-emerald-500', '!bg-emerald-50');
+                });
+                activeIndex++;
+                renderLearningStages();
+            }, 1200);
+        }
+    }
+    function checkSpelling(correct) {
+        const input = document.getElementById('spell-input');
+        const chosen = input.value.toLowerCase().trim();
+        if (chosen === correct.toLowerCase()) {
+            input.classList.add('!border-emerald-500', '!bg-emerald-50');
+            checkAnswer(null, chosen, correct.toLowerCase());
+        } else {
+            input.classList.add('match-wrong', '!border-rose-500', '!bg-rose-50');
+            input.value = correct.toUpperCase();
+            setTimeout(() => {
+                input.classList.remove('match-wrong', '!border-rose-500', '!bg-rose-50', '!border-emerald-500', '!bg-emerald-50');
+                checkAnswer(null, chosen, correct.toLowerCase());
+            }, 1500);
+        }
+    }
+    function checkTranslation(correct) {
+        const input = document.getElementById('trans-input');
+        const chosen = input.value.trim();
+        if (chosen === correct) {
+            input.classList.add('!border-emerald-500', '!bg-emerald-50');
+            checkAnswer(null, chosen, correct);
+        } else {
+            input.classList.add('match-wrong', '!border-rose-500', '!bg-rose-50');
+            input.value = correct;
+            setTimeout(() => {
+                input.classList.remove('match-wrong', '!border-rose-500', '!bg-rose-50', '!border-emerald-500', '!bg-emerald-50');
+                checkAnswer(null, chosen, correct);
+            }, 1500);
+        }
+    }
+    function checkListening(correct) {
+        const input = document.getElementById('list-input');
+        const chosen = input.value.toLowerCase().trim();
+        if (chosen === correct.toLowerCase()) {
+            input.classList.add('!border-emerald-500', '!bg-emerald-50');
+            checkAnswer(null, chosen, correct.toLowerCase());
+        } else {
+            input.classList.add('match-wrong', '!border-rose-500', '!bg-rose-50');
+            input.value = correct.toUpperCase();
+            setTimeout(() => {
+                input.classList.remove('match-wrong', '!border-rose-500', '!bg-rose-50', '!border-emerald-500', '!bg-emerald-50');
+                checkAnswer(null, chosen, correct.toLowerCase());
+            }, 1500);
+        }
+    }
+
+    // STAGE 3: MATCH 5-5
+    function renderMatch5() {
+        const container = document.getElementById('content');
+        if (activeList.length === 0) {
+            container.innerHTML = `<div class='text-center p-10'><h2 class='text-xl font-bold mb-4 text-emerald-600'>Փուլն ավարտված է! 🎉</h2><button onclick='exitToMenu()' class='bg-indigo-600 text-white px-6 py-2 rounded-xl'>Հետ դեպի Մենյու</button></div>`;
+            return;
+        }
+        const currentBatch = activeList.slice(0, 5);
+        const enList = [...currentBatch].sort(() => 0.5 - Math.random());
+        const hyList = [...currentBatch].sort(() => 0.5 - Math.random());
+        container.innerHTML = `
+            <div class="mb-6 text-xs font-bold text-gray-400 text-center">ՀԱՄԱՊԱՏԱՍԽԱՆԵՑՐՈՒ ${Math.min(5, activeList.length)} ԲԱՌ</div>
+            <div class="grid grid-cols-2 gap-4 w-full max-w-md">
+                <div class="flex flex-col gap-3" id="en-cols">${enList.map(w => `<div class="match-box bg-white shadow-sm hover:border-indigo-200 transition text-slate-800" data-type="en" data-id="${w.id}" onclick="handleMatch(this)">${w.en}</div>`).join('')}</div>
+                <div class="flex flex-col gap-3" id="hy-cols">${hyList.map(w => `<div class="match-box bg-white shadow-sm hover:border-indigo-200 transition text-slate-800" data-type="hy" data-id="${w.id}" onclick="handleMatch(this)">${w.hy}</div>`).join('')}</div>
+            </div>
+        `;
+    }
+    function handleMatch(el) {
+        if(el.classList.contains('match-correct') || el.classList.contains('match-wrong')) return;
+        if(!matchSelected) {
+            matchSelected = el;
+            el.classList.add('match-selected');
+        } else {
+            if(matchSelected === el) {
+                el.classList.remove('match-selected');
+                matchSelected = null;
+                return;
+            }
+            if(matchSelected.dataset.type !== el.dataset.type && matchSelected.dataset.id === el.dataset.id) {
+                el.classList.remove('match-selected');
+                el.classList.add('match-correct');
+                matchSelected.classList.remove('match-selected');
+                matchSelected.classList.add('match-correct');
+                if (el.dataset.type === 'en') speak(el.innerText);
+                else speak(matchSelected.innerText);
+                matchSelected = null;
+                checkMatchEnd();
+            } else {
+                el.classList.add('match-wrong');
+                matchSelected.classList.add('match-wrong');
+                const first = matchSelected;
+                setTimeout(() => {
+                    el.classList.remove('match-wrong', 'match-selected');
+                    first.classList.remove('match-wrong', 'match-selected');
+                }, 500);
+                matchSelected = null;
+            }
+        }
+    }
+    function checkMatchEnd() {
+        const container = document.getElementById('content');
+        const corrects = container.querySelectorAll('.match-correct').length;
+        const currentBatchSize = container.querySelectorAll('#en-cols .match-box').length;
+        if(corrects === currentBatchSize * 2) {
+            const subList = activeList.slice(0, 5);
+            subList.forEach(w => { w.score++; if(w.score > 10) w.score = 10; });
+            save();
+            setTimeout(() => {
+                activeList = words.filter(w => w.score < 10).slice(0, 10);
+                renderMatch5();
+            }, 800);
+        }
+    }
+
+    // STAGE 7: EXAM
+    function renderExam() {
+        const container = document.getElementById('content');
+        if(activeIndex >= Math.min(100, activeList.length)) {
+            const totalQuestions = Math.min(100, activeList.length);
+            const percentage = totalQuestions > 0 ? Math.round((examScore / totalQuestions) * 20) : 0;
+            container.innerHTML = `
+                <div class="text-center p-6 flex flex-col items-center w-full max-w-sm">
+                    <h2 class="text-3xl font-black mb-6 text-slate-800">Քննությունն ավարտվեց:</h2>
+                    <div class="bg-white p-8 rounded-3xl shadow-xl border-2 border-indigo-100 w-full mb-8 text-center">
+                        <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">Քո արդյունքը</p>
+                        <p class="text-8xl font-black text-indigo-600 mb-2">${percentage}<span class="text-5xl text-indigo-300">/20</span></p>
+                        <p class="text-xl font-bold text-slate-700">${examScore} ճիշտ պատասխան ${totalQuestions}-ից</p>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-12 bg-gray-200 h-1.5 rounded-full overflow-hidden">
-                            <div class="bg-emerald-500 h-full" style="width: ${w.score * 10}%"></div>
+                    <button onclick="exitToMenu()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition">ՀԵՏ ԴԵՊԻ ՄԵՆՅՈՒ</button>
+                </div>
+            `;
+            return;
+        }
+        const word = activeList[activeIndex];
+        const otherOptions = words.filter(w => w.id !== word.id).sort(() => 0.5 - Math.random()).slice(0, 3).map(w => w.hy);
+        const options = [word.hy, ...otherOptions].sort(() => 0.5 - Math.random());
+        container.innerHTML = `
+            <div class="mb-4 text-xs font-bold text-gray-400">ՀԱՐՑ ${activeIndex+1} / ${Math.min(100, activeList.length)}</div>
+            <div class="text-center mb-10 cursor-pointer" onclick="speak('${word.en}')">
+                <p class="text-6xl font-black text-indigo-600 tracking-tight" onclick="event.stopPropagation(); lookupWord('${word.en}')" style="cursor:pointer">${word.en}</p>
+            </div>
+            <div class="grid grid-cols-1 gap-4 w-full max-w-sm">
+                ${options.map(opt => `<button onclick="handleExamAnswer(this, '${opt}', '${word.hy}')" class="bg-white border-2 border-gray-100 p-5 rounded-2xl font-semibold text-lg hover:border-indigo-200">${opt}</button>`).join('')}
+            </div>
+        `;
+        speak(word.en);
+    }
+    function handleExamAnswer(clickedBtn, chosen, correct) {
+        const buttons = document.querySelectorAll('#content button');
+        buttons.forEach(btn => btn.style.pointerEvents = 'none');
+        if(chosen === correct) {
+            examScore++;
+            if(clickedBtn) clickedBtn.classList.add('!border-emerald-500', '!bg-emerald-50', '!text-emerald-900');
+        } else {
+            if(clickedBtn) clickedBtn.classList.add('!border-rose-500', '!bg-rose-50', '!text-rose-900');
+            buttons.forEach(btn => { if (btn.innerText === correct) btn.classList.add('!border-emerald-500', '!bg-emerald-50'); });
+        }
+        activeIndex++;
+        setTimeout(() => renderExam(), 600);
+    }
+
+    // STAGE 8: WORD LIST
+    function renderStage8() {
+        const container = document.getElementById('content');
+        const learnedCount = words.filter(w => w.score >= 10).length;
+        let html = `
+            <div class="w-full max-w-md bg-white p-6 rounded-3xl shadow-lg border border-gray-100 mb-6 text-center">
+                <p class="text-xl font-bold text-slate-800 mb-2">Ընդհանուր առաջընթաց</p>
+                <p class="text-5xl font-black text-emerald-600 mb-1">${learnedCount} / ${words.length}</p>
+                <p class="text-sm text-gray-500">բառ յուրացված է (10/10 միավոր)</p>
+                <div class="w-full bg-gray-100 rounded-full h-3 mt-5 shadow-inner"><div class="bg-emerald-500 h-3 rounded-full transition-all duration-500" style="width: ${(learnedCount / words.length) * 100}%"></div></div>
+            </div>
+            <div class="w-full max-w-md space-y-2 mb-6" id="words-list">
+        `;
+        words.forEach((w, index) => {
+            const isLearned = w.score >= 10;
+            html += `
+                <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border ${isLearned ? 'border-emerald-100 bg-emerald-50' : 'border-gray-100'} hover:border-indigo-100 transition">
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <span class="text-xs font-mono text-gray-300 w-6 text-right">${index+1}.</span>
+                        <div class="cursor-pointer" onclick="speak('${w.en}')">
+                            <span class="font-bold text-lg text-indigo-700" onclick="event.stopPropagation(); lookupWord('${w.en}')" style="cursor:pointer" title="Սեղմեք բառարանը տեսնելու համար">${w.en}</span>
+                            <span class="text-sm text-gray-500 ml-1">[${w.tr}]</span>
+                            <p class="text-slate-700 text-sm mt-0.5">${w.hy}</p>
                         </div>
-                        <span class="text-[10px] font-bold text-gray-400">${w.score}/10</span>
+                    </div>
+                    <div class="text-right flex flex-col items-end gap-1">
+                        ${isLearned ? '<span class="learned-badge">ՅՈՒՐԱՑՎԱԾ</span>' : `<span class="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded-full">${w.score}/10</span>`}
+                        <button class="text-xs text-indigo-500 hover:text-indigo-700 font-medium" onclick="resetWordScore(${w.id})">զրոյացնել</button>
                     </div>
                 </div>
-            `).join('') + `</div>`;
+            `;
+        });
+        html += `</div>`;
+        container.innerHTML = html;
+    }
+    function resetWordScore(wordId) {
+        const word = words.find(w => w.id === wordId);
+        if (word && confirm(`Անգլերեն '${word.en}' բառի առաջընթացը զրոյացվի՞`)) {
+            word.score = 0;
+            save();
+            renderStage8();
         }
+    }
 
-        function resetData() {
-            if(confirm("Ջնջե՞լ ամբողջ առաջընթացը:")) {
-                localStorage.removeItem('usanim_data');
-                location.reload();
-            }
-        }
-
-        initApp();
-    </script>
+    // ---------- Գործարկում ----------
+    loadWordsFromJSON();
+</script>
 </body>
 </html>
