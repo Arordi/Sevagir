@@ -3,23 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Usanim - English A1 (895 Words)</title>
+    <title>Usanim - English A1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #f8fafc; user-select: none; touch-action: manipulation; }
         .stage-card { transition: all 0.2s ease; border: 2px solid transparent; cursor: pointer; height: 100%; }
-        .stage-card:active { transform: scale(0.95); background-color: #f1f5f9; }
+        .stage-card:active { transform: scale(0.95); }
         .match-box { border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px; text-align: center; cursor: pointer; min-height: 60px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; }
         .match-selected { border-color: #3b82f6; background-color: #eff6ff; }
         .match-correct { border-color: #22c55e; background-color: #f0fdf4; pointer-events: none; opacity: 0.6; }
         .match-wrong { border-color: #ef4444; background-color: #fef2f2; animation: shake 0.3s; }
         @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
-        input { font-size: 18px !important; }
-        #progress-bar { transition: width 0.5s ease-in-out; }
-        .star-rating { color: #fbbf24; font-size: 1.2rem; }
+        
+        /* Աստղերի ոճավորում */
+        .star-container { display: flex; gap: 2px; justify-content: center; margin-bottom: 10px; }
+        .star { position: relative; display: inline-block; width: 24px; height: 24px; color: #e2e8f0; font-size: 24px; line-height: 24px; }
+        .star.full { color: #fbbf24; }
+        .star.half::after { content: '★'; position: absolute; left: 0; top: 0; width: 50%; overflow: hidden; color: #fbbf24; }
+        .star::before { content: '★'; }
     </style>
 </head>
-<body class="w-full bg-white min-h-screen shadow-sm relative">
+<body class="w-full bg-white min-h-screen relative">
 
     <div class="bg-indigo-600 p-4 text-white sticky top-0 z-50 shadow-md w-full">
         <div class="max-w-4xl mx-auto flex justify-between items-center mb-2">
@@ -35,32 +39,32 @@
     </div>
 
     <div id="menu" class="max-w-4xl mx-auto p-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-        <button onclick="openStage(1)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center">
+        <button onclick="openStage(1)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center border">
             <span class="text-3xl mb-2">🗂️</span>
             <span class="font-bold text-sm">Փուլ 1</span>
             <p class="text-[10px] text-gray-400 uppercase">Flashcards</p>
         </button>
-        <button onclick="openStage(2)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center">
+        <button onclick="openStage(2)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center border">
             <span class="text-3xl mb-2">🔘</span>
             <span class="font-bold text-sm">Փուլ 2</span>
             <p class="text-[10px] text-gray-400 uppercase">Ընտրություն</p>
         </button>
-        <button onclick="openStage(3)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center">
+        <button onclick="openStage(3)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center border">
             <span class="text-3xl mb-2">🧩</span>
             <span class="font-bold text-sm">Փուլ 3</span>
             <p class="text-[10px] text-gray-400 uppercase">Match 5-5</p>
         </button>
-        <button onclick="openStage(4)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center">
+        <button onclick="openStage(4)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center border">
             <span class="text-3xl mb-2">⌨️</span>
             <span class="font-bold text-sm">Փուլ 4</span>
             <p class="text-[10px] text-gray-400 uppercase">Ուղղագրություն</p>
         </button>
-        <button onclick="openStage(5)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center">
+        <button onclick="openStage(5)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center border">
             <span class="text-3xl mb-2">🔄</span>
             <span class="font-bold text-sm">Փուլ 5</span>
             <p class="text-[10px] text-gray-400 uppercase">Թարգմանություն</p>
         </button>
-        <button onclick="openStage(6)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center">
+        <button onclick="openStage(6)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center border">
             <span class="text-3xl mb-2">🎧</span>
             <span class="font-bold text-sm">Փուլ 6</span>
             <p class="text-[10px] text-gray-400 uppercase">Լսողություն</p>
@@ -108,7 +112,7 @@
                 }));
                 loadProgress();
                 updateOverallProgress();
-            } catch (e) { document.getElementById('progress-text').innerText = "Տվյալների սխալ"; }
+            } catch (e) { console.error(e); }
         }
 
         function loadProgress() {
@@ -141,9 +145,18 @@
         }
 
         function getStars(score) {
-            let stars = "";
-            for(let i=0; i<10; i++) stars += i < score ? "★" : "☆";
-            return `<div class="star-rating mb-2">${stars}</div>`;
+            let html = '<div class="star-container">';
+            for (let i = 1; i <= 5; i++) {
+                if (score >= i * 2) {
+                    html += '<span class="star full"></span>';
+                } else if (score >= (i * 2) - 1) {
+                    html += '<span class="star half"></span>';
+                } else {
+                    html += '<span class="star"></span>';
+                }
+            }
+            html += '</div>';
+            return html;
         }
 
         function openStage(num) {
@@ -254,10 +267,12 @@
             const allBtns = document.querySelectorAll('#options-grid button');
             
             if(chosen === correct) {
-                btn.classList.add('bg-emerald-500', 'text-white', 'border-emerald-600');
+                btn.classList.replace('bg-white', 'bg-emerald-500');
+                btn.classList.add('text-white', 'border-emerald-600');
                 word.score = Math.min(10, word.score + 1);
             } else {
-                btn.classList.add('bg-rose-500', 'text-white', 'border-rose-600');
+                btn.classList.replace('bg-white', 'bg-rose-500');
+                btn.classList.add('text-white', 'border-rose-600');
                 allBtns.forEach(b => { if(b.innerText === correct) b.classList.add('border-emerald-500', 'bg-emerald-50'); });
                 word.score = Math.max(0, word.score - 1);
             }
@@ -273,11 +288,11 @@
             const word = activeList[activeIndex % activeList.length];
             
             if(input.value.trim().toLowerCase() === correct.toLowerCase()) {
-                input.classList.add('bg-emerald-50', 'border-emerald-500');
+                input.classList.add('bg-emerald-500', 'text-white', 'border-emerald-600');
                 word.score = Math.min(10, word.score + 1);
             } else {
-                input.classList.add('bg-rose-50', 'border-rose-500');
-                feedback.innerHTML = `<span class="text-rose-600">Սխալ! Ճիշտը՝</span> <span class="text-emerald-600 underline">${correct}</span>`;
+                input.classList.add('bg-rose-500', 'text-white', 'border-rose-600');
+                feedback.innerHTML = `<span class="text-rose-600">Ճիշտը՝</span> <span class="text-emerald-600 underline">${correct}</span>`;
                 feedback.classList.remove('hidden');
                 word.score = Math.max(0, word.score - 1);
             }
@@ -287,28 +302,28 @@
             document.getElementById('next-btn').classList.remove('hidden');
         }
 
-        function nextWord() {
-            const word = activeList[activeIndex % activeList.length];
-            if(word.score >= 10) activeList = activeList.filter(w => w.id !== word.id);
-            else activeIndex++;
-            renderLearningStages();
-        }
-
         function renderMatch5() {
             const container = document.getElementById('content');
             const batch = activeList.slice(0, 5);
             if(batch.length === 0) { exitToMenu(); return; }
             const enL = [...batch].sort(() => 0.5 - Math.random());
             const hyL = [...batch].sort(() => 0.5 - Math.random());
+            
+            // Աստղերի ընդհանուր միջինը այս խմբի համար
+            const avgScore = batch.reduce((a, b) => a + b.score, 0) / 5;
+
             container.innerHTML = `
-                <div class="grid grid-cols-2 gap-4 w-full max-w-2xl">
+                ${getStars(avgScore)}
+                <div class="grid grid-cols-2 gap-4 w-full max-w-2xl mt-4">
                     <div class="flex flex-col gap-3">${enL.map(w => `<div class="match-box bg-white shadow-sm" data-type="en" data-id="${w.id}" onclick="handleM(this)">${w.en}</div>`).join('')}</div>
                     <div class="flex flex-col gap-3">${hyL.map(w => `<div class="match-box bg-white shadow-sm" data-type="hy" data-id="${w.id}" onclick="handleM(this)">${w.hy}</div>`).join('')}</div>
-                </div>`;
+                </div>
+                <button id="next-btn" onclick="nextWord()" class="hidden mt-8 w-full max-w-2xl bg-slate-800 text-white p-5 rounded-2xl font-bold text-xl">ՀԱՋՈՐԴԸ ➔</button>
+            `;
         }
 
         function handleM(el) {
-            if(el.classList.contains('match-correct') || el === matchSelected) return;
+            if(el.classList.contains('match-correct') || el === matchSelected || canProceed) return;
             if(!matchSelected) { matchSelected = el; el.classList.add('match-selected'); }
             else {
                 if(matchSelected.dataset.id === el.dataset.id && matchSelected.dataset.type !== el.dataset.type) {
@@ -316,8 +331,10 @@
                     speak(words.find(w => w.id == el.dataset.id).en);
                     matchSelected = null;
                     if(document.querySelectorAll('.match-correct').length === (activeList.slice(0, 5).length * 2)) {
-                        activeList.slice(0, 5).forEach(w => w.score++); saveProgress();
-                        setTimeout(() => { activeList = words.filter(w => w.score < 10).slice(0, 10); renderMatch5(); }, 800);
+                        activeList.slice(0, 5).forEach(w => w.score = Math.min(10, w.score + 1)); 
+                        saveProgress();
+                        canProceed = true;
+                        document.getElementById('next-btn').classList.remove('hidden');
                     }
                 } else {
                     el.classList.add('match-wrong'); matchSelected.classList.add('match-wrong');
@@ -326,6 +343,18 @@
                     matchSelected = null;
                 }
             }
+        }
+
+        function nextWord() {
+            const word = activeList[activeIndex % activeList.length];
+            if(activeStage !== 3) {
+                if(word.score >= 10) activeList = activeList.filter(w => w.id !== word.id);
+                else activeIndex++;
+            } else {
+                activeList = words.filter(w => w.score < 10).slice(0, 10);
+                activeIndex = 0;
+            }
+            renderLearningStages();
         }
 
         function renderExam() {
@@ -357,7 +386,7 @@
                         <p class="text-sm text-gray-500">${w.hy}</p>
                     </div>
                     <div class="flex flex-col items-end">
-                        <div class="star-rating text-xs">${getStars(w.score)}</div>
+                        ${getStars(w.score)}
                         <span class="text-[10px] font-bold text-gray-400 uppercase">SCORE: ${w.score}/10</span>
                     </div>
                 </div>
