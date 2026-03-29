@@ -3,554 +3,216 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Usanim Pro - Լեզուների ուսուցում</title>
+    <title>Usanim Pro - A1 Ultimate</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: #f0fdf4; user-select: none; touch-action: manipulation; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f0fdf4; user-select: none; touch-action: manipulation; }
         .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
-        .home-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; border-left: 10px solid #10b981; }
-        .home-card:active { transform: scale(0.96); }
-        
-        /* Բոլոր 9 փուլերի կոճակների ՄԻԱՍՆԱԿԱՆ ոճը */
-        .stage-card { 
-            transition: all 0.2s ease; 
-            cursor: pointer; 
-            background-color: #a7f3d0; /* Emerald-200 */
-            border: 2px solid #6ee7b7; /* Emerald-300 */
-            border-radius: 2rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            width: 100%;
-        }
-        .stage-card:active { transform: scale(0.95); background-color: #6ee7b7; }
-        
-        /* Փուլի տեքստի ոճը */
-        .stage-card span:last-child { 
-            color: #064e3b; /* Dark Emerald */
-            font-weight: 800; 
-            font-size: 11px; 
-            text-transform: uppercase; 
-            margin-top: 8px; 
-            tracking-widest;
-        }
-        
-        .btn-primary { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 1.25rem; border-radius: 1.25rem; font-weight: bold; width: 100%; box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3); border: none; }
-        .blur-text { filter: blur(8px); transition: all 0.3s ease; cursor: pointer; }
+        .stage-card { transition: 0.2s; cursor: pointer; background: #a7f3d0; border: 2px solid #6ee7b7; border-radius: 2rem; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); width: 100%; display: flex; flex-direction: column; align-items: center; }
+        .stage-card:active { transform: scale(0.95); background: #6ee7b7; }
+        .stage-card span:last-child { color: #064e3b; font-weight: 800; font-size: 11px; text-transform: uppercase; margin-top: 8px; letter-spacing: 0.1em; }
+        .btn-primary { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 1.25rem; border-radius: 1.25rem; font-weight: bold; width: 100%; box-shadow: 0 10px 15px -3px rgba(16,185,129,0.3); }
+        .blur-text { filter: blur(8px); transition: 0.3s; cursor: pointer; }
         .blur-text.revealed { filter: blur(0); }
-        
-        /* Matching (Փուլ 3) ոճեր */
         .match-item { border: 2px solid #d1fae5; border-radius: 20px; padding: 12px; text-align: center; cursor: pointer; min-height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 600; background: white; transition: 0.2s; }
-        .match-selected { border-color: #10b981; background-color: #f0fdf4; color: #065f46; }
-        .match-correct { border-color: #22c55e; background-color: #dcfce7; color: #16a34a; }
-        .match-wrong { border-color: #ef4444; background-color: #fef2f2; animation: shake 0.3s; }
+        .match-selected { border-color: #10b981; background: #f0fdf4; }
+        .match-correct { border-color: #22c55e; background: #dcfce7; color: #16a34a; pointer-events: none; }
+        .match-wrong { border-color: #ef4444 !important; background: #fef2f2 !important; animation: shake 0.3s; }
         @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
-        
-        .hidden { display: none !important; }
-        
-        /* Միավորների կետեր (Dots) */
         .dot { width: 7px; height: 7px; border-radius: 50%; background: #e2e8f0; display: inline-block; margin: 0 2px; }
         .dot-active { background: #10b981; box-shadow: 0 0 5px #10b981; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body class="min-h-screen">
 
     <div id="welcome-screen" class="min-h-screen flex flex-col p-6 max-w-lg mx-auto">
         <div class="mt-20 mb-12 text-center">
-            <h1 class="text-5xl font-black text-emerald-900 tracking-tight mb-2 italic">Usanim</h1>
+            <h1 class="text-5xl font-black text-emerald-900 italic">Usanim</h1>
             <p class="text-emerald-600 font-bold tracking-[0.3em] uppercase text-xs">Premium Learning</p>
         </div>
-        <div class="space-y-4">
-            <div onclick="goToAppMenu()" class="home-card glass p-8 rounded-[2.5rem] shadow-xl flex items-center justify-between relative overflow-hidden">
-                <div class="flex items-center gap-5 z-10">
-                    <div class="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-3xl shadow-inner border border-emerald-100">🇬🇧</div>
-                    <div>
-                        <h2 class="text-2xl font-black text-slate-800 leading-tight">A1 Մակարդակ</h2>
-                        <div class="flex items-center gap-2 mt-1">
-                            <p id="home-word-count" class="text-slate-500 text-xs font-bold uppercase">...</p>
-                            <span class="text-slate-300">|</span>
-                            <p id="home-progress-pct" class="text-emerald-600 text-xs font-black">0%</p>
-                        </div>
+        <div onclick="toggleView('welcome-screen', 'app-content')" class="glass p-8 rounded-[2.5rem] shadow-xl flex items-center justify-between relative overflow-hidden cursor-pointer border-l-[10px] border-emerald-500">
+            <div class="flex items-center gap-5">
+                <div class="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-3xl shadow-inner">🇬🇧</div>
+                <div>
+                    <h2 class="text-2xl font-black text-slate-800">A1 Մակարդակ</h2>
+                    <div class="flex items-center gap-2 mt-1">
+                        <p id="h-count" class="text-slate-500 text-xs font-bold uppercase">...</p>
+                        <p id="h-pct" class="text-emerald-600 text-xs font-black">0%</p>
                     </div>
                 </div>
-                <div class="z-10 w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-md">➔</div>
-                <div id="home-bg-progress" class="absolute left-0 bottom-0 h-2 bg-emerald-400 transition-all duration-1000" style="width: 0%"></div>
             </div>
+            <div id="h-bg-line" class="absolute left-0 bottom-0 h-1.5 bg-emerald-400 transition-all duration-1000" style="width: 0%"></div>
         </div>
     </div>
 
     <div id="app-content" class="hidden">
-        <div class="bg-emerald-600 p-4 text-white sticky top-0 z-50 shadow-lg w-full">
+        <div class="bg-emerald-600 p-4 text-white sticky top-0 z-50 shadow-lg">
             <div class="max-w-4xl mx-auto flex justify-between items-center mb-2">
-                <div onclick="goToWelcome()" class="cursor-pointer flex items-center gap-2">
-                    <span class="text-xl">🏠</span>
-                    <h1 class="font-bold text-lg leading-none italic uppercase tracking-tighter">Usanim A1</h1>
+                <div onclick="toggleView('app-content', 'welcome-screen')" class="cursor-pointer flex items-center gap-2">
+                    <span class="text-xl">🏠</span><h1 class="font-bold italic uppercase tracking-tighter">Usanim A1</h1>
                 </div>
-                <button onclick="showDeleteModal()" class="text-[10px] bg-white/20 hover:bg-white/30 text-white px-4 py-1.5 rounded-full font-black uppercase tracking-widest transition-colors">Reset</button>
+                <button onclick="$('delete-modal').classList.remove('hidden')" class="text-[10px] bg-white/20 px-4 py-1.5 rounded-full font-black uppercase">Reset</button>
             </div>
-            <div class="max-w-4xl mx-auto w-full bg-black/10 rounded-full h-2 overflow-hidden">
-                <div id="progress-bar" class="bg-white h-full rounded-full transition-all duration-700" style="width: 0%"></div>
-            </div>
+            <div class="max-w-4xl mx-auto bg-black/10 rounded-full h-2 overflow-hidden"><div id="p-bar" class="bg-white h-full transition-all" style="width: 0%"></div></div>
         </div>
-
         <div id="menu" class="max-w-4xl mx-auto p-4 grid grid-cols-2 md:grid-cols-3 gap-4 py-8">
-            <button onclick="openStage(1)" class="stage-card"><span class="text-3xl">🗂️</span><span>Փուլ 1</span></button>
-            <button onclick="openStage(2)" class="stage-card"><span class="text-3xl">🔘</span><span>Փուլ 2</span></button>
-            <button onclick="openStage(3)" class="stage-card"><span class="text-3xl">🧩</span><span>Փուլ 3</span></button>
-            <button onclick="openStage(4)" class="stage-card"><span class="text-3xl">⌨️</span><span>Փուլ 4</span></button>
-            <button onclick="openStage(5)" class="stage-card"><span class="text-3xl">🔄</span><span>Փուլ 5</span></button>
-            <button onclick="openStage(6)" class="stage-card"><span class="text-3xl">🎧</span><span>Փուլ 6</span></button>
-            <button onclick="openSmartStage()" class="stage-card"><span class="text-3xl">🎓</span><span>Փուլ 7</span></button>
-            <button onclick="openExam()" class="stage-card"><span class="text-3xl">📝</span><span>Փուլ 8</span></button>
-            <button onclick="openStatsStage()" class="stage-card"><span class="text-3xl">📊</span><span>Փուլ 9</span></button>
+            <button onclick="openStage(1)" class="stage-card"><span>🗂️</span><span>Փուլ 1</span></button>
+            <button onclick="openStage(2)" class="stage-card"><span>🔘</span><span>Փուլ 2</span></button>
+            <button onclick="openStage(3)" class="stage-card"><span>🧩</span><span>Փուլ 3</span></button>
+            <button onclick="openStage(4)" class="stage-card"><span>⌨️</span><span>Փուլ 4</span></button>
+            <button onclick="openStage(5)" class="stage-card"><span>🔄</span><span>Փուլ 5</span></button>
+            <button onclick="openStage(6)" class="stage-card"><span>🎧</span><span>Փուլ 6</span></button>
+            <button onclick="openSmart()" class="stage-card"><span>🎓</span><span>Փուլ 7</span></button>
+            <button onclick="openExam()" class="stage-card"><span>📝</span><span>Փուլ 8</span></button>
+            <button onclick="openStats()" class="stage-card"><span>📊</span><span>Փուլ 9</span></button>
         </div>
     </div>
 
     <div id="view" class="hidden p-4 min-h-screen max-w-2xl mx-auto">
         <div class="flex justify-between items-center mb-8 pt-4">
-            <button onclick="exitToMenu()" class="font-black text-emerald-600 text-xs uppercase tracking-widest bg-emerald-100 px-4 py-2 rounded-full">⬅ ԵԼՔ</button>
-            <div id="view-title" class="text-[10px] font-black text-emerald-800 uppercase tracking-[0.4em]"></div>
+            <button onclick="exitToMenu()" class="font-black text-emerald-600 text-xs uppercase bg-emerald-100 px-4 py-2 rounded-full">⬅ ԵԼՔ</button>
+            <div id="v-title" class="text-[10px] font-black text-emerald-800 uppercase tracking-[0.4em]"></div>
             <div class="w-12"></div>
         </div>
         <div id="content" class="flex flex-col items-center w-full"></div>
     </div>
 
     <div id="smart-menu" class="hidden max-w-2xl mx-auto p-6 space-y-6">
-        <button onclick="exitToMenu()" class="font-black text-emerald-600 text-xs uppercase tracking-widest bg-emerald-100 px-4 py-2 rounded-full">⬅ ԵԼՔ</button>
-        <div id="smart-container" class="space-y-4"></div>
+        <button onclick="exitToMenu()" class="font-black text-emerald-600 text-xs uppercase bg-emerald-100 px-4 py-2 rounded-full mb-4">⬅ ԵԼՔ</button>
+        <div id="smart-cont" class="space-y-4"></div>
     </div>
 
     <div id="delete-modal" class="hidden fixed inset-0 bg-emerald-950/80 z-[100] flex items-center justify-center p-6 backdrop-blur-sm">
         <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm text-center shadow-2xl">
-            <h2 class="text-xl font-black text-slate-800 mb-4 uppercase">Ջնջել ամբողջը</h2>
-            <p class="text-slate-500 text-sm mb-6">Գրիր <b class="text-emerald-600">DELETE</b> հաստատելու համար</p>
-            <input type="text" id="delete-confirm-input" class="w-full p-4 border-2 border-emerald-100 rounded-2xl text-center mb-6 uppercase outline-none focus:border-emerald-500 transition-all">
+            <h2 class="text-xl font-black mb-4 uppercase text-rose-600">Ջնջել ամբողջը</h2>
+            <input type="text" id="del-in" class="w-full p-4 border-2 border-emerald-100 rounded-2xl text-center mb-6 outline-none uppercase" placeholder="DELETE">
             <div class="flex gap-3">
-                <button onclick="hideDeleteModal()" class="flex-1 p-4 bg-slate-100 text-slate-600 rounded-2xl font-bold">ՈՉ</button>
-                <button id="real-delete-btn" onclick="confirmFinalDelete()" disabled class="flex-1 p-4 bg-emerald-100 text-emerald-300 rounded-2xl font-bold transition-all">ԱՅՈ</button>
+                <button onclick="$('delete-modal').classList.add('hidden')" class="flex-1 p-4 bg-slate-100 rounded-2xl font-bold">ՈՉ</button>
+                <button id="del-btn" onclick="confirmDelete()" disabled class="flex-1 p-4 bg-rose-600 text-white rounded-2xl font-bold">ԱՅՈ</button>
             </div>
         </div>
     </div>
 
     <script>
-        let words = [], activeStage = 1, activeIndex = 0, activeList = [], canProceed = false;
-        let examScores = [], dailyWordsCount = 0;
-        let selectedEn = null, selectedHy = null;
+        let words = [], activeStage = 1, activeIndex = 0, activeList = [], examScores = [], dailyCount = 0, selEn = null, selHy = null;
+        const $ = id => document.getElementById(id);
+        const toggleView = (h, s) => { $(h).classList.add('hidden'); $(s).classList.remove('hidden'); updateStats(); };
+        const speak = t => { window.speechSynthesis.cancel(); const m = new SpeechSynthesisUtterance(t); m.lang = 'en-US'; window.speechSynthesis.speak(m); };
 
-        async function initApp() {
+        async function init() {
             try {
-                const response = await fetch('./vocabulary.json');
-                const data = await response.json();
-                words = data.map((item, index) => ({
-                    id: item.id || index, en: item.word, hy: item.translation,
-                    score: 0, stagesCompleted: [], isInstant: false, isSeen: false,
-                    errorCount: 0, learnedDate: null, repLevel: 0, nextRepDate: null
-                }));
-                loadProgress();
-                updateStats();
-                document.getElementById('home-word-count').innerText = `${words.length} բառ`;
-                
-                document.getElementById('delete-confirm-input').addEventListener('input', function(e) {
-                    const btn = document.getElementById('real-delete-btn');
-                    const isMatch = e.target.value.toUpperCase() === 'DELETE';
-                    btn.disabled = !isMatch;
-                    btn.className = isMatch ? 'flex-1 p-4 bg-emerald-600 text-white rounded-2xl font-bold' : 'flex-1 p-4 bg-emerald-100 text-emerald-300 rounded-2xl font-bold';
-                });
-            } catch (e) { console.error("Error:", e); }
+                const res = await fetch('./vocabulary.json');
+                const data = await res.json();
+                words = data.map((it, i) => ({ id: it.id || i, en: it.word, hy: it.translation, score: 0, stagesCompleted: [], isInstant: false, isSeen: false, errorCount: 0, repLevel: 0, nextRepDate: null }));
+                load(); updateStats();
+                $('h-count').innerText = `${words.length} բառ`;
+                $('del-in').oninput = e => { const ok = e.target.value === 'DELETE'; $('del-btn').disabled = !ok; $('del-btn').className = ok ? 'flex-1 p-4 bg-rose-600 text-white rounded-2xl font-bold' : 'flex-1 p-4 bg-emerald-100 text-emerald-300 rounded-2xl font-bold'; };
+            } catch(e) { console.error(e); }
         }
 
-        function loadProgress() {
-            const saved = localStorage.getItem('usanim_v3_data');
-            if(saved) {
-                const p = JSON.parse(saved);
-                words.forEach(w => {
-                    if(p.words && p.words[w.id]) Object.assign(w, p.words[w.id]);
-                });
-                examScores = p.examScores || [];
-                dailyWordsCount = p.dailyWordsCount || 0;
-            }
-        }
-
-        function saveProgress() {
-            const storage = { words: {}, examScores, dailyWordsCount };
-            words.forEach(w => {
-                storage.words[w.id] = { 
-                    score: w.score, stagesCompleted: w.stagesCompleted, isInstant: w.isInstant, 
-                    isSeen: w.isSeen, errorCount: w.errorCount, learnedDate: w.learnedDate,
-                    repLevel: w.repLevel, nextRepDate: w.nextRepDate
-                };
-            });
-            localStorage.setItem('usanim_v3_data', JSON.stringify(storage));
-        }
+        const load = () => { const s = localStorage.getItem('usanim_v3_data'); if(s) { const p = JSON.parse(s); words.forEach(w => p.words[w.id] && Object.assign(w, p.words[w.id])); examScores = p.examScores || []; dailyCount = p.dailyCount || 0; } };
+        const save = () => { const storage = { words: {}, examScores, dailyCount }; words.forEach(w => storage.words[w.id] = { ...w }); localStorage.setItem('usanim_v3_data', JSON.stringify(storage)); };
 
         function updateStats() {
             const learned = words.filter(w => w.stagesCompleted.length >= 5 || w.isInstant).length;
             const pct = Math.round((learned / words.length) * 100);
-            document.getElementById('home-progress-pct').innerText = pct + "%";
-            document.getElementById('home-bg-progress').style.width = pct + "%";
-            document.getElementById('progress-bar').style.width = pct + "%";
+            $('h-pct').innerText = pct + "%"; $('h-bg-line').style.width = pct + "%"; $('p-bar').style.width = pct + "%";
         }
 
-        function goToAppMenu() { document.getElementById('welcome-screen').classList.add('hidden'); document.getElementById('app-content').classList.remove('hidden'); }
-        function goToWelcome() { document.getElementById('app-content').classList.add('hidden'); document.getElementById('welcome-screen').classList.remove('hidden'); updateStats(); }
+        const exitToMenu = () => { ['view', 'smart-menu'].forEach(id => $(id).classList.add('hidden')); $('app-content').classList.remove('hidden'); updateStats(); window.speechSynthesis.cancel(); };
 
-        function openStage(num) {
-            activeStage = num; activeIndex = 0;
-            document.getElementById('app-content').classList.add('hidden');
-            document.getElementById('view').classList.remove('hidden');
-            document.getElementById('view-title').innerText = `Փուլ ${num}`;
-            initStageLogic();
+        function openStage(num) { activeStage = num; activeIndex = 0; toggleView('app-content', 'view'); $('v-title').innerText = `Փուլ ${num}`; renderStage(); }
+
+        function renderStage() {
+            const cont = $('content'); cont.innerHTML = "";
+            activeList = activeStage === 1 ? words.filter(w => !w.isInstant && !w.isSeen) : 
+                         activeStage === 3 ? words.filter(w => !w.stagesCompleted.includes(3) && !w.isInstant) :
+                         words.filter(w => !w.stagesCompleted.includes(activeStage) && !w.isInstant);
+            if (activeStage === 1) renderS1(); else if (activeStage === 2) renderS2(); else if (activeStage === 3) renderS3(); else renderGen();
         }
 
-        function initStageLogic() {
-            const container = document.getElementById('content');
-            container.innerHTML = ""; canProceed = false;
-            
-            if (activeStage === 1) {
-                activeList = words.filter(w => !w.isInstant && !w.isSeen);
-                renderStage1();
-            } else if (activeStage === 3) {
-                activeList = words.filter(w => !w.stagesCompleted.includes(3) && !w.isInstant);
-                renderStage3();
-            } else {
-                activeList = words.filter(w => !w.stagesCompleted.includes(activeStage) && !w.isInstant);
-                renderGenericStage();
-            }
-        }
-
-        function renderStage1() {
-            if (activeIndex >= activeList.length) return renderFinish();
-            const word = activeList[activeIndex];
-            document.getElementById('content').innerHTML = `
-                <div class="w-full bg-white rounded-[3rem] p-12 text-center shadow-xl mb-10 border-b-8 border-emerald-500">
-                    <h2 class="text-6xl font-black text-slate-800 mb-6 italic" onclick="speak('${word.en}')">${word.en}</h2>
-                    <h3 onclick="this.classList.toggle('revealed')" class="text-3xl font-bold text-emerald-200 blur-text italic">${word.hy}</h3>
-                </div>
-                <div class="grid grid-cols-2 gap-5 w-full">
-                    <button onclick="handleStage1(true)" class="btn-primary !bg-emerald-500">ԳԻՏԵՄ</button>
-                    <button onclick="handleStage1(false)" class="btn-primary !bg-rose-500">ՉԳԻՏԵՄ</button>
-                </div>`;
-            speak(word.en);
-        }
-
-        function handleStage1(known) {
+        function renderS1() {
+            if (activeIndex >= activeList.length) return renderFin();
             const w = activeList[activeIndex];
-            if(known) {
-                w.isInstant = true; w.isSeen = true;
-                w.learnedDate = new Date().toISOString().split('T')[0];
-                dailyWordsCount++;
-            } else { w.isSeen = true; }
-            saveProgress(); activeIndex++; renderStage1();
+            $('content').innerHTML = `<div class="w-full bg-white rounded-[3rem] p-12 text-center shadow-xl mb-10 border-b-8 border-emerald-500"><h2 class="text-6xl font-black italic mb-6" onclick="speak('${w.en}')">${w.en}</h2><h3 onclick="this.classList.toggle('revealed')" class="text-3xl font-bold text-emerald-200 blur-text italic">${w.hy}</h3></div><div class="grid grid-cols-2 gap-5 w-full"><button onclick="hS1(true)" class="btn-primary">ԳԻՏԵՄ</button><button onclick="hS1(false)" class="btn-primary !bg-rose-500">ՉԳԻՏԵՄ</button></div>`;
+            speak(w.en);
         }
+        const hS1 = ok => { const w = activeList[activeIndex]; if(ok) { w.isInstant = true; w.isSeen = true; dailyCount++; } else w.isSeen = true; save(); activeIndex++; renderS1(); };
 
-        function renderStage3() {
-            const batch = activeList.slice(0, 5);
-            if(batch.length === 0) return renderFinish();
-            const leftSide = [...batch].sort(() => Math.random() - 0.5);
-            const rightSide = [...batch].sort(() => Math.random() - 0.5);
-
-            document.getElementById('content').innerHTML = `
-                <div class="grid grid-cols-2 gap-4 w-full items-start">
-                    <div class="space-y-4" id="en-list"></div>
-                    <div class="space-y-4" id="hy-list"></div>
-                </div>
-                <button id="next-batch-btn" onclick="initStageLogic()" class="hidden btn-primary mt-8">ՀԱՋՈՐԴ ԽՈՒՄԲԸ</button>
-            `;
-
-            leftSide.forEach(w => {
-                const el = document.createElement('div');
-                el.className = 'match-item';
-                // Միավորները անգլերեն բառի տակ
-                el.innerHTML = `<span>${w.en}</span><div class="mt-1">${getDots(w.score)}</div>`;
-                el.onclick = () => selectMatch(el, 'en', w);
-                document.getElementById('en-list').appendChild(el);
-            });
-
-            rightSide.forEach(w => {
-                const el = document.createElement('div');
-                el.className = 'match-item';
-                el.innerHTML = `<span>${w.hy}</span>`;
-                el.onclick = () => selectMatch(el, 'hy', w);
-                document.getElementById('hy-list').appendChild(el);
+        function renderS2() {
+            const batch = activeList.slice(0, 10); if(!batch.length) return renderFin();
+            const w = batch[activeIndex % batch.length];
+            const others = words.filter(x => x.id !== w.id).sort(() => 0.5 - Math.random()).slice(0, 3);
+            const opts = [...others, w].sort(() => 0.5 - Math.random());
+            $('content').innerHTML = `<div class="w-full text-center"><div class="mb-6">${getDots(w.score)}</div><div class="mb-10 text-6xl font-black italic text-emerald-900" onclick="speak('${w.en}')">${w.en}</div><div class="grid grid-cols-1 gap-3 w-full" id="opts"></div><button id="nx-btn" onclick="renderStage()" class="hidden btn-primary mt-8 !bg-slate-800">ՀԱՋՈՐԴԸ</button></div>`;
+            speak(w.en);
+            opts.forEach(o => {
+                const b = document.createElement('button'); b.className = "w-full p-5 bg-white border-2 border-emerald-100 rounded-2xl font-bold text-xl"; b.innerText = o.hy;
+                b.onclick = () => {
+                    if(o.id === w.id) { w.score = Math.min(5, w.score + 1); b.className = "w-full p-5 bg-emerald-500 text-white rounded-2xl font-bold text-xl"; if(w.score >= 5) { w.score = 0; w.stagesCompleted.push(2); } setTimeout(renderStage, 600); }
+                    else { w.score = Math.max(0, w.score - 1); w.errorCount++; b.className = "w-full p-5 bg-rose-500 text-white rounded-2xl font-bold text-xl"; $('nx-btn').classList.remove('hidden'); }
+                    save();
+                };
+                $('opts').appendChild(b);
             });
         }
 
-        function selectMatch(el, type, word) {
+        function renderS3() {
+            const batch = activeList.slice(0, 5); if(!batch.length) return renderFin();
+            const l = [...batch].sort(() => 0.5 - Math.random()), r = [...batch].sort(() => 0.5 - Math.random());
+            $('content').innerHTML = `<div class="grid grid-cols-2 gap-4 w-full"><div id="en-l" class="space-y-4"></div><div id="hy-l" class="space-y-4"></div></div><button id="n-btn" onclick="renderStage()" class="hidden btn-primary mt-8">ՀԱՋՈՐԴ ԽՈՒՄԲԸ</button>`;
+            l.forEach(w => { const d = document.createElement('div'); d.className = 'match-item'; d.innerHTML = `<span>${w.en}</span><div class="mt-1">${getDots(w.score)}</div>`; d.onclick = () => selM(d, 'en', w); $('en-l').appendChild(d); });
+            r.forEach(w => { const d = document.createElement('div'); d.className = 'match-item'; d.innerHTML = `<span>${w.hy}</span>`; d.onclick = () => selM(d, 'hy', w); $('hy-l').appendChild(d); });
+        }
+
+        function selM(el, ty, w) {
             if(el.classList.contains('match-correct')) return;
-            document.querySelectorAll(`.match-item`).forEach(i => i.classList.remove('match-selected'));
-            el.classList.add('match-selected');
-            if(type === 'en') { selectedEn = { el, word }; speak(word.en); }
-            else selectedHy = { el, word };
-
-            if(selectedEn && selectedHy) {
-                if(selectedEn.word.id === selectedHy.word.id) {
-                    selectedEn.el.className = 'match-item match-correct';
-                    selectedHy.el.className = 'match-item match-correct';
-                    selectedEn.word.score += 2;
-                    if(selectedEn.word.score >= 10) {
-                        selectedEn.word.score = 0;
-                        selectedEn.word.stagesCompleted.push(3);
-                    }
-                } else {
-                    selectedEn.el.classList.add('match-wrong');
-                    selectedHy.el.classList.add('match-wrong');
-                    selectedEn.word.score = Math.max(0, selectedEn.word.score - 2);
-                    selectedEn.word.errorCount++;
-                    setTimeout(() => {
-                        selectedEn.el.classList.remove('match-wrong', 'match-selected');
-                        selectedHy.el.classList.remove('match-wrong', 'match-selected');
-                    }, 400);
-                }
-                saveProgress(); selectedEn = null; selectedHy = null;
-                if(document.querySelectorAll('.match-correct').length === 10) document.getElementById('next-batch-btn').classList.remove('hidden');
+            document.querySelectorAll('.match-item').forEach(i => i.classList.remove('match-selected')); el.classList.add('match-selected');
+            if(ty === 'en') { selEn = { el, w }; speak(w.en); } else selHy = { el, w };
+            if(selEn && selHy) {
+                if(selEn.w.id === selHy.w.id) { [selEn.el, selHy.el].forEach(i => i.className = 'match-item match-correct'); selEn.w.score = Math.min(5, selEn.w.score + 1); if(selEn.w.score >= 5) { selEn.w.score = 0; selEn.w.stagesCompleted.push(3); } }
+                else { [selEn.el, selHy.el].forEach(i => i.classList.add('match-wrong')); selEn.w.score = Math.max(0, selEn.w.score - 1); selEn.w.errorCount++; setTimeout(() => [selEn.el, selHy.el].forEach(i => i.classList.remove('match-wrong', 'match-selected')), 400); }
+                save(); selEn = selHy = null; if(document.querySelectorAll('.match-correct').length === 10) $('n-btn').classList.remove('hidden');
             }
         }
 
-        function renderGenericStage() {
-            const batch = activeList.slice(0, 10);
-            if(batch.length === 0) return renderFinish();
-            const word = batch[activeIndex % batch.length];
-            let question = word.en, answer = word.hy;
-            if(activeStage === 4) { question = word.hy; answer = word.en; }
-            if(activeStage === 6) question = "🔊";
-
-            document.getElementById('content').innerHTML = `
-                <div class="w-full text-center">
-                    <div class="mb-6">${getDots(word.score)}</div>
-                    <div class="mb-10 text-6xl font-black text-emerald-900 italic" onclick="speak('${word.en}')">${question}</div>
-                    <input type="text" id="stage-input" class="w-full p-6 border-4 border-emerald-100 rounded-[2.5rem] text-center text-2xl outline-none focus:border-emerald-500 transition-all shadow-inner" placeholder="..." autocomplete="off">
-                    <button id="check-btn" onclick="checkGeneric('${answer}')" class="btn-primary mt-8">ՍՏՈՒԳԵԼ</button>
-                    <button id="next-btn" onclick="initStageLogic()" class="hidden btn-primary mt-8 !bg-slate-800">ՀԱՋՈՐԴԸ</button>
-                </div>`;
-            if(activeStage !== 6) speak(word.en);
-            document.getElementById('stage-input').focus();
+        function renderGen() {
+            const batch = activeList.slice(0, 10); if(!batch.length) return renderFin();
+            const w = batch[activeIndex % batch.length];
+            const q = activeStage === 6 ? "🔊" : (activeStage === 4 ? w.hy : w.en), a = activeStage === 4 ? w.en : w.hy;
+            $('content').innerHTML = `<div class="w-full text-center"><div class="mb-6">${getDots(w.score)}</div><div class="mb-10 text-6xl font-black italic text-emerald-900" onclick="speak('${w.en}')">${q}</div><input id="s-in" class="w-full p-6 border-4 border-emerald-100 rounded-[2.5rem] text-center text-2xl outline-none" placeholder="..." autocomplete="off"><button id="c-btn" onclick="checkGen('${a}', '${w.id}')" class="btn-primary mt-8">ՍՏՈՒԳԵԼ</button><button id="nx-btn" onclick="renderStage()" class="hidden btn-primary mt-8 !bg-slate-800">ՀԱՋՈՐԴԸ</button></div>`;
+            if(activeStage !== 6) speak(w.en); $('s-in').focus();
         }
 
-        function checkGeneric(correct) {
-            const input = document.getElementById('stage-input');
-            const word = activeList.slice(0, 10)[activeIndex % 10];
-            if(input.value.trim().toLowerCase() === correct.toLowerCase()) {
-                word.score += 2;
-                input.className = "w-full p-6 border-4 border-emerald-500 bg-emerald-500 text-white rounded-[2.5rem] text-center text-2xl outline-none";
-                if(word.score >= 10) {
-                    word.score = 0; word.stagesCompleted.push(activeStage);
-                    if(word.stagesCompleted.length >= 5) {
-                        word.learnedDate = new Date().toISOString().split('T')[0];
-                        setNextRep(word);
-                    }
-                }
-                setTimeout(initStageLogic, 600);
-            } else {
-                word.score = Math.max(0, word.score - 2);
-                word.errorCount++;
-                input.className = "w-full p-6 border-4 border-rose-500 bg-rose-500 text-white rounded-[2.5rem] text-center text-2xl outline-none";
-                input.value = correct;
-                document.getElementById('check-btn').classList.add('hidden');
-                document.getElementById('next-btn').classList.remove('hidden');
-            }
-            saveProgress();
+        function checkGen(a, id) {
+            const inVal = $('s-in').value.trim().toLowerCase(), w = words.find(x => x.id == id);
+            if(inVal === a.toLowerCase()) { w.score = Math.min(5, w.score + 1); if(w.score >= 5) { w.score = 0; w.stagesCompleted.push(activeStage); if(w.stagesCompleted.length >= 5) setNextRep(w); } setTimeout(renderStage, 600); }
+            else { w.score = Math.max(0, w.score - 1); w.errorCount++; $('s-in').className = "w-full p-6 border-4 border-rose-500 bg-rose-500 text-white rounded-[2.5rem] text-center text-2xl outline-none"; $('s-in').value = a; $('c-btn').classList.add('hidden'); $('nx-btn').classList.remove('hidden'); }
+            save();
         }
 
-        function openSmartStage() {
-            document.getElementById('app-content').classList.add('hidden');
-            document.getElementById('smart-menu').classList.remove('hidden');
-            const container = document.getElementById('smart-container');
-            container.innerHTML = "";
-            const now = new Date();
-            const repWords = words.filter(w => w.nextRepDate && new Date(w.nextRepDate) <= now);
-            const hardWords = words.filter(w => w.errorCount >= 5);
+        const setNextRep = w => { const d = new Date(); let dCount = w.repLevel === 0 ? 7 : (w.repLevel === 1 ? 30 : 90); d.setDate(d.getDate() + dCount); w.nextRepDate = d.toISOString(); };
 
-            container.innerHTML = `
-                <div class="bg-white p-6 rounded-[2.5rem] shadow-xl border-l-[12px] border-emerald-500">
-                    <h3 class="font-black text-emerald-900 text-xl mb-1 italic">ԿՐԿՆՈՒԹՅՈՒՆ</h3>
-                    <p class="text-sm text-slate-400 mb-6 font-bold uppercase tracking-tighter">7 օր / 1 ամիս / 3 ամիս</p>
-                    <button onclick="startRepetition()" class="btn-primary !p-4 !rounded-2xl shadow-emerald-200">ՍԿՍԵԼ (${repWords.length})</button>
-                </div>
-                <div class="bg-white p-6 rounded-[2.5rem] shadow-xl border-l-[12px] border-rose-500">
-                    <h3 class="font-black text-rose-900 text-xl mb-1 italic">ՇՏԿՈՒՄ</h3>
-                    <p class="text-sm text-slate-400 mb-6 font-bold uppercase tracking-tighter">Դժվար բառերի վարժանք (5+ սխալ)</p>
-                    <button onclick="startCorrection()" class="btn-primary !p-4 !rounded-2xl !bg-rose-600 shadow-rose-200">ՍԿՍԵԼ (${hardWords.length})</button>
-                </div>`;
+        function openSmart() {
+            toggleView('app-content', 'smart-menu');
+            const now = new Date(), reps = words.filter(w => w.nextRepDate && new Date(w.nextRepDate) <= now), hards = words.filter(w => w.errorCount >= 5);
+            $('smart-cont').innerHTML = `<div class="bg-white p-6 rounded-[2.5rem] shadow-xl border-l-[12px] border-emerald-500"><h3 class="font-black text-emerald-900 uppercase">Կրկնություն</h3><button onclick="startR()" class="btn-primary !p-4 mt-4">Սկսել (${reps.length})</button></div><div class="bg-white p-6 rounded-[2.5rem] shadow-xl border-l-[12px] border-rose-500"><h3 class="font-black text-rose-900 uppercase">Շտկում</h3><button onclick="startC()" class="btn-primary !p-4 !bg-rose-600 mt-4">Սկսել (${hards.length})</button></div>`;
         }
+        const startR = () => { activeList = words.filter(w => w.nextRepDate && new Date(w.nextRepDate) <= new Date()); if(!activeList.length) return; activeIndex = 0; toggleView('smart-menu', 'view'); renderRep(); };
+        function renderRep() { const w = activeList[activeIndex]; $('content').innerHTML = `<div class="w-full bg-white rounded-[3.5rem] p-12 text-center shadow-xl mb-10 border-b-8 border-emerald-500"><h2 class="text-6xl font-black mb-6">${w.en}</h2><h3 onclick="this.classList.toggle('revealed')" class="text-3xl font-bold text-emerald-100 blur-text">${w.hy}</h3></div><div class="grid grid-cols-2 gap-5 w-full"><button onclick="hR(true)" class="btn-primary">ԳԻՏԵՄ</button><button onclick="hR(false)" class="btn-primary !bg-rose-500">ՉԳԻՏԵՄ</button></div>`; speak(w.en); }
+        function hR(ok) { const w = activeList[activeIndex]; if(ok) { w.repLevel++; setNextRep(w); activeIndex++; if(activeIndex >= activeList.length) exitToMenu(); else renderRep(); } else { Object.assign(w, {score:0, stagesCompleted:[], isInstant:false, isSeen:false, repLevel:0, nextRepDate:null, errorCount:0}); exitToMenu(); } save(); }
+        const startC = () => { activeList = words.filter(w => w.errorCount >= 5); if(!activeList.length) return; activeIndex = 0; toggleView('smart-menu', 'view'); renderCor(); };
+        function renderCor() { const w = activeList[activeIndex % activeList.length]; $('content').innerHTML = `<div class="w-full text-center"><div class="mb-10 bg-white rounded-[3.5rem] p-12 shadow-xl border-b-8 border-rose-500"><h2 class="text-6xl mb-6">${w.en}</h2><h3 onclick="this.classList.toggle('revealed')" class="text-3xl font-bold text-rose-100 blur-text">${w.hy}</h3></div><div class="grid grid-cols-2 gap-5 w-full"><button onclick="hC(true)" class="btn-primary">ԳԻՏԵՄ</button><button onclick="hC(false)" class="btn-primary !bg-rose-500">ՉԳԻՏԵՄ</button></div></div>`; speak(w.en); }
+        function hC(ok) { const w = activeList[activeIndex % activeList.length]; if(ok) { w.score++; if(w.score >= 5) { w.errorCount = 0; w.score = 0; activeList.splice(activeIndex % activeList.length, 1); } else activeIndex++; } else { w.score = Math.max(0, w.score - 1); activeIndex++; } save(); if(activeList.length) renderCor(); else exitToMenu(); }
 
-        function startRepetition() {
-            const now = new Date();
-            activeList = words.filter(w => w.nextRepDate && new Date(w.nextRepDate) <= now);
-            if(activeList.length === 0) return alert("Կրկնելու բան դեռ չկա:");
-            activeIndex = 0;
-            document.getElementById('smart-menu').classList.add('hidden');
-            document.getElementById('view').classList.remove('hidden');
-            renderRepCard();
-        }
-
-        function renderRepCard() {
-            const word = activeList[activeIndex];
-            document.getElementById('content').innerHTML = `
-                <div class="w-full bg-white rounded-[3.5rem] p-12 text-center shadow-2xl mb-10 border-b-8 border-emerald-500">
-                    <h2 class="text-6xl font-black text-slate-800 mb-6 italic">${word.en}</h2>
-                    <h3 onclick="this.classList.toggle('revealed')" class="text-3xl font-bold text-emerald-100 blur-text italic">${word.hy}</h3>
-                </div>
-                <div class="grid grid-cols-2 gap-5 w-full">
-                    <button onclick="handleRep(true)" class="btn-primary !bg-emerald-500 !rounded-3xl">ԳԻՏԵՄ</button>
-                    <button onclick="handleRep(false)" class="btn-primary !bg-rose-500 !rounded-3xl">ՉԳԻՏԵՄ</button>
-                </div>`;
-            speak(word.en);
-        }
-
-        function handleRep(known) {
-            const word = activeList[activeIndex];
-            if(known) {
-                word.repLevel++;
-                setNextRep(word);
-                activeIndex++;
-                if(activeIndex >= activeList.length) exitToMenu(); else renderRepCard();
-            } else {
-                // Եթե սխալվում է կրկնության ժամանակ, ամբողջությամբ զրոյանում է
-                word.score = 0; word.stagesCompleted = []; word.isInstant = false; word.isSeen = false;
-                word.repLevel = 0; word.nextRepDate = null; word.errorCount = 0;
-                alert("Բառը զրոյացվեց: Այն կհայտնվի 1-ին փուլում:");
-                exitToMenu();
-            }
-            saveProgress();
-        }
-
-        function setNextRep(word) {
-            const now = new Date();
-            let days = 7;
-            if(word.repLevel === 1) days = 30;
-            if(word.repLevel >= 2) days = 90;
-            now.setDate(now.getDate() + days);
-            word.nextRepDate = now.toISOString();
-        }
-
-        function startCorrection() {
-            activeList = words.filter(w => w.errorCount >= 5);
-            if(activeList.length === 0) return alert("Շտկելու բան չկա:");
-            activeIndex = 0;
-            document.getElementById('smart-menu').classList.add('hidden');
-            document.getElementById('view').classList.remove('hidden');
-            renderCorrectionCard();
-        }
-
-        function renderCorrectionCard() {
-            const word = activeList[activeIndex % activeList.length];
-            document.getElementById('content').innerHTML = `
-                <div class="w-full text-center">
-                    <div class="mb-10 bg-white rounded-[3.5rem] p-12 shadow-2xl border-b-8 border-rose-500">
-                        <h2 class="text-6xl font-black mb-6 italic">${word.en}</h2>
-                        <h3 onclick="this.classList.toggle('revealed')" class="text-3xl font-bold text-rose-100 blur-text italic">${word.hy}</h3>
-                    </div>
-                    <div class="grid grid-cols-2 gap-5 w-full">
-                        <button onclick="handleCorrection(true)" class="btn-primary !bg-emerald-500">ԳԻՏԵՄ</button>
-                        <button onclick="handleCorrection(false)" class="btn-primary !bg-rose-500">ՉԳԻՏԵՄ</button>
-                    </div>
-                </div>`;
-            speak(word.en);
-        }
-
-        function handleCorrection(known) {
-            const word = activeList[activeIndex % activeList.length];
-            if(known) {
-                word.score += 2;
-                if(word.score >= 10) {
-                    word.errorCount = 0; word.score = 0;
-                    activeList.splice(activeIndex % activeList.length, 1);
-                } else { activeIndex++; }
-            } else { word.score = Math.max(0, word.score - 2); activeIndex++; }
-            saveProgress();
-            if(activeList.length > 0) renderCorrectionCard(); else exitToMenu();
-        }
-
-        function openStatsStage() {
-            document.getElementById('app-content').classList.add('hidden');
-            document.getElementById('smart-menu').classList.remove('hidden');
-            const learned = words.filter(w => w.stagesCompleted.length >= 5 || w.isInstant).length;
-            const avgExam = examScores.length ? Math.round(examScores.reduce((a,b)=>a+b,0)/examScores.length) : 0;
-            const totalPct = Math.round((learned/words.length)*100);
-
-            document.getElementById('smart-container').innerHTML = `
-                <div class="bg-emerald-900 text-white p-10 rounded-[3.5rem] shadow-2xl text-center">
-                    <h2 class="text-2xl font-black mb-8 italic uppercase tracking-widest">Վիճակագրություն</h2>
-                    <div class="space-y-4 text-left font-bold text-emerald-100">
-                        <div class="flex justify-between border-b border-emerald-800 pb-2"><span>Առաջընթաց:</span><span class="text-emerald-400">${totalPct}%</span></div>
-                        <div class="flex justify-between border-b border-emerald-800 pb-2"><span>Սովորած բառեր:</span><span class="text-emerald-400">${learned}</span></div>
-                        <div class="flex justify-between border-b border-emerald-800 pb-2"><span>Քննության միջին:</span><span class="text-emerald-400">${avgExam}%</span></div>
-                        <div class="flex justify-between"><span>Այսօր սովորած:</span><span class="text-emerald-400">${dailyWordsCount}</span></div>
-                    </div>
-                </div>`;
-        }
-
-        function openExam() {
-            activeList = [...words].sort(() => 0.5 - Math.random()).slice(0, 50);
-            activeIndex = 0; let correctCount = 0;
-            document.getElementById('app-content').classList.add('hidden');
-            document.getElementById('view').classList.remove('hidden');
-            document.getElementById('view-title').innerText = "Քննություն";
-            renderExamStep(correctCount);
-        }
-
-        function renderExamStep(correctCount) {
-            if(activeIndex >= activeList.length) {
-                const scorePct = Math.round((correctCount/activeList.length)*100);
-                examScores.push(scorePct); saveProgress();
-                return renderFinish(`Արդյունք: ${scorePct}%`);
-            }
-            const word = activeList[activeIndex];
-            document.getElementById('content').innerHTML = `
-                <div class="w-full text-center">
-                    <p class="text-xs font-bold text-emerald-400 mb-6 uppercase tracking-widest">${activeIndex+1} / ${activeList.length}</p>
-                    <h2 class="text-6xl font-black text-emerald-900 mb-10 italic">${word.en}</h2>
-                    <input type="text" id="exam-in" class="w-full p-6 border-4 border-emerald-100 rounded-3xl text-center text-xl mb-8 outline-none" placeholder="..." autofocus>
-                    <button id="ex-btn" class="btn-primary">ՀԱՋՈՐԴԸ</button>
-                </div>`;
-            document.getElementById('ex-btn').onclick = () => {
-                const val = document.getElementById('exam-in').value.trim().toLowerCase();
-                if(val === word.hy.toLowerCase()) correctCount++;
-                activeIndex++; renderExamStep(correctCount);
-            };
-        }
-
-        // Միավորների կետերի ստացում
-        function getDots(score) {
-            let html = '<div class="flex justify-center gap-1">';
-            for(let i=0; i<5; i++) {
-                const active = (score / 2) > i ? 'dot-active' : '';
-                html += `<span class="dot ${active}"></span>`;
-            }
-            return html + '</div>';
-        }
-
-        function renderFinish(extra = "") {
-            document.getElementById('content').innerHTML = `
-                <div class="text-center p-12 bg-white rounded-[3.5rem] shadow-2xl w-full border-b-8 border-emerald-500">
-                    <div class="text-7xl mb-6">🏆</div>
-                    <h2 class="text-3xl font-black mb-4 text-emerald-900 italic">Գերազանց է</h2>
-                    <p class="text-slate-500 mb-8 font-bold">${extra || "Բաժինը հաջողությամբ անցաք:"}</p>
-                    <button onclick="exitToMenu()" class="btn-primary">ՎԵՐԱԴԱՌՆԱԼ</button>
-                </div>`;
-        }
-
-        function exitToMenu() {
-            document.querySelectorAll('#view, #smart-menu').forEach(el => el.classList.add('hidden'));
-            document.getElementById('app-content').classList.remove('hidden');
-            window.speechSynthesis.cancel();
-            updateStats();
-        }
-
-        function speak(text) {
-            window.speechSynthesis.cancel();
-            const msg = new SpeechSynthesisUtterance(text);
-            msg.lang = 'en-US';
-            window.speechSynthesis.speak(msg);
-        }
-
-        function showDeleteModal() { document.getElementById('delete-modal').classList.remove('hidden'); }
-        function hideDeleteModal() { document.getElementById('delete-modal').classList.add('hidden'); }
-        function confirmFinalDelete() { localStorage.removeItem('usanim_v3_data'); location.reload(); }
-
-        initApp();
+        function openStats() { toggleView('app-content', 'smart-menu'); const l = words.filter(w => w.stagesCompleted.length >= 5 || w.isInstant).length, avg = examScores.length ? Math.round(examScores.reduce((a,b)=>a+b,0)/examScores.length) : 0; $('smart-cont').innerHTML = `<div class="bg-emerald-900 text-white p-10 rounded-[3.5rem] shadow-2xl"><h2 class="text-2xl font-black uppercase mb-8">Վիճակագրություն</h2><div class="space-y-4 text-left font-bold text-emerald-100"><div class="flex justify-between border-b border-emerald-800 pb-2"><span>Առաջընթաց:</span><span class="text-emerald-400">${Math.round((l/words.length)*100)}%</span></div><div class="flex justify-between border-b border-emerald-800 pb-2"><span>Սովորած:</span><span class="text-emerald-400">${l}</span></div><div class="flex justify-between border-b border-emerald-800 pb-2"><span>Քննություն:</span><span class="text-emerald-400">${avg}%</span></div><div class="flex justify-between"><span>Այսօր:</span><span class="text-emerald-400">${dailyCount}</span></div></div></div>`; }
+        function openExam() { activeList = [...words].sort(()=>0.5-Math.random()).slice(0,50); activeIndex = 0; let cor = 0; toggleView('app-content', 'view'); $('v-title').innerText = "Քննություն"; renderEx(cor); }
+        function renderEx(cor) { if(activeIndex >= activeList.length) { const pct = Math.round((cor/activeList.length)*100); examScores.push(pct); save(); return renderFin(`Արդյունք: ${pct}%`); } const w = activeList[activeIndex]; $('content').innerHTML = `<div class="w-full text-center"><p class="text-xs font-bold text-emerald-400 mb-6 uppercase">${activeIndex+1} / ${activeList.length}</p><h2 class="text-6xl font-black italic text-emerald-900 mb-10">${w.en}</h2><input id="ex-in" class="w-full p-6 border-4 border-emerald-100 rounded-3xl text-center text-xl outline-none" autofocus autocomplete="off"><button id="ex-btn" class="btn-primary mt-8">ՀԱՋՈՐԴԸ</button></div>`; $('ex-btn').onclick = () => { if($('ex-in').value.trim().toLowerCase() === w.hy.toLowerCase()) cor++; activeIndex++; renderEx(cor); }; }
+        const getDots = s => `<div class="flex justify-center gap-1">${Array(5).fill(0).map((_,i)=>s>i?`<span class="dot dot-active"></span>`:`<span class="dot"></span>`).join('')}</div>`;
+        const renderFin = (e="") => $('content').innerHTML = `<div class="text-center p-12 bg-white rounded-[3.5rem] shadow-2xl border-b-8 border-emerald-500"><div class="text-7xl mb-6">🏆</div><h2 class="text-3xl font-black text-emerald-900 italic">Գերազանց է</h2><p class="text-slate-500 font-bold mb-8">${e||"Ավարտվեց"}</p><button onclick="exitToMenu()" class="btn-primary">ՎԵՐԱԴԱՌՆԱԼ</button></div>`;
+        const confirmDelete = () => { localStorage.removeItem('usanim_v3_data'); location.reload(); };
+        init();
     </script>
 </body>
 </html>
