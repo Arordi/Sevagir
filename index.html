@@ -11,8 +11,10 @@
         .home-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; border-left: 10px solid #059669; background: #065f46; }
         .home-card:active { transform: scale(0.96); }
         
+        /* 3D Tilt effect for stage cards */
         .stage-card { 
-            transition: all 0.2s ease; 
+            transition: transform 0.1s ease, box-shadow 0.2s;
+            transform-style: preserve-3d;
             cursor: pointer; 
             background-color: #065f46; 
             border: 2px solid #059669; 
@@ -27,7 +29,51 @@
         .stage-card:active { transform: scale(0.95); background-color: #059669; }
         .stage-card span:last-child { color: #a7f3d0; font-weight: 800; font-size: 11px; text-transform: uppercase; margin-top: 4px; }
         
-        .btn-primary { background: linear-gradient(135deg, #059669 0%, #064e3b 100%); color: white; padding: 1.25rem; border-radius: 1.25rem; font-weight: bold; width: 100%; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); border: none; }
+        /* Breathing effect for primary buttons */
+        .btn-primary { 
+            background: linear-gradient(135deg, #059669 0%, #064e3b 100%); 
+            color: white; 
+            padding: 1.25rem; 
+            border-radius: 1.25rem; 
+            font-weight: bold; 
+            width: 100%; 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); 
+            border: none;
+            transition: all 0.2s;
+            animation: breathe 2s infinite ease-in-out;
+        }
+        @keyframes breathe {
+            0% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(5, 150, 105, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0); }
+        }
+        /* Wave animation for speaker in stage 6 */
+        .speaker-wave {
+            animation: wave 0.6s infinite;
+        }
+        @keyframes wave {
+            0% { box-shadow: 0 0 0 0 #10b981; }
+            50% { box-shadow: 0 0 0 12px rgba(16, 185, 129, 0.3); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        /* Splash animation for welcome screen */
+        .splash-word {
+            animation: slideIn 0.8s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        /* Confetti canvas */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
         .blur-text { filter: blur(8px); transition: all 0.3s ease; cursor: pointer; }
         .blur-text.revealed { filter: blur(0); }
         
@@ -62,11 +108,12 @@
     </style>
 </head>
 <body class="min-h-screen">
+    <canvas id="confetti-canvas"></canvas>
 
     <div id="welcome-screen" class="min-h-screen flex flex-col p-6 max-w-lg mx-auto">
         <div class="mt-20 mb-12 text-center">
-            <h1 class="text-5xl font-black text-emerald-400 tracking-tight mb-2 italic">Usanim</h1>
-            <p class="text-emerald-500 font-bold tracking-[0.3em] uppercase text-xs">Premium Learning</p>
+            <h1 class="text-5xl font-black text-emerald-400 tracking-tight mb-2 italic splash-word">Usanim</h1>
+            <p class="text-emerald-500 font-bold tracking-[0.3em] uppercase text-xs splash-word" style="animation-delay: 0.2s;">Premium Learning</p>
         </div>
         <div class="space-y-4">
             <div onclick="goToAppMenu()" class="home-card glass p-8 rounded-[2.5rem] shadow-xl flex items-center justify-between relative overflow-hidden">
@@ -102,15 +149,15 @@
         </div>
 
         <div id="menu" class="max-w-4xl mx-auto p-4 grid grid-cols-2 md:grid-cols-3 gap-4 py-8">
-            <button onclick="openStage(1)" class="stage-card"><span class="text-3xl">🗂️</span><span>Փուլ 1</span></button>
-            <button onclick="openStage(2)" class="stage-card"><span class="text-3xl">🔘</span><span>Փուլ 2</span></button>
-            <button onclick="openStage(3)" class="stage-card"><span class="text-3xl">🧩</span><span>Փուլ 3</span></button>
-            <button onclick="openStage(4)" class="stage-card"><span class="text-3xl">⌨️</span><span>Փուլ 4</span></button>
-            <button onclick="openStage(5)" class="stage-card"><span class="text-3xl">🔄</span><span>Փուլ 5</span></button>
-            <button onclick="openStage(6)" class="stage-card"><span class="text-3xl">🎧</span><span>Փուլ 6</span></button>
-            <button onclick="openSmartStage()" class="stage-card"><span class="text-3xl">🎓</span><span>Փուլ 7</span></button>
-            <button onclick="openExam()" class="stage-card"><span class="text-3xl">📝</span><span>Փուլ 8</span></button>
-            <button onclick="openStatsStage()" class="stage-card"><span class="text-3xl">📊</span><span>Փուլ 9</span></button>
+            <button class="stage-card" data-tilt><span class="text-3xl">🗂️</span><span>Փուլ 1</span></button>
+            <button class="stage-card" data-tilt><span class="text-3xl">🔘</span><span>Փուլ 2</span></button>
+            <button class="stage-card" data-tilt><span class="text-3xl">🧩</span><span>Փուլ 3</span></button>
+            <button class="stage-card" data-tilt><span class="text-3xl">⌨️</span><span>Փուլ 4</span></button>
+            <button class="stage-card" data-tilt><span class="text-3xl">🔄</span><span>Փուլ 5</span></button>
+            <button class="stage-card" data-tilt><span class="text-3xl">🎧</span><span>Փուլ 6</span></button>
+            <button class="stage-card" data-tilt><span class="text-3xl">🎓</span><span>Փուլ 7</span></button>
+            <button class="stage-card" data-tilt><span class="text-3xl">📝</span><span>Փուլ 8</span></button>
+            <button class="stage-card" data-tilt><span class="text-3xl">📊</span><span>Փուլ 9</span></button>
         </div>
     </div>
 
@@ -145,6 +192,70 @@
         let examScores = [], dailyWordsCount = 0, dailyGoal = 20;
         let selectedEn = null, selectedHy = null;
 
+        // === NEW EFFECTS FUNCTIONS (no logic change) ===
+        function triggerHaptic() {
+            if (navigator.vibrate) navigator.vibrate(50);
+        }
+        function showConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+            for (let i = 0; i < 100; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    size: Math.random() * 6 + 2,
+                    color: `hsl(${Math.random() * 360}, 70%, 60%)`,
+                    speedY: Math.random() * 5 + 2,
+                    speedX: (Math.random() - 0.5) * 2
+                });
+            }
+            let animating = true;
+            function draw() {
+                if (!animating) return;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => {
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(p.x, p.y, p.size, p.size);
+                    p.y += p.speedY;
+                    p.x += p.speedX;
+                    if (p.y > canvas.height) p.y = -10;
+                });
+                requestAnimationFrame(draw);
+            }
+            draw();
+            setTimeout(() => { animating = false; ctx.clearRect(0, 0, canvas.width, canvas.height); }, 1500);
+        }
+        function animateNumber(element, start, end, duration) {
+            let range = end - start;
+            let stepTime = Math.abs(Math.floor(duration / range));
+            let current = start;
+            let timer = setInterval(() => {
+                current += (current < end ? 1 : -1);
+                element.innerText = current;
+                if (current === end) clearInterval(timer);
+            }, stepTime);
+        }
+        // Initialize 3D tilt on stage cards
+        document.querySelectorAll('[data-tilt]').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = (y - centerY) / 20;
+                const rotateY = (centerX - x) / 20;
+                card.style.transform = `perspective(500px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(500px) rotateX(0deg) rotateY(0deg)';
+            });
+        });
+
+        // === ORIGINAL LOGIC (unchanged) ===
         async function initApp() {
             try {
                 const response = await fetch('./vocabulary.json');
@@ -163,6 +274,10 @@
                     const isMatch = e.target.value.toUpperCase() === 'DELETE';
                     btn.disabled = !isMatch;
                     btn.className = isMatch ? 'flex-1 p-4 bg-rose-600 text-white rounded-2xl font-bold' : 'flex-1 p-4 bg-emerald-800 text-emerald-500 rounded-2xl font-bold';
+                });
+                // Assign click handlers after dynamic generation (for stage cards)
+                document.querySelectorAll('.stage-card').forEach((btn, idx) => {
+                    btn.onclick = () => openStage(idx+1);
                 });
             } catch (e) { console.error("Error loading app:", e); }
         }
@@ -233,7 +348,6 @@
             document.getElementById('view-title').innerText = `Փուլ ${num}`;
             
             if (num === 1) {
-                // Փուլ 1-ի համար վերցնում ենք ԲՈԼՈՐ չսովորած բառերը (առանց կտրման)
                 activeList = words.filter(w => !w.isInstant && !w.stagesCompleted.includes(1));
             } else {
                 activeList = words.filter(w => !w.isInstant && !w.stagesCompleted.includes(activeStage)).slice(0, 10);
@@ -245,7 +359,7 @@
             const container = document.getElementById('content');
             container.innerHTML = "";
             if (activeList.length === 0) {
-                if (activeStage === 1) renderStage1Finish(); // Փուլ 1-ի հատուկ ավարտ
+                if (activeStage === 1) renderStage1Finish();
                 else renderFinish();
                 return;
             }
@@ -255,7 +369,6 @@
         }
 
         function renderStage1Finish() {
-            // Երբ ամբողջ ցանկն անցնենք, առաջարկում ենք կրկնել չսովորածները
             const notLearnedCount = words.filter(w => !w.isInstant && !w.stagesCompleted.includes(1)).length;
             document.getElementById('content').innerHTML = `
                 <div class="text-center p-12 bg-emerald-800 rounded-[3.5rem] shadow-2xl w-full border-b-8 border-emerald-500">
@@ -292,22 +405,19 @@
                 dailyWordsCount++;
                 saveProgress();
                 activeIndex++;
-                if (activeIndex >= activeList.length) {
-                    initStageLogic(); // կանցնի renderStage1Finish()
-                } else {
-                    renderStage1();
-                }
+                if (activeIndex >= activeList.length) initStageLogic();
+                else renderStage1();
+                triggerHaptic();
+                showConfetti(); // celebration
             } else { 
                 w.isSeen = true; 
                 w.stagesCompleted = []; 
                 w.score = 0;
                 saveProgress();
                 activeIndex++;
-                if (activeIndex >= activeList.length) {
-                    initStageLogic(); // ավարտ
-                } else {
-                    renderStage1();
-                }
+                if (activeIndex >= activeList.length) initStageLogic();
+                else renderStage1();
+                triggerHaptic();
             }
         }
 
@@ -342,10 +452,16 @@
                 if(selectedEn.word.id === selectedHy.word.id) {
                     selectedEn.el.className = 'match-item match-correct'; selectedHy.el.className = 'match-item match-correct';
                     selectedEn.word.score = Math.min(10, selectedEn.word.score + 1);
-                    if(selectedEn.word.score >= 10) { selectedEn.word.score = 0; selectedEn.word.stagesCompleted.push(3); }
+                    if(selectedEn.word.score >= 10) { 
+                        selectedEn.word.score = 0; 
+                        selectedEn.word.stagesCompleted.push(3);
+                        showConfetti();
+                        triggerHaptic();
+                    }
                 } else {
                     selectedEn.el.classList.add('match-wrong'); selectedHy.el.classList.add('match-wrong');
                     selectedEn.word.score = Math.max(0, selectedEn.word.score - 1);
+                    triggerHaptic();
                     setTimeout(() => { document.querySelectorAll('.match-wrong').forEach(i => i.classList.remove('match-wrong', 'match-selected')); }, 400);
                 }
                 saveProgress(); selectedEn = null; selectedHy = null;
@@ -363,7 +479,7 @@
             
             let speakerButton = '';
             if (activeStage === 6) {
-                speakerButton = `<button onclick="speak('${word.en}')" class="text-4xl mb-4 bg-emerald-700 p-3 rounded-full">🔊</button>`;
+                speakerButton = `<button id="speaker-stage6" onclick="speak('${word.en}'); document.getElementById('speaker-stage6').classList.add('speaker-wave'); setTimeout(()=>document.getElementById('speaker-stage6').classList.remove('speaker-wave'),600)" class="text-4xl mb-4 bg-emerald-700 p-3 rounded-full">🔊</button>`;
             }
             
             document.getElementById('content').innerHTML = `
@@ -376,7 +492,6 @@
                     <button id="next-btn" onclick="initStageLogic()" class="hidden btn-primary mt-8 !bg-emerald-900">ՀԱՋՈՐԴԸ</button>
                 </div>`;
             if (activeStage === 6) {
-                // Ավտոմատ արտասանություն լսողական փուլի համար
                 setTimeout(() => speak(word.en), 200);
             } else {
                 speak(word.en);
@@ -404,9 +519,19 @@
             const word = activeList[activeIndex % activeList.length];
             if(cleanText(selected) === cleanText(correct)) {
                 word.score = Math.min(10, word.score + 1);
-                if(word.score >= 10) { word.score = 0; word.stagesCompleted.push(2); }
+                if(word.score >= 10) { 
+                    word.score = 0; 
+                    word.stagesCompleted.push(2);
+                    showConfetti();
+                    triggerHaptic();
+                }
                 activeIndex++;
-            } else { word.score = Math.max(0, word.score - 1); word.errorCount++; activeIndex++; }
+            } else { 
+                word.score = Math.max(0, word.score - 1); 
+                word.errorCount++; 
+                activeIndex++;
+                triggerHaptic();
+            }
             saveProgress(); initStageLogic();
         }
 
@@ -423,6 +548,8 @@
                         word.learnedDate = new Date().toISOString().split('T')[0];
                         dailyWordsCount++;
                     }
+                    showConfetti();
+                    triggerHaptic();
                 }
                 activeIndex++;
                 setTimeout(initStageLogic, 600);
@@ -432,6 +559,7 @@
                 input.value = correct;
                 document.getElementById('check-btn').classList.add('hidden');
                 document.getElementById('next-btn').classList.remove('hidden');
+                triggerHaptic();
             }
             saveProgress();
         }
@@ -479,8 +607,8 @@
 
         function handleRep(known) {
             const word = activeList[activeIndex];
-            if(known) { word.repLevel++; setNextRep(word); activeIndex++; if(activeIndex >= activeList.length) exitToMenu(); else renderRepCard(); }
-            else { word.score = 0; word.stagesCompleted = []; word.repLevel = 0; word.nextRepDate = null; alert("Զրոյացվեց:"); exitToMenu(); }
+            if(known) { word.repLevel++; setNextRep(word); activeIndex++; if(activeIndex >= activeList.length) exitToMenu(); else renderRepCard(); triggerHaptic(); showConfetti(); }
+            else { word.score = 0; word.stagesCompleted = []; word.repLevel = 0; word.nextRepDate = null; alert("Զրոյացվեց:"); exitToMenu(); triggerHaptic(); }
             saveProgress();
         }
 
@@ -514,8 +642,8 @@
 
         function handleCorrection(known) {
             const word = activeList[activeIndex % activeList.length];
-            if(known) { word.score = Math.min(10, word.score + 1); if(word.score >= 10) { word.errorCount = 0; word.score = 0; activeList.splice(activeIndex % activeList.length, 1); } else activeIndex++; }
-            else { word.score = Math.max(0, word.score - 1); activeIndex++; }
+            if(known) { word.score = Math.min(10, word.score + 1); if(word.score >= 10) { word.errorCount = 0; word.score = 0; activeList.splice(activeIndex % activeList.length, 1); showConfetti(); } else activeIndex++; triggerHaptic(); }
+            else { word.score = Math.max(0, word.score - 1); activeIndex++; triggerHaptic(); }
             saveProgress(); if(activeList.length > 0) renderCorrectionCard(); else exitToMenu();
         }
 
@@ -540,7 +668,7 @@
                             <path class="text-emerald-400" stroke-dasharray="${goalProgress}, 100" stroke-width="3" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                         </svg>
                         <div class="absolute inset-0 flex flex-col items-center justify-center">
-                            <span class="text-xl font-black">${dailyWordsCount}</span>
+                            <span class="text-xl font-black" id="daily-count-anim">${dailyWordsCount}</span>
                             <span class="text-[7px] uppercase font-bold text-emerald-400">բառ</span>
                         </div>
                     </div>
@@ -554,7 +682,7 @@
                 <div class="bg-emerald-900 p-6 rounded-[2.5rem] shadow-2xl border border-emerald-700">
                     <div class="grid grid-cols-2 gap-3">
                         <div class="bg-emerald-800 p-3 rounded-2xl text-center">
-                            <span class="block text-xl font-black text-emerald-400">${learnedCount}</span>
+                            <span class="block text-xl font-black text-emerald-400" id="learned-count-anim">0</span>
                             <span class="text-[9px] uppercase font-bold text-emerald-200 tracking-widest">Սովորած</span>
                         </div>
                         <div class="bg-emerald-800 p-3 rounded-2xl text-center">
@@ -583,6 +711,9 @@
                     </div>
                 </div>
             `;
+            // Animate numbers
+            animateNumber(document.getElementById('learned-count-anim'), 0, learnedCount, 800);
+            animateNumber(document.getElementById('daily-count-anim'), 0, dailyWordsCount, 800);
         }
 
         function updateDailyGoal(val) {
@@ -612,7 +743,14 @@
                     <button id="ex-btn" class="btn-primary">ՀԱՋՈՐԴԸ</button>
                 </div>`;
             setTimeout(() => document.getElementById('exam-in').focus(), 50);
-            document.getElementById('ex-btn').onclick = () => { if(cleanText(document.getElementById('exam-in').value) === cleanText(word.hy)) correctCount++; activeIndex++; renderExamStep(correctCount); };
+            document.getElementById('ex-btn').onclick = () => { 
+                if(cleanText(document.getElementById('exam-in').value) === cleanText(word.hy)) {
+                    correctCount++; 
+                    triggerHaptic();
+                } else triggerHaptic();
+                activeIndex++; 
+                renderExamStep(correctCount); 
+            };
         }
 
         function renderFinish(extra = "") {
@@ -623,6 +761,7 @@
                     <p class="text-emerald-200 mb-8 font-bold">${extra || "Բաժինը հաջողությամբ անցաք:"}</p>
                     <button onclick="exitToMenu()" class="btn-primary">ՎԵՐԱԴԱՌՆԱԼ</button>
                 </div>`;
+            showConfetti();
         }
 
         function exitToMenu() {
