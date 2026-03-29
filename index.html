@@ -6,31 +6,31 @@
     <title>Usanim Pro - Լեզուների ուսուցում</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: #f0fdf4; user-select: none; touch-action: manipulation; }
-        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
-        .home-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; border-left: 10px solid #10b981; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: #064e3b; user-select: none; touch-action: manipulation; color: white; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .home-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; border-left: 10px solid #059669; background: #065f46; }
         .home-card:active { transform: scale(0.96); }
         
         .stage-card { 
             transition: all 0.2s ease; 
             cursor: pointer; 
-            background-color: #a7f3d0; 
-            border: 2px solid #6ee7b7; 
+            background-color: #065f46; 
+            border: 2px solid #059669; 
             border-radius: 2rem;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 1.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+            color: white;
         }
-        .stage-card:active { transform: scale(0.95); background-color: #6ee7b7; }
-        .stage-card span:last-child { color: #064e3b; font-weight: 800; font-size: 11px; text-transform: uppercase; margin-top: 4px; }
+        .stage-card:active { transform: scale(0.95); background-color: #059669; }
+        .stage-card span:last-child { color: #a7f3d0; font-weight: 800; font-size: 11px; text-transform: uppercase; margin-top: 4px; }
         
-        .btn-primary { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 1.25rem; border-radius: 1.25rem; font-weight: bold; width: 100%; box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3); border: none; }
+        .btn-primary { background: linear-gradient(135deg, #059669 0%, #064e3b 100%); color: white; padding: 1.25rem; border-radius: 1.25rem; font-weight: bold; width: 100%; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); border: none; }
         .blur-text { filter: blur(8px); transition: all 0.3s ease; cursor: pointer; }
         .blur-text.revealed { filter: blur(0); }
         
-        /* Stars Styling */
         .star-box { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; }
         .star-icon { font-size: 36px; transition: all 0.3s ease; }
         .star-text { 
@@ -44,54 +44,56 @@
             pointer-events: none;
         }
 
-        .match-item { border: 2px solid #d1fae5; border-radius: 20px; padding: 12px; text-align: center; cursor: pointer; min-height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 600; background: white; transition: 0.2s; }
-        .match-selected { border-color: #10b981; background-color: #f0fdf4; color: #065f46; }
-        .match-correct { border-color: #22c55e; background-color: #dcfce7; color: #16a34a; }
-        .match-wrong { border-color: #ef4444; background-color: #fef2f2; animation: shake 0.3s; }
+        .match-item { border: 2px solid #065f46; border-radius: 20px; padding: 12px; text-align: center; cursor: pointer; min-height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 600; background: #064e3b; transition: 0.2s; color: white; }
+        .match-selected { border-color: #10b981; background-color: #065f46; }
+        .match-correct { border-color: #22c55e; background-color: #14532d; color: #4ade80; }
+        .match-wrong { border-color: #ef4444; background-color: #450a0a; animation: shake 0.3s; }
         @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
         .hidden { display: none !important; }
         
-        .choice-btn { transition: all 0.2s; border: 2px solid #e2e8f0; }
-        .choice-btn:active { transform: scale(0.98); }
+        .choice-btn { transition: all 0.2s; border: 2px solid #065f46; background: #065f46; color: white; }
+        .choice-btn:active { transform: scale(0.98); background: #059669; }
+
+        input { background: #064e3b !important; color: white !important; border-color: #059669 !important; }
     </style>
 </head>
 <body class="min-h-screen">
 
     <div id="welcome-screen" class="min-h-screen flex flex-col p-6 max-w-lg mx-auto">
         <div class="mt-20 mb-12 text-center">
-            <h1 class="text-5xl font-black text-emerald-900 tracking-tight mb-2 italic">Usanim</h1>
-            <p class="text-emerald-600 font-bold tracking-[0.3em] uppercase text-xs">Premium Learning</p>
+            <h1 class="text-5xl font-black text-emerald-400 tracking-tight mb-2 italic">Usanim</h1>
+            <p class="text-emerald-500 font-bold tracking-[0.3em] uppercase text-xs">Premium Learning</p>
         </div>
         <div class="space-y-4">
             <div onclick="goToAppMenu()" class="home-card glass p-8 rounded-[2.5rem] shadow-xl flex items-center justify-between relative overflow-hidden">
                 <div class="flex items-center gap-5 z-10">
-                    <div class="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-3xl shadow-inner border border-emerald-100">🇬🇧</div>
+                    <div class="w-16 h-16 bg-emerald-900/50 rounded-2xl flex items-center justify-center text-3xl border border-emerald-700">🇬🇧</div>
                     <div>
-                        <h2 class="text-2xl font-black text-slate-800 leading-tight">A1 Մակարդակ</h2>
+                        <h2 class="text-2xl font-black text-white leading-tight">A1 Մակարդակ</h2>
                         <div class="flex items-center gap-2 mt-1">
-                            <p id="home-word-count" class="text-slate-500 text-xs font-bold uppercase">...</p>
-                            <span class="text-slate-300">|</span>
-                            <p id="home-progress-pct" class="text-emerald-600 text-xs font-black">0%</p>
+                            <p id="home-word-count" class="text-emerald-300 text-xs font-bold uppercase">...</p>
+                            <span class="text-emerald-700">|</span>
+                            <p id="home-progress-pct" class="text-emerald-400 text-xs font-black">0%</p>
                         </div>
                     </div>
                 </div>
                 <div class="z-10 w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-md">➔</div>
-                <div id="home-bg-progress" class="absolute left-0 bottom-0 h-2 bg-emerald-400 transition-all duration-1000" style="width: 0%"></div>
+                <div id="home-bg-progress" class="absolute left-0 bottom-0 h-1 bg-emerald-400 transition-all duration-1000" style="width: 0%"></div>
             </div>
         </div>
     </div>
 
     <div id="app-content" class="hidden">
-        <div class="bg-emerald-600 p-4 text-white sticky top-0 z-50 shadow-lg w-full">
+        <div class="bg-emerald-900 p-4 text-white sticky top-0 z-50 shadow-lg w-full border-b border-emerald-800">
             <div class="max-w-4xl mx-auto flex justify-between items-center mb-2">
                 <div onclick="goToWelcome()" class="cursor-pointer flex items-center gap-2">
                     <span class="text-xl">🏠</span>
                     <h1 class="font-bold text-lg leading-none italic uppercase tracking-tighter">Usanim A1</h1>
                 </div>
-                <button onclick="showDeleteModal()" class="text-[10px] bg-white/20 hover:bg-white/30 text-white px-4 py-1.5 rounded-full font-black uppercase tracking-widest transition-colors">Reset</button>
+                <button onclick="showDeleteModal()" class="text-[10px] bg-white/10 hover:bg-white/20 text-white px-4 py-1.5 rounded-full font-black uppercase tracking-widest transition-colors">Reset</button>
             </div>
-            <div class="max-w-4xl mx-auto w-full bg-black/10 rounded-full h-2 overflow-hidden">
-                <div id="progress-bar" class="bg-white h-full rounded-full transition-all duration-700" style="width: 0%"></div>
+            <div class="max-w-4xl mx-auto w-full bg-black/30 rounded-full h-1.5 overflow-hidden">
+                <div id="progress-bar" class="bg-emerald-400 h-full rounded-full transition-all duration-700" style="width: 0%"></div>
             </div>
         </div>
 
@@ -104,39 +106,39 @@
             <button onclick="openStage(6)" class="stage-card"><span class="text-3xl">🎧</span><span>Փուլ 6</span></button>
             <button onclick="openSmartStage()" class="stage-card"><span class="text-3xl">🎓</span><span>Փուլ 7</span></button>
             <button onclick="openExam()" class="stage-card"><span class="text-3xl">📝</span><span>Փուլ 8</span></button>
-            <button onclick="openStatsStage()" class="stage-card !bg-emerald-800 !border-emerald-900"><span class="text-3xl">📊</span><span class="!text-emerald-50">Փուլ 9</span></button>
+            <button onclick="openStatsStage()" class="stage-card"><span class="text-3xl">📊</span><span>Փուլ 9</span></button>
         </div>
     </div>
 
     <div id="view" class="hidden p-4 min-h-screen max-w-2xl mx-auto">
         <div class="flex justify-between items-center mb-8 pt-4">
-            <button onclick="exitToMenu()" class="font-black text-emerald-600 text-xs uppercase tracking-widest bg-emerald-100 px-4 py-2 rounded-full">⬅ ԵԼՔ</button>
-            <div id="view-title" class="text-[10px] font-black text-emerald-800 uppercase tracking-[0.4em]"></div>
+            <button onclick="exitToMenu()" class="font-black text-emerald-400 text-xs uppercase tracking-widest bg-emerald-900/50 px-4 py-2 rounded-full border border-emerald-700">⬅ ԵԼՔ</button>
+            <div id="view-title" class="text-[10px] font-black text-emerald-300 uppercase tracking-[0.4em]"></div>
             <div class="w-12"></div>
         </div>
         <div id="content" class="flex flex-col items-center w-full"></div>
     </div>
 
     <div id="smart-menu" class="hidden max-w-2xl mx-auto p-6 space-y-6">
-        <button onclick="exitToMenu()" class="font-black text-emerald-600 text-xs uppercase tracking-widest bg-emerald-100 px-4 py-2 rounded-full">⬅ ԵԼՔ</button>
+        <button onclick="exitToMenu()" class="font-black text-emerald-400 text-xs uppercase tracking-widest bg-emerald-900/50 px-4 py-2 rounded-full border border-emerald-700">⬅ ԵԼՔ</button>
         <div id="smart-container" class="space-y-4"></div>
     </div>
 
-    <div id="delete-modal" class="hidden fixed inset-0 bg-emerald-950/80 z-[100] flex items-center justify-center p-6 backdrop-blur-sm">
-        <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm text-center shadow-2xl">
-            <h2 class="text-xl font-black text-slate-800 mb-4 uppercase">Ջնջել ամբողջը</h2>
-            <p class="text-slate-500 text-sm mb-6">Գրիր <b class="text-emerald-600">DELETE</b> հաստատելու համար</p>
-            <input type="text" id="delete-confirm-input" class="w-full p-4 border-2 border-emerald-100 rounded-2xl text-center mb-6 uppercase outline-none focus:border-emerald-500 transition-all">
+    <div id="delete-modal" class="hidden fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-6 backdrop-blur-md">
+        <div class="bg-emerald-900 p-8 rounded-[2.5rem] w-full max-w-sm text-center shadow-2xl border border-emerald-700">
+            <h2 class="text-xl font-black text-white mb-4 uppercase">Ջնջել ամբողջը</h2>
+            <p class="text-emerald-300 text-sm mb-6">Գրիր <b class="text-white">DELETE</b> հաստատելու համար</p>
+            <input type="text" id="delete-confirm-input" class="w-full p-4 border-2 border-emerald-700 rounded-2xl text-center mb-6 uppercase outline-none focus:border-emerald-400 transition-all">
             <div class="flex gap-3">
-                <button onclick="hideDeleteModal()" class="flex-1 p-4 bg-slate-100 text-slate-600 rounded-2xl font-bold">ՈՉ</button>
-                <button id="real-delete-btn" onclick="confirmFinalDelete()" disabled class="flex-1 p-4 bg-emerald-100 text-emerald-300 rounded-2xl font-bold transition-all">ԱՅՈ</button>
+                <button onclick="hideDeleteModal()" class="flex-1 p-4 bg-emerald-800 text-emerald-100 rounded-2xl font-bold">ՈՉ</button>
+                <button id="real-delete-btn" onclick="confirmFinalDelete()" disabled class="flex-1 p-4 bg-emerald-700 text-emerald-500 rounded-2xl font-bold transition-all">ԱՅՈ</button>
             </div>
         </div>
     </div>
 
     <script>
         let words = [], activeStage = 1, activeIndex = 0, activeList = [], canProceed = false;
-        let examScores = [], dailyWordsCount = 0;
+        let examScores = [], dailyWordsCount = 0, dailyGoal = 20;
         let selectedEn = null, selectedHy = null;
 
         async function initApp() {
@@ -156,7 +158,7 @@
                     const btn = document.getElementById('real-delete-btn');
                     const isMatch = e.target.value.toUpperCase() === 'DELETE';
                     btn.disabled = !isMatch;
-                    btn.className = isMatch ? 'flex-1 p-4 bg-emerald-600 text-white rounded-2xl font-bold' : 'flex-1 p-4 bg-emerald-100 text-emerald-300 rounded-2xl font-bold';
+                    btn.className = isMatch ? 'flex-1 p-4 bg-rose-600 text-white rounded-2xl font-bold' : 'flex-1 p-4 bg-emerald-800 text-emerald-500 rounded-2xl font-bold';
                 });
             } catch (e) { console.error("Error loading app:", e); }
         }
@@ -170,11 +172,12 @@
                 });
                 examScores = p.examScores || [];
                 dailyWordsCount = p.dailyWordsCount || 0;
+                dailyGoal = p.dailyGoal || 20;
             }
         }
 
         function saveProgress() {
-            const storage = { words: {}, examScores, dailyWordsCount };
+            const storage = { words: {}, examScores, dailyWordsCount, dailyGoal };
             words.forEach(w => {
                 storage.words[w.id] = { 
                     score: w.score, stagesCompleted: w.stagesCompleted, isInstant: w.isInstant, 
@@ -199,12 +202,12 @@
             stages.forEach(s => {
                 const isCompleted = word.stagesCompleted.includes(s);
                 const isActive = (activeStage === s);
-                let colorClass = isCompleted ? 'text-yellow-400' : 'text-slate-200';
-                if (isActive && !isCompleted) colorClass = 'text-yellow-200';
+                let colorClass = isCompleted ? 'text-yellow-400' : 'text-emerald-800';
+                if (isActive && !isCompleted) colorClass = 'text-emerald-500';
                 html += `
                     <div class="star-box">
                         <span class="star-icon ${colorClass}">★</span>
-                        ${isActive && !isCompleted ? `<span class="star-text">${word.score}</span>` : ''}
+                        ${isActive && !isCompleted ? `<span class="star-text !text-white">${word.score}</span>` : ''}
                         ${isCompleted ? `<span class="star-text">✓</span>` : ''}
                     </div>`;
             });
@@ -230,12 +233,8 @@
         function initStageLogic() {
             const container = document.getElementById('content');
             container.innerHTML = "";
-            
-            // Միշտ վերցնում ենք առաջին 10 չսովորած բառերը այս փուլի համար
             activeList = words.filter(w => !w.isInstant && !w.stagesCompleted.includes(activeStage)).slice(0, 10);
-            
             if (activeList.length === 0) return renderFinish();
-
             if (activeStage === 1) renderStage1();
             else if (activeStage === 3) renderStage3();
             else renderGenericStage();
@@ -244,13 +243,13 @@
         function renderStage1() {
             const word = activeList[activeIndex % activeList.length];
             document.getElementById('content').innerHTML = `
-                <div class="w-full bg-white rounded-[3rem] p-12 text-center shadow-xl mb-10 border-b-8 border-emerald-500">
-                    <h2 class="text-6xl font-black text-slate-800 mb-6 italic" onclick="speak('${word.en}')">${word.en}</h2>
-                    <h3 onclick="this.classList.toggle('revealed')" class="text-3xl font-bold text-emerald-200 blur-text italic">${word.hy}</h3>
+                <div class="w-full bg-emerald-800 rounded-[3rem] p-12 text-center shadow-xl mb-10 border-b-8 border-emerald-500">
+                    <h2 class="text-6xl font-black text-white mb-6 italic" onclick="speak('${word.en}')">${word.en}</h2>
+                    <h3 onclick="this.classList.toggle('revealed')" class="text-3xl font-bold text-emerald-600 blur-text italic">${word.hy}</h3>
                 </div>
                 <div class="grid grid-cols-2 gap-5 w-full">
-                    <button onclick="handleStage1(true)" class="btn-primary !bg-emerald-500">ԳԻՏԵՄ</button>
-                    <button onclick="handleStage1(false)" class="btn-primary !bg-rose-500">ՉԳԻՏԵՄ</button>
+                    <button onclick="handleStage1(true)" class="btn-primary">ԳԻՏԵՄ</button>
+                    <button onclick="handleStage1(false)" class="btn-primary !bg-emerald-900 border border-emerald-700">ՉԳԻՏԵՄ</button>
                 </div>`;
             speak(word.en);
         }
@@ -261,13 +260,13 @@
                 w.isInstant = true; w.isSeen = true;
                 w.learnedDate = new Date().toISOString().split('T')[0];
                 dailyWordsCount++;
-            } else { w.isSeen = true; w.stagesCompleted = []; } // Եթե չգիտի, պետք է անցնի բոլոր փուլերը
+            } else { w.isSeen = true; w.stagesCompleted = []; }
             saveProgress();
             initStageLogic();
         }
 
         function renderStage3() {
-            const batch = activeList.slice(0, 5); // Փուլ 3-ում աշխատում ենք 5-ական զույգերով
+            const batch = activeList.slice(0, 5);
             document.getElementById('content').innerHTML = `
                 <div class="grid grid-cols-2 gap-4 w-full items-start">
                     <div class="space-y-4" id="en-list"></div>
@@ -311,19 +310,17 @@
         function renderGenericStage() {
             const word = activeList[activeIndex % activeList.length];
             if (activeStage === 2) { renderMultipleChoice(word); return; }
-
             let question = word.en, answer = word.hy;
             if(activeStage === 4) { question = word.hy; answer = word.en; }
             if(activeStage === 5) { question = word.en; answer = word.hy; }
-            if(activeStage === 6) { question = "🔊"; answer = word.en; } // Փուլ 6-ում պատասխանը անգլերենն է
-
+            if(activeStage === 6) { question = "🔊"; answer = word.en; }
             document.getElementById('content').innerHTML = `
                 <div class="w-full text-center">
                     <div class="mb-2">${getStars(word)}</div>
-                    <div class="mb-10 text-6xl font-black text-emerald-900 italic" onclick="speak('${word.en}')">${question}</div>
-                    <input type="text" id="stage-input" autofocus class="w-full p-6 border-4 border-emerald-100 rounded-[2.5rem] text-center text-2xl outline-none focus:border-emerald-500 transition-all shadow-inner" placeholder="..." autocomplete="off">
+                    <div class="mb-10 text-6xl font-black text-white italic" onclick="speak('${word.en}')">${question}</div>
+                    <input type="text" id="stage-input" autofocus class="w-full p-6 border-4 border-emerald-800 rounded-[2.5rem] text-center text-2xl outline-none focus:border-emerald-400 transition-all shadow-inner" placeholder="..." autocomplete="off">
                     <button id="check-btn" onclick="checkGeneric('${answer}')" class="btn-primary mt-8">ՍՏՈՒԳԵԼ</button>
-                    <button id="next-btn" onclick="initStageLogic()" class="hidden btn-primary mt-8 !bg-slate-800">ՀԱՋՈՐԴԸ</button>
+                    <button id="next-btn" onclick="initStageLogic()" class="hidden btn-primary mt-8 !bg-emerald-900">ՀԱՋՈՐԴԸ</button>
                 </div>`;
             if(activeStage !== 6) speak(word.en);
             setTimeout(() => document.getElementById('stage-input')?.focus(), 50);
@@ -337,9 +334,9 @@
             document.getElementById('content').innerHTML = `
                 <div class="w-full text-center">
                     <div class="mb-2">${getStars(word)}</div>
-                    <div class="mb-10 text-6xl font-black text-emerald-900 italic" onclick="speak('${word.en}')">${word.en}</div>
+                    <div class="mb-10 text-6xl font-black text-white italic" onclick="speak('${word.en}')">${word.en}</div>
                     <div class="grid grid-cols-1 gap-3 w-full">
-                        ${options.map(opt => `<button onclick="checkChoice('${opt}', '${word.hy}')" class="choice-btn p-5 bg-white border-2 border-emerald-100 rounded-2xl font-bold text-lg text-slate-700">${opt}</button>`).join('')}
+                        ${options.map(opt => `<button onclick="checkChoice('${opt}', '${word.hy}')" class="choice-btn p-5 border-2 border-emerald-800 rounded-2xl font-bold text-lg">${opt}</button>`).join('')}
                     </div>
                 </div>`;
             speak(word.en);
@@ -360,20 +357,20 @@
             const word = activeList[activeIndex % activeList.length];
             if(cleanText(input.value) === cleanText(correct)) {
                 word.score = Math.min(10, word.score + 1);
-                input.className = "w-full p-6 border-4 border-emerald-500 bg-emerald-500 text-white rounded-[2.5rem] text-center text-2xl outline-none";
+                input.className = "w-full p-6 border-4 border-emerald-500 bg-emerald-600 text-white rounded-[2.5rem] text-center text-2xl outline-none";
                 if(word.score >= 10) { 
                     word.score = 0; 
                     word.stagesCompleted.push(activeStage);
-                    // Եթե բոլոր աստղերը հավաքեց
                     if([2,3,4,5,6].every(s => word.stagesCompleted.includes(s))) {
                         word.learnedDate = new Date().toISOString().split('T')[0];
+                        dailyWordsCount++;
                     }
                 }
                 activeIndex++;
                 setTimeout(initStageLogic, 600);
             } else {
                 word.score = Math.max(0, word.score - 1); word.errorCount++;
-                input.className = "w-full p-6 border-4 border-rose-500 bg-rose-500 text-white rounded-[2.5rem] text-center text-2xl outline-none";
+                input.className = "w-full p-6 border-4 border-rose-600 bg-rose-900 text-white rounded-[2.5rem] text-center text-2xl outline-none";
                 input.value = correct;
                 document.getElementById('check-btn').classList.add('hidden');
                 document.getElementById('next-btn').classList.remove('hidden');
@@ -389,15 +386,15 @@
             const repWords = words.filter(w => w.nextRepDate && new Date(w.nextRepDate) <= now);
             const hardWords = words.filter(w => w.errorCount >= 5);
             container.innerHTML = `
-                <div class="bg-white p-6 rounded-[2.5rem] shadow-xl border-l-[12px] border-emerald-500">
-                    <h3 class="font-black text-emerald-900 text-xl mb-1 italic">ԿՐԿՆՈՒԹՅՈՒՆ</h3>
-                    <p class="text-sm text-slate-400 mb-6 font-bold uppercase tracking-tighter">Ինտերվալային ուսուցում</p>
+                <div class="bg-emerald-800 p-6 rounded-[2.5rem] shadow-xl border-l-[12px] border-emerald-500">
+                    <h3 class="font-black text-white text-xl mb-1 italic">ԿՐԿՆՈՒԹՅՈՒՆ</h3>
+                    <p class="text-sm text-emerald-300 mb-6 font-bold uppercase tracking-tighter">Ինտերվալային ուսուցում</p>
                     <button onclick="startRepetition()" class="btn-primary !p-4 !rounded-2xl">ՍԿՍԵԼ (${repWords.length})</button>
                 </div>
-                <div class="bg-white p-6 rounded-[2.5rem] shadow-xl border-l-[12px] border-rose-500">
-                    <h3 class="font-black text-rose-900 text-xl mb-1 italic">ՇՏԿՈՒՄ</h3>
-                    <p class="text-sm text-slate-400 mb-6 font-bold uppercase tracking-tighter">Դժվար բառերի վարժանք</p>
-                    <button onclick="startCorrection()" class="btn-primary !p-4 !rounded-2xl !bg-rose-600">ՍԿՍԵԼ (${hardWords.length})</button>
+                <div class="bg-emerald-800 p-6 rounded-[2.5rem] shadow-xl border-l-[12px] border-rose-500">
+                    <h3 class="font-black text-rose-300 text-xl mb-1 italic">ՇՏԿՈՒՄ</h3>
+                    <p class="text-sm text-emerald-300 mb-6 font-bold uppercase tracking-tighter">Դժվար բառերի վարժանք</p>
+                    <button onclick="startCorrection()" class="btn-primary !p-4 !rounded-2xl !bg-rose-900 border border-rose-700">ՍԿՍԵԼ (${hardWords.length})</button>
                 </div>`;
         }
 
@@ -411,13 +408,13 @@
         function renderRepCard() {
             const word = activeList[activeIndex];
             document.getElementById('content').innerHTML = `
-                <div class="w-full bg-white rounded-[3.5rem] p-12 text-center shadow-2xl mb-10 border-b-8 border-emerald-500">
-                    <h2 class="text-6xl font-black text-slate-800 mb-6 italic">${word.en}</h2>
-                    <h3 onclick="this.classList.toggle('revealed')" class="text-3xl font-bold text-emerald-100 blur-text italic">${word.hy}</h3>
+                <div class="w-full bg-emerald-800 rounded-[3.5rem] p-12 text-center shadow-2xl mb-10 border-b-8 border-emerald-500">
+                    <h2 class="text-6xl font-black text-white mb-6 italic">${word.en}</h2>
+                    <h3 onclick="this.classList.toggle('revealed')" class="text-3xl font-bold text-emerald-900 blur-text italic">${word.hy}</h3>
                 </div>
                 <div class="grid grid-cols-2 gap-5 w-full">
-                    <button onclick="handleRep(true)" class="btn-primary !bg-emerald-500">ԳԻՏԵՄ</button>
-                    <button onclick="handleRep(false)" class="btn-primary !bg-rose-500">ՉԳԻՏԵՄ</button>
+                    <button onclick="handleRep(true)" class="btn-primary">ԳԻՏԵՄ</button>
+                    <button onclick="handleRep(false)" class="btn-primary !bg-emerald-900">ՉԳԻՏԵՄ</button>
                 </div>`;
             speak(word.en);
         }
@@ -445,13 +442,13 @@
             const word = activeList[activeIndex % activeList.length];
             document.getElementById('content').innerHTML = `
                 <div class="w-full text-center">
-                    <div class="mb-10 bg-white rounded-[3.5rem] p-12 shadow-2xl border-b-8 border-rose-500">
-                        <h2 class="text-6xl font-black mb-6 italic">${word.en}</h2>
-                        <h3 onclick="this.classList.toggle('revealed')" class="text-3xl font-bold text-rose-100 blur-text italic">${word.hy}</h3>
+                    <div class="mb-10 bg-emerald-800 rounded-[3.5rem] p-12 shadow-2xl border-b-8 border-rose-500">
+                        <h2 class="text-6xl font-black text-white mb-6 italic">${word.en}</h2>
+                        <h3 onclick="this.classList.toggle('revealed')" class="text-3xl font-bold text-rose-900 blur-text italic">${word.hy}</h3>
                     </div>
                     <div class="grid grid-cols-2 gap-5 w-full">
-                        <button onclick="handleCorrection(true)" class="btn-primary !bg-emerald-500">ԳԻՏԵՄ</button>
-                        <button onclick="handleCorrection(false)" class="btn-primary !bg-rose-500">ՉԳԻՏԵՄ</button>
+                        <button onclick="handleCorrection(true)" class="btn-primary">ԳԻՏԵՄ</button>
+                        <button onclick="handleCorrection(false)" class="btn-primary !bg-emerald-900">ՉԳԻՏԵՄ</button>
                     </div>
                 </div>`;
             speak(word.en);
@@ -467,17 +464,73 @@
         function openStatsStage() {
             document.getElementById('app-content').classList.add('hidden');
             document.getElementById('smart-menu').classList.remove('hidden');
-            const learned = words.filter(w => w.isInstant || [2,3,4,5,6].every(s => w.stagesCompleted.includes(s))).length;
+            const container = document.getElementById('smart-container');
+            
+            const learnedWords = words.filter(w => w.isInstant || [2,3,4,5,6].every(s => w.stagesCompleted.includes(s)));
+            const learnedCount = learnedWords.length;
             const avgExam = examScores.length ? Math.round(examScores.reduce((a,b)=>a+b,0)/examScores.length) : 0;
-            document.getElementById('smart-container').innerHTML = `
-                <div class="bg-emerald-900 text-white p-10 rounded-[3.5rem] shadow-2xl text-center">
-                    <h2 class="text-2xl font-black mb-8 italic uppercase tracking-widest">Վիճակագրություն</h2>
-                    <div class="space-y-4 text-left font-bold text-emerald-100">
-                        <div class="flex justify-between border-b border-emerald-800 pb-2"><span>Սովորած բառեր:</span><span class="text-emerald-400">${learned}</span></div>
-                        <div class="flex justify-between border-b border-emerald-800 pb-2"><span>Քննության միջին:</span><span class="text-emerald-400">${avgExam}%</span></div>
-                        <div class="flex justify-between"><span>Այսօր սովորած:</span><span class="text-emerald-400">${dailyWordsCount}</span></div>
+            
+            const goalProgress = Math.min(100, Math.round((dailyWordsCount / dailyGoal) * 100));
+            const motivation = goalProgress >= 100 ? "Հիանալի է: Օրվա նպատակը կատարված է:" : `Մնացել է ${dailyGoal - dailyWordsCount} բառ այսօրվա նպատակին:`;
+
+            container.innerHTML = `
+                <div class="bg-emerald-800 p-8 rounded-[3rem] shadow-2xl border-b-8 border-emerald-500 text-center">
+                    <h2 class="text-xl font-black mb-4 italic uppercase text-emerald-300">Օրական Նպատակ</h2>
+                    <div class="relative w-32 h-32 mx-auto mb-4">
+                        <svg class="w-full h-full" viewBox="0 0 36 36">
+                            <path class="text-emerald-900" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path class="text-emerald-400" stroke-dasharray="${goalProgress}, 100" stroke-width="3" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span class="text-2xl font-black">${dailyWordsCount}</span>
+                            <span class="text-[8px] uppercase font-bold text-emerald-400">բառ</span>
+                        </div>
                     </div>
-                </div>`;
+                    <p class="text-sm font-bold text-emerald-100 mb-6 italic">${motivation}</p>
+                    <div class="flex items-center justify-center gap-4">
+                        <span class="text-xs font-bold uppercase">Նպատակ:</span>
+                        <input type="number" value="${dailyGoal}" onchange="updateDailyGoal(this.value)" class="w-20 p-2 rounded-xl text-center font-black bg-emerald-900 border border-emerald-700">
+                    </div>
+                </div>
+
+                <div class="bg-emerald-900 p-8 rounded-[3rem] shadow-2xl border border-emerald-700">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-emerald-800 p-4 rounded-2xl text-center">
+                            <span class="block text-2xl font-black text-emerald-400">${learnedCount}</span>
+                            <span class="text-[10px] uppercase font-bold text-emerald-200 tracking-widest">Սովորած</span>
+                        </div>
+                        <div class="bg-emerald-800 p-4 rounded-2xl text-center">
+                            <span class="block text-2xl font-black text-emerald-400">${avgExam}%</span>
+                            <span class="text-[10px] uppercase font-bold text-emerald-200 tracking-widest">Քննություն</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-emerald-900 p-6 rounded-[3rem] shadow-2xl border border-emerald-700">
+                    <h3 class="font-black text-emerald-300 text-sm mb-4 uppercase tracking-widest italic text-center">Սովորած բառերի ցանկ</h3>
+                    <div class="max-h-80 overflow-y-auto space-y-2 pr-2 custom-scroll">
+                        ${learnedWords.length === 0 ? '<p class="text-center text-emerald-600 italic py-10">Դեռ սովորած բառեր չկան</p>' : 
+                          learnedWords.map(w => `
+                            <div class="flex justify-between items-center p-4 bg-emerald-800/50 rounded-2xl border border-emerald-700/50">
+                                <div>
+                                    <div class="font-black text-white">${w.en}</div>
+                                    <div class="text-[10px] text-emerald-400 font-bold">${w.hy}</div>
+                                </div>
+                                <div class="flex gap-1">
+                                    ${w.isInstant ? '<span class="text-xs font-black text-yellow-400">INSTANT</span>' : 
+                                      '<span class="text-yellow-400 text-lg">★★★★★</span>'}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateDailyGoal(val) {
+            dailyGoal = parseInt(val) || 20;
+            saveProgress();
+            openStatsStage();
         }
 
         function openExam() {
@@ -496,8 +549,8 @@
             document.getElementById('content').innerHTML = `
                 <div class="w-full text-center">
                     <p class="text-xs font-bold text-emerald-400 mb-6 uppercase tracking-widest">${activeIndex+1} / ${activeList.length}</p>
-                    <h2 class="text-6xl font-black text-emerald-900 mb-10 italic">${word.en}</h2>
-                    <input type="text" id="exam-in" autofocus class="w-full p-6 border-4 border-emerald-100 rounded-3xl text-center text-xl mb-8 outline-none" placeholder="..." autocomplete="off">
+                    <h2 class="text-6xl font-black text-white mb-10 italic">${word.en}</h2>
+                    <input type="text" id="exam-in" autofocus class="w-full p-6 border-4 border-emerald-800 rounded-3xl text-center text-xl mb-8 outline-none" placeholder="..." autocomplete="off">
                     <button id="ex-btn" class="btn-primary">ՀԱՋՈՐԴԸ</button>
                 </div>`;
             setTimeout(() => document.getElementById('exam-in').focus(), 50);
@@ -506,10 +559,10 @@
 
         function renderFinish(extra = "") {
             document.getElementById('content').innerHTML = `
-                <div class="text-center p-12 bg-white rounded-[3.5rem] shadow-2xl w-full border-b-8 border-emerald-500">
+                <div class="text-center p-12 bg-emerald-800 rounded-[3.5rem] shadow-2xl w-full border-b-8 border-emerald-500">
                     <div class="text-7xl mb-6">🏆</div>
-                    <h2 class="text-3xl font-black mb-4 text-emerald-900 italic">Գերազանց է</h2>
-                    <p class="text-slate-500 mb-8 font-bold">${extra || "Բաժինը հաջողությամբ անցաք:"}</p>
+                    <h2 class="text-3xl font-black mb-4 text-white italic">Գերազանց է</h2>
+                    <p class="text-emerald-200 mb-8 font-bold">${extra || "Բաժինը հաջողությամբ անցաք:"}</p>
                     <button onclick="exitToMenu()" class="btn-primary">ՎԵՐԱԴԱՌՆԱԼ</button>
                 </div>`;
         }
@@ -534,4 +587,3 @@
     </script>
 </body>
 </html>
-
