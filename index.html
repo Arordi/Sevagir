@@ -55,6 +55,10 @@
         .choice-btn:active { transform: scale(0.98); background: #059669; }
 
         input { background: #064e3b !important; color: white !important; border-color: #059669 !important; }
+
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #059669; border-radius: 10px; }
     </style>
 </head>
 <body class="min-h-screen">
@@ -260,8 +264,14 @@
                 w.isInstant = true; w.isSeen = true;
                 w.learnedDate = new Date().toISOString().split('T')[0];
                 dailyWordsCount++;
-            } else { w.isSeen = true; w.stagesCompleted = []; }
+            } else { 
+                // Հին օրենքով վերականգնում՝ բառը պարզապես մնում է ուսուցման մեջ
+                w.isSeen = true; 
+                w.stagesCompleted = []; 
+                w.score = 0;
+            }
             saveProgress();
+            activeIndex++; // Անցնել հաջորդ բառին
             initStageLogic();
         }
 
@@ -303,7 +313,7 @@
                     setTimeout(() => { document.querySelectorAll('.match-wrong').forEach(i => i.classList.remove('match-wrong', 'match-selected')); }, 400);
                 }
                 saveProgress(); selectedEn = null; selectedHy = null;
-                if(document.querySelectorAll('.match-correct').length === 10) document.getElementById('next-batch-btn').classList.remove('hidden');
+                if(document.querySelectorAll('.match-correct').length === (activeList.slice(0,5).length * 2)) document.getElementById('next-batch-btn').classList.remove('hidden');
             }
         }
 
@@ -471,54 +481,54 @@
             const avgExam = examScores.length ? Math.round(examScores.reduce((a,b)=>a+b,0)/examScores.length) : 0;
             
             const goalProgress = Math.min(100, Math.round((dailyWordsCount / dailyGoal) * 100));
-            const motivation = goalProgress >= 100 ? "Հիանալի է: Օրվա նպատակը կատարված է:" : `Մնացել է ${dailyGoal - dailyWordsCount} բառ այսօրվա նպատակին:`;
+            const motivation = goalProgress >= 100 ? "Հիանալի է: Օրվա նպատակը կատարված է:" : `Մնացել է ${Math.max(0, dailyGoal - dailyWordsCount)} բառ այսօրվա նպատակին:`;
 
             container.innerHTML = `
-                <div class="bg-emerald-800 p-8 rounded-[3rem] shadow-2xl border-b-8 border-emerald-500 text-center">
-                    <h2 class="text-xl font-black mb-4 italic uppercase text-emerald-300">Օրական Նպատակ</h2>
-                    <div class="relative w-32 h-32 mx-auto mb-4">
+                <div class="bg-emerald-800 p-6 rounded-[2.5rem] shadow-2xl border-b-8 border-emerald-500 text-center mx-auto w-full">
+                    <h2 class="text-lg font-black mb-3 italic uppercase text-emerald-300">Օրական Նպատակ</h2>
+                    <div class="relative w-24 h-24 mx-auto mb-3">
                         <svg class="w-full h-full" viewBox="0 0 36 36">
                             <path class="text-emerald-900" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                             <path class="text-emerald-400" stroke-dasharray="${goalProgress}, 100" stroke-width="3" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                         </svg>
                         <div class="absolute inset-0 flex flex-col items-center justify-center">
-                            <span class="text-2xl font-black">${dailyWordsCount}</span>
-                            <span class="text-[8px] uppercase font-bold text-emerald-400">բառ</span>
+                            <span class="text-xl font-black">${dailyWordsCount}</span>
+                            <span class="text-[7px] uppercase font-bold text-emerald-400">բառ</span>
                         </div>
                     </div>
-                    <p class="text-sm font-bold text-emerald-100 mb-6 italic">${motivation}</p>
-                    <div class="flex items-center justify-center gap-4">
-                        <span class="text-xs font-bold uppercase">Նպատակ:</span>
-                        <input type="number" value="${dailyGoal}" onchange="updateDailyGoal(this.value)" class="w-20 p-2 rounded-xl text-center font-black bg-emerald-900 border border-emerald-700">
-                    </div>
-                </div>
-
-                <div class="bg-emerald-900 p-8 rounded-[3rem] shadow-2xl border border-emerald-700">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="bg-emerald-800 p-4 rounded-2xl text-center">
-                            <span class="block text-2xl font-black text-emerald-400">${learnedCount}</span>
-                            <span class="text-[10px] uppercase font-bold text-emerald-200 tracking-widest">Սովորած</span>
-                        </div>
-                        <div class="bg-emerald-800 p-4 rounded-2xl text-center">
-                            <span class="block text-2xl font-black text-emerald-400">${avgExam}%</span>
-                            <span class="text-[10px] uppercase font-bold text-emerald-200 tracking-widest">Քննություն</span>
-                        </div>
+                    <p class="text-xs font-bold text-emerald-100 mb-4 italic">${motivation}</p>
+                    <div class="flex items-center justify-center gap-3">
+                        <span class="text-[10px] font-bold uppercase">Նպատակ:</span>
+                        <input type="number" value="${dailyGoal}" onchange="updateDailyGoal(this.value)" class="w-16 p-1 rounded-xl text-center font-black bg-emerald-900 border border-emerald-700 text-sm">
                     </div>
                 </div>
 
-                <div class="bg-emerald-900 p-6 rounded-[3rem] shadow-2xl border border-emerald-700">
-                    <h3 class="font-black text-emerald-300 text-sm mb-4 uppercase tracking-widest italic text-center">Սովորած բառերի ցանկ</h3>
-                    <div class="max-h-80 overflow-y-auto space-y-2 pr-2 custom-scroll">
-                        ${learnedWords.length === 0 ? '<p class="text-center text-emerald-600 italic py-10">Դեռ սովորած բառեր չկան</p>' : 
+                <div class="bg-emerald-900 p-6 rounded-[2.5rem] shadow-2xl border border-emerald-700">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-emerald-800 p-3 rounded-2xl text-center">
+                            <span class="block text-xl font-black text-emerald-400">${learnedCount}</span>
+                            <span class="text-[9px] uppercase font-bold text-emerald-200 tracking-widest">Սովորած</span>
+                        </div>
+                        <div class="bg-emerald-800 p-3 rounded-2xl text-center">
+                            <span class="block text-xl font-black text-emerald-400">${avgExam}%</span>
+                            <span class="text-[9px] uppercase font-bold text-emerald-200 tracking-widest">Քննություն</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-emerald-900 p-5 rounded-[2.5rem] shadow-2xl border border-emerald-700">
+                    <h3 class="font-black text-emerald-300 text-[10px] mb-3 uppercase tracking-widest italic text-center">Սովորած բառերի ցանկ</h3>
+                    <div class="max-h-60 overflow-y-auto space-y-2 pr-1 custom-scroll">
+                        ${learnedWords.length === 0 ? '<p class="text-center text-emerald-600 italic py-6 text-sm">Դեռ սովորած բառեր չկան</p>' : 
                           learnedWords.map(w => `
-                            <div class="flex justify-between items-center p-4 bg-emerald-800/50 rounded-2xl border border-emerald-700/50">
+                            <div class="flex justify-between items-center p-3 bg-emerald-800/50 rounded-2xl border border-emerald-700/50">
                                 <div>
-                                    <div class="font-black text-white">${w.en}</div>
-                                    <div class="text-[10px] text-emerald-400 font-bold">${w.hy}</div>
+                                    <div class="font-black text-white text-sm">${w.en}</div>
+                                    <div class="text-[9px] text-emerald-400 font-bold">${w.hy}</div>
                                 </div>
                                 <div class="flex gap-1">
-                                    ${w.isInstant ? '<span class="text-xs font-black text-yellow-400">INSTANT</span>' : 
-                                      '<span class="text-yellow-400 text-lg">★★★★★</span>'}
+                                    ${w.isInstant ? '<span class="text-[9px] font-black text-yellow-400">INSTANT</span>' : 
+                                      '<span class="text-yellow-400 text-sm">★★★★★</span>'}
                                 </div>
                             </div>
                         `).join('')}
@@ -528,7 +538,7 @@
         }
 
         function updateDailyGoal(val) {
-            dailyGoal = parseInt(val) || 20;
+            dailyGoal = Math.max(1, Math.min(100, parseInt(val) || 20));
             saveProgress();
             openStatsStage();
         }
@@ -587,3 +597,4 @@
     </script>
 </body>
 </html>
+
