@@ -260,19 +260,26 @@
 
         function handleStage1(known) {
             const w = activeList[activeIndex % activeList.length];
+            w.isSeen = true;
+            
+            // Ավելացնում ենք 1-ին փուլը ավարտվածների մեջ, որ նորից չհայտնվի
+            if (!w.stagesCompleted.includes(1)) {
+                w.stagesCompleted.push(1);
+            }
+
             if(known) {
-                w.isInstant = true; w.isSeen = true;
+                w.isInstant = true; 
                 w.learnedDate = new Date().toISOString().split('T')[0];
                 dailyWordsCount++;
-                saveProgress();
-                initStageLogic();
             } else { 
-                // Փուլ 1-ի տրամաբանություն. Չգիտեմ սեղմելիս բառը մնում է ցուցակում
-                w.isSeen = true; 
                 w.score = 0;
-                w.stagesCompleted = [];
-                saveProgress();
-                activeIndex++; // Անցնել հաջորդ բառին
+            }
+
+            saveProgress();
+            activeIndex++; 
+            if (activeIndex >= activeList.length) {
+                renderFinish();
+            } else {
                 initStageLogic();
             }
         }
@@ -325,7 +332,7 @@
             let question = word.en, answer = word.hy;
             if(activeStage === 4) { question = word.hy; answer = word.en; }
             if(activeStage === 5) { question = word.en; answer = word.hy; }
-            if(activeStage === 6) { question = "🔊"; answer = word.en; } // Փուլ 6. Լսում ես և գրում
+            if(activeStage === 6) { question = "🔊"; answer = word.en; }
             
             document.getElementById('content').innerHTML = `
                 <div class="w-full text-center">
@@ -336,7 +343,7 @@
                     <button id="next-btn" onclick="initStageLogic()" class="hidden btn-primary mt-8 !bg-emerald-900">ՀԱՋՈՐԴԸ</button>
                 </div>`;
             
-            if(activeStage === 6) { speak(word.en); } else { speak(word.en); }
+            speak(word.en);
             setTimeout(() => document.getElementById('stage-input')?.focus(), 50);
         }
 
@@ -481,6 +488,11 @@
         function showDeleteModal() { document.getElementById('delete-modal').classList.remove('hidden'); }
         function hideDeleteModal() { document.getElementById('delete-modal').classList.add('hidden'); }
         function confirmFinalDelete() { localStorage.removeItem('usanim_v3_data'); location.reload(); }
+
+        // Smart Stage-ի համար (Stage 7) - կարող ես ավելացնել տրամաբանություն
+        function openSmartStage() {
+            alert("Այս փուլը շուտով հասանելի կլինի:");
+        }
 
         initApp();
     </script>
