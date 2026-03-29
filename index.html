@@ -243,7 +243,13 @@
         function initStageLogic() {
             const container = document.getElementById('content');
             container.innerHTML = "";
-            activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(activeStage)).slice(0, 10);
+            
+            if (activeStage === 1) {
+                activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
+            } else {
+                activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(activeStage)).slice(0, 10);
+            }
+
             if (activeList.length === 0) return renderFinish();
             if (activeStage === 1) renderStage1();
             else if (activeStage === 3) renderStage3();
@@ -314,7 +320,6 @@
                 if(selectedEn.word.id === selectedHy.word.id) {
                     selectedEn.el.className = 'match-item match-correct'; 
                     selectedHy.el.className = 'match-item match-correct';
-                    // Միավորների համակարգ
                     selectedEn.word.score = Math.min(10, selectedEn.word.score + 1);
                     if(selectedEn.word.score >= 10) { 
                         selectedEn.word.score = 0; 
@@ -323,7 +328,6 @@
                 } else {
                     selectedEn.el.classList.add('match-wrong'); 
                     selectedHy.el.classList.add('match-wrong');
-                    // Սխալի դեպքում -1
                     selectedEn.word.score = Math.max(0, selectedEn.word.score - 1);
                     setTimeout(() => { document.querySelectorAll('.match-wrong').forEach(i => i.classList.remove('match-wrong', 'match-selected')); }, 400);
                 }
@@ -352,7 +356,10 @@
                     <button id="next-btn" onclick="initStageLogic()" class="hidden btn-primary mt-8 !bg-emerald-900">ՀԱՋՈՐԴԸ</button>
                 </div>`;
             
-            speak(word.en);
+            // Փուլ 4-ում սկզբից չի հնչում
+            if(activeStage !== 4) {
+                speak(word.en);
+            }
             setTimeout(() => document.getElementById('stage-input')?.focus(), 50);
         }
 
@@ -393,6 +400,10 @@
             const input = document.getElementById('stage-input');
             const word = activeList[activeIndex % activeList.length];
             if(cleanText(input.value) === cleanText(correct)) {
+                // Եթե Փուլ 4 է և ճիշտ է, հնչեցնում ենք
+                if(activeStage === 4) {
+                    speak(word.en);
+                }
                 word.score = Math.min(10, word.score + 1);
                 input.className = "w-full p-6 border-4 border-emerald-500 bg-emerald-600 text-white rounded-[2.5rem] text-center text-2xl outline-none";
                 if(word.score >= 10) { 
