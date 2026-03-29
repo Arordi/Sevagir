@@ -3,216 +3,402 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Usanim Pro - A1 Ultimate</title>
+    <title>Usanim - English A1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f0fdf4; user-select: none; touch-action: manipulation; }
-        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
-        .stage-card { transition: 0.2s; cursor: pointer; background: #a7f3d0; border: 2px solid #6ee7b7; border-radius: 2rem; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); width: 100%; display: flex; flex-direction: column; align-items: center; }
-        .stage-card:active { transform: scale(0.95); background: #6ee7b7; }
-        .stage-card span:last-child { color: #064e3b; font-weight: 800; font-size: 11px; text-transform: uppercase; margin-top: 8px; letter-spacing: 0.1em; }
-        .btn-primary { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 1.25rem; border-radius: 1.25rem; font-weight: bold; width: 100%; box-shadow: 0 10px 15px -3px rgba(16,185,129,0.3); }
-        .blur-text { filter: blur(8px); transition: 0.3s; cursor: pointer; }
-        .blur-text.revealed { filter: blur(0); }
-        .match-item { border: 2px solid #d1fae5; border-radius: 20px; padding: 12px; text-align: center; cursor: pointer; min-height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 600; background: white; transition: 0.2s; }
-        .match-selected { border-color: #10b981; background: #f0fdf4; }
-        .match-correct { border-color: #22c55e; background: #dcfce7; color: #16a34a; pointer-events: none; }
-        .match-wrong { border-color: #ef4444 !important; background: #fef2f2 !important; animation: shake 0.3s; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f8fafc; user-select: none; touch-action: manipulation; }
+        .stage-card { transition: all 0.2s ease; border: 2px solid transparent; cursor: pointer; height: 100%; }
+        .stage-card:active { transform: scale(0.95); }
+        .match-box { border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px; text-align: center; cursor: pointer; min-height: 60px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; }
+        .match-selected { border-color: #3b82f6; background-color: #eff6ff; }
+        .match-correct { border-color: #22c55e; background-color: #f0fdf4; pointer-events: none; opacity: 0.6; }
+        .match-wrong { border-color: #ef4444; background-color: #fef2f2; animation: shake 0.3s; }
         @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
-        .dot { width: 7px; height: 7px; border-radius: 50%; background: #e2e8f0; display: inline-block; margin: 0 2px; }
-        .dot-active { background: #10b981; box-shadow: 0 0 5px #10b981; }
-        .hidden { display: none !important; }
+        
+        .blur-text { filter: blur(10px); transition: all 0.3s ease; cursor: pointer; }
+        .blur-text.revealed { filter: blur(0); }
+
+        .global-star { font-size: 18px; line-height: 1; transition: color 0.3s; }
+        .local-dot { font-size: 14px; line-height: 1; transition: color 0.3s; }
+
+        .btn-primary { background-color: #4f46e5; color: white; padding: 1.25rem; border-radius: 1rem; font-weight: bold; font-size: 1.25rem; width: 100%; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .btn-next { background-color: #1e293b; color: white; padding: 1.25rem; border-radius: 1rem; font-weight: bold; font-size: 1.25rem; width: 100%; margin-top: 1.5rem; }
     </style>
 </head>
-<body class="min-h-screen">
+<body class="w-full bg-white min-h-screen relative">
 
-    <div id="welcome-screen" class="min-h-screen flex flex-col p-6 max-w-lg mx-auto">
-        <div class="mt-20 mb-12 text-center">
-            <h1 class="text-5xl font-black text-emerald-900 italic">Usanim</h1>
-            <p class="text-emerald-600 font-bold tracking-[0.3em] uppercase text-xs">Premium Learning</p>
-        </div>
-        <div onclick="toggleView('welcome-screen', 'app-content')" class="glass p-8 rounded-[2.5rem] shadow-xl flex items-center justify-between relative overflow-hidden cursor-pointer border-l-[10px] border-emerald-500">
-            <div class="flex items-center gap-5">
-                <div class="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-3xl shadow-inner">🇬🇧</div>
-                <div>
-                    <h2 class="text-2xl font-black text-slate-800">A1 Մակարդակ</h2>
-                    <div class="flex items-center gap-2 mt-1">
-                        <p id="h-count" class="text-slate-500 text-xs font-bold uppercase">...</p>
-                        <p id="h-pct" class="text-emerald-600 text-xs font-black">0%</p>
-                    </div>
-                </div>
+    <div class="bg-indigo-600 p-4 text-white sticky top-0 z-50 shadow-md w-full">
+        <div class="max-w-4xl mx-auto flex justify-between items-center mb-2">
+            <div onclick="exitToMenu()" class="cursor-pointer">
+                <h1 class="font-bold text-xl">Usanim A1</h1>
+                <p id="progress-text" class="text-xs opacity-80">Սինխրոնացված է ✅</p>
             </div>
-            <div id="h-bg-line" class="absolute left-0 bottom-0 h-1.5 bg-emerald-400 transition-all duration-1000" style="width: 0%"></div>
+            <button onclick="resetData()" class="text-[10px] bg-rose-600 hover:bg-rose-700 px-3 py-1 rounded-md transition font-bold">RESET 🗑️</button>
+        </div>
+        <div class="max-w-4xl mx-auto w-full bg-indigo-900 rounded-full h-2">
+            <div id="progress-bar" class="bg-emerald-400 h-2 rounded-full" style="width: 0%"></div>
         </div>
     </div>
 
-    <div id="app-content" class="hidden">
-        <div class="bg-emerald-600 p-4 text-white sticky top-0 z-50 shadow-lg">
-            <div class="max-w-4xl mx-auto flex justify-between items-center mb-2">
-                <div onclick="toggleView('app-content', 'welcome-screen')" class="cursor-pointer flex items-center gap-2">
-                    <span class="text-xl">🏠</span><h1 class="font-bold italic uppercase tracking-tighter">Usanim A1</h1>
-                </div>
-                <button onclick="$('delete-modal').classList.remove('hidden')" class="text-[10px] bg-white/20 px-4 py-1.5 rounded-full font-black uppercase">Reset</button>
-            </div>
-            <div class="max-w-4xl mx-auto bg-black/10 rounded-full h-2 overflow-hidden"><div id="p-bar" class="bg-white h-full transition-all" style="width: 0%"></div></div>
-        </div>
-        <div id="menu" class="max-w-4xl mx-auto p-4 grid grid-cols-2 md:grid-cols-3 gap-4 py-8">
-            <button onclick="openStage(1)" class="stage-card"><span>🗂️</span><span>Փուլ 1</span></button>
-            <button onclick="openStage(2)" class="stage-card"><span>🔘</span><span>Փուլ 2</span></button>
-            <button onclick="openStage(3)" class="stage-card"><span>🧩</span><span>Փուլ 3</span></button>
-            <button onclick="openStage(4)" class="stage-card"><span>⌨️</span><span>Փուլ 4</span></button>
-            <button onclick="openStage(5)" class="stage-card"><span>🔄</span><span>Փուլ 5</span></button>
-            <button onclick="openStage(6)" class="stage-card"><span>🎧</span><span>Փուլ 6</span></button>
-            <button onclick="openSmart()" class="stage-card"><span>🎓</span><span>Փուլ 7</span></button>
-            <button onclick="openExam()" class="stage-card"><span>📝</span><span>Փուլ 8</span></button>
-            <button onclick="openStats()" class="stage-card"><span>📊</span><span>Փուլ 9</span></button>
-        </div>
+    <div id="menu" class="max-w-4xl mx-auto p-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <button onclick="openStage(1)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center border">
+            <span class="text-3xl mb-2">🗂️</span><span class="font-bold text-sm">Փուլ 1</span><p class="text-[10px] text-gray-400 uppercase">Flashcards</p>
+        </button>
+        <button onclick="openStage(2)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center border">
+            <span class="text-3xl mb-2">🔘</span><span class="font-bold text-sm">Փուլ 2</span><p class="text-[10px] text-gray-400 uppercase">Ընտրություն</p>
+        </button>
+        <button onclick="openStage(3)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center border">
+            <span class="text-3xl mb-2">🧩</span><span class="font-bold text-sm">Փուլ 3</span><p class="text-[10px] text-gray-400 uppercase">Match Game</p>
+        </button>
+        <button onclick="openStage(4)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center border">
+            <span class="text-3xl mb-2">⌨️</span><span class="font-bold text-sm">Փուլ 4</span><p class="text-[10px] text-gray-400 uppercase">Ուղղագրություն</p>
+        </button>
+        <button onclick="openStage(5)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center border">
+            <span class="text-3xl mb-2">🔄</span><span class="font-bold text-sm">Փուլ 5</span><p class="text-[10px] text-gray-400 uppercase">Թարգմանություն</p>
+        </button>
+        <button onclick="openStage(6)" class="stage-card p-4 bg-white shadow-sm rounded-2xl border-gray-100 flex flex-col items-center border">
+            <span class="text-3xl mb-2">🎧</span><span class="font-bold text-sm">Փուլ 6</span><p class="text-[10px] text-gray-400 uppercase">Լսողություն</p>
+        </button>
+        <button onclick="openStage(7)" class="stage-card p-4 bg-indigo-50 border-indigo-200 rounded-2xl shadow-sm flex flex-col items-center">
+            <span class="text-3xl mb-1">🎓</span><span class="font-bold text-indigo-700 text-sm">Քննություն</span>
+        </button>
+        <button onclick="openStage(8)" class="stage-card p-4 bg-emerald-50 border-emerald-200 rounded-2xl shadow-sm flex flex-col items-center">
+            <span class="text-3xl mb-1">📊</span><span class="font-bold text-emerald-700 text-sm">Արդյունքներ</span>
+        </button>
     </div>
 
-    <div id="view" class="hidden p-4 min-h-screen max-w-2xl mx-auto">
-        <div class="flex justify-between items-center mb-8 pt-4">
-            <button onclick="exitToMenu()" class="font-black text-emerald-600 text-xs uppercase bg-emerald-100 px-4 py-2 rounded-full">⬅ ԵԼՔ</button>
-            <div id="v-title" class="text-[10px] font-black text-emerald-800 uppercase tracking-[0.4em]"></div>
-            <div class="w-12"></div>
+    <div id="view" class="hidden p-4 min-h-[80vh] max-w-4xl mx-auto">
+        <div class="flex justify-between items-center mb-6">
+            <button onclick="exitToMenu()" class="text-indigo-600 font-bold flex items-center bg-indigo-50 px-4 py-2 rounded-xl">🏠 Մենյու</button>
+            <div id="view-title" class="text-xs font-bold text-gray-400 uppercase tracking-widest"></div>
         </div>
         <div id="content" class="flex flex-col items-center w-full"></div>
     </div>
 
-    <div id="smart-menu" class="hidden max-w-2xl mx-auto p-6 space-y-6">
-        <button onclick="exitToMenu()" class="font-black text-emerald-600 text-xs uppercase bg-emerald-100 px-4 py-2 rounded-full mb-4">⬅ ԵԼՔ</button>
-        <div id="smart-cont" class="space-y-4"></div>
-    </div>
-
-    <div id="delete-modal" class="hidden fixed inset-0 bg-emerald-950/80 z-[100] flex items-center justify-center p-6 backdrop-blur-sm">
-        <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm text-center shadow-2xl">
-            <h2 class="text-xl font-black mb-4 uppercase text-rose-600">Ջնջել ամբողջը</h2>
-            <input type="text" id="del-in" class="w-full p-4 border-2 border-emerald-100 rounded-2xl text-center mb-6 outline-none uppercase" placeholder="DELETE">
-            <div class="flex gap-3">
-                <button onclick="$('delete-modal').classList.add('hidden')" class="flex-1 p-4 bg-slate-100 rounded-2xl font-bold">ՈՉ</button>
-                <button id="del-btn" onclick="confirmDelete()" disabled class="flex-1 p-4 bg-rose-600 text-white rounded-2xl font-bold">ԱՅՈ</button>
-            </div>
-        </div>
-    </div>
-
     <script>
-        let words = [], activeStage = 1, activeIndex = 0, activeList = [], examScores = [], dailyCount = 0, selEn = null, selHy = null;
-        const $ = id => document.getElementById(id);
-        const toggleView = (h, s) => { $(h).classList.add('hidden'); $(s).classList.remove('hidden'); updateStats(); };
-        const speak = t => { window.speechSynthesis.cancel(); const m = new SpeechSynthesisUtterance(t); m.lang = 'en-US'; window.speechSynthesis.speak(m); };
+        let words = [];
+        let activeStage = 1;
+        let activeIndex = 0;
+        let activeList = [];
+        let matchSelected = null;
+        let examScore = 0;
+        let examList = [];
+        let canProceed = false;
 
-        async function init() {
+        async function initApp() {
             try {
-                const res = await fetch('./vocabulary.json');
-                const data = await res.json();
-                words = data.map((it, i) => ({ id: it.id || i, en: it.word, hy: it.translation, score: 0, stagesCompleted: [], isInstant: false, isSeen: false, errorCount: 0, repLevel: 0, nextRepDate: null }));
-                load(); updateStats();
-                $('h-count').innerText = `${words.length} բառ`;
-                $('del-in').oninput = e => { const ok = e.target.value === 'DELETE'; $('del-btn').disabled = !ok; $('del-btn').className = ok ? 'flex-1 p-4 bg-rose-600 text-white rounded-2xl font-bold' : 'flex-1 p-4 bg-emerald-100 text-emerald-300 rounded-2xl font-bold'; };
-            } catch(e) { console.error(e); }
+                const response = await fetch('./vocabulary.json');
+                const data = await response.json();
+                words = data.map((item, index) => ({
+                    id: item.id || index,
+                    en: item.word,
+                    hy: item.translation,
+                    tr: item.transcription || "",
+                    score: 0,
+                    isInstant: false,
+                    stagesCompleted: []
+                }));
+                loadProgress();
+                updateOverallProgress();
+            } catch (e) { console.error("Data error:", e); }
         }
 
-        const load = () => { const s = localStorage.getItem('usanim_v3_data'); if(s) { const p = JSON.parse(s); words.forEach(w => p.words[w.id] && Object.assign(w, p.words[w.id])); examScores = p.examScores || []; dailyCount = p.dailyCount || 0; } };
-        const save = () => { const storage = { words: {}, examScores, dailyCount }; words.forEach(w => storage.words[w.id] = { ...w }); localStorage.setItem('usanim_v3_data', JSON.stringify(storage)); };
-
-        function updateStats() {
-            const learned = words.filter(w => w.stagesCompleted.length >= 5 || w.isInstant).length;
-            const pct = Math.round((learned / words.length) * 100);
-            $('h-pct').innerText = pct + "%"; $('h-bg-line').style.width = pct + "%"; $('p-bar').style.width = pct + "%";
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
         }
 
-        const exitToMenu = () => { ['view', 'smart-menu'].forEach(id => $(id).classList.add('hidden')); $('app-content').classList.remove('hidden'); updateStats(); window.speechSynthesis.cancel(); };
-
-        function openStage(num) { activeStage = num; activeIndex = 0; toggleView('app-content', 'view'); $('v-title').innerText = `Փուլ ${num}`; renderStage(); }
-
-        function renderStage() {
-            const cont = $('content'); cont.innerHTML = "";
-            activeList = activeStage === 1 ? words.filter(w => !w.isInstant && !w.isSeen) : 
-                         activeStage === 3 ? words.filter(w => !w.stagesCompleted.includes(3) && !w.isInstant) :
-                         words.filter(w => !w.stagesCompleted.includes(activeStage) && !w.isInstant);
-            if (activeStage === 1) renderS1(); else if (activeStage === 2) renderS2(); else if (activeStage === 3) renderS3(); else renderGen();
-        }
-
-        function renderS1() {
-            if (activeIndex >= activeList.length) return renderFin();
-            const w = activeList[activeIndex];
-            $('content').innerHTML = `<div class="w-full bg-white rounded-[3rem] p-12 text-center shadow-xl mb-10 border-b-8 border-emerald-500"><h2 class="text-6xl font-black italic mb-6" onclick="speak('${w.en}')">${w.en}</h2><h3 onclick="this.classList.toggle('revealed')" class="text-3xl font-bold text-emerald-200 blur-text italic">${w.hy}</h3></div><div class="grid grid-cols-2 gap-5 w-full"><button onclick="hS1(true)" class="btn-primary">ԳԻՏԵՄ</button><button onclick="hS1(false)" class="btn-primary !bg-rose-500">ՉԳԻՏԵՄ</button></div>`;
-            speak(w.en);
-        }
-        const hS1 = ok => { const w = activeList[activeIndex]; if(ok) { w.isInstant = true; w.isSeen = true; dailyCount++; } else w.isSeen = true; save(); activeIndex++; renderS1(); };
-
-        function renderS2() {
-            const batch = activeList.slice(0, 10); if(!batch.length) return renderFin();
-            const w = batch[activeIndex % batch.length];
-            const others = words.filter(x => x.id !== w.id).sort(() => 0.5 - Math.random()).slice(0, 3);
-            const opts = [...others, w].sort(() => 0.5 - Math.random());
-            $('content').innerHTML = `<div class="w-full text-center"><div class="mb-6">${getDots(w.score)}</div><div class="mb-10 text-6xl font-black italic text-emerald-900" onclick="speak('${w.en}')">${w.en}</div><div class="grid grid-cols-1 gap-3 w-full" id="opts"></div><button id="nx-btn" onclick="renderStage()" class="hidden btn-primary mt-8 !bg-slate-800">ՀԱՋՈՐԴԸ</button></div>`;
-            speak(w.en);
-            opts.forEach(o => {
-                const b = document.createElement('button'); b.className = "w-full p-5 bg-white border-2 border-emerald-100 rounded-2xl font-bold text-xl"; b.innerText = o.hy;
-                b.onclick = () => {
-                    if(o.id === w.id) { w.score = Math.min(5, w.score + 1); b.className = "w-full p-5 bg-emerald-500 text-white rounded-2xl font-bold text-xl"; if(w.score >= 5) { w.score = 0; w.stagesCompleted.push(2); } setTimeout(renderStage, 600); }
-                    else { w.score = Math.max(0, w.score - 1); w.errorCount++; b.className = "w-full p-5 bg-rose-500 text-white rounded-2xl font-bold text-xl"; $('nx-btn').classList.remove('hidden'); }
-                    save();
-                };
-                $('opts').appendChild(b);
-            });
-        }
-
-        function renderS3() {
-            const batch = activeList.slice(0, 5); if(!batch.length) return renderFin();
-            const l = [...batch].sort(() => 0.5 - Math.random()), r = [...batch].sort(() => 0.5 - Math.random());
-            $('content').innerHTML = `<div class="grid grid-cols-2 gap-4 w-full"><div id="en-l" class="space-y-4"></div><div id="hy-l" class="space-y-4"></div></div><button id="n-btn" onclick="renderStage()" class="hidden btn-primary mt-8">ՀԱՋՈՐԴ ԽՈՒՄԲԸ</button>`;
-            l.forEach(w => { const d = document.createElement('div'); d.className = 'match-item'; d.innerHTML = `<span>${w.en}</span><div class="mt-1">${getDots(w.score)}</div>`; d.onclick = () => selM(d, 'en', w); $('en-l').appendChild(d); });
-            r.forEach(w => { const d = document.createElement('div'); d.className = 'match-item'; d.innerHTML = `<span>${w.hy}</span>`; d.onclick = () => selM(d, 'hy', w); $('hy-l').appendChild(d); });
-        }
-
-        function selM(el, ty, w) {
-            if(el.classList.contains('match-correct')) return;
-            document.querySelectorAll('.match-item').forEach(i => i.classList.remove('match-selected')); el.classList.add('match-selected');
-            if(ty === 'en') { selEn = { el, w }; speak(w.en); } else selHy = { el, w };
-            if(selEn && selHy) {
-                if(selEn.w.id === selHy.w.id) { [selEn.el, selHy.el].forEach(i => i.className = 'match-item match-correct'); selEn.w.score = Math.min(5, selEn.w.score + 1); if(selEn.w.score >= 5) { selEn.w.score = 0; selEn.w.stagesCompleted.push(3); } }
-                else { [selEn.el, selHy.el].forEach(i => i.classList.add('match-wrong')); selEn.w.score = Math.max(0, selEn.w.score - 1); selEn.w.errorCount++; setTimeout(() => [selEn.el, selHy.el].forEach(i => i.classList.remove('match-wrong', 'match-selected')), 400); }
-                save(); selEn = selHy = null; if(document.querySelectorAll('.match-correct').length === 10) $('n-btn').classList.remove('hidden');
+        function loadProgress() {
+            const saved = localStorage.getItem('usanim_data');
+            if(saved) {
+                const parsed = JSON.parse(saved);
+                words.forEach(w => { 
+                    if(parsed[w.id]) {
+                        w.score = parsed[w.id].s || 0;
+                        w.isInstant = parsed[w.id].i || false;
+                        w.stagesCompleted = parsed[w.id].c || [];
+                    }
+                });
             }
         }
 
-        function renderGen() {
-            const batch = activeList.slice(0, 10); if(!batch.length) return renderFin();
-            const w = batch[activeIndex % batch.length];
-            const q = activeStage === 6 ? "🔊" : (activeStage === 4 ? w.hy : w.en), a = activeStage === 4 ? w.en : w.hy;
-            $('content').innerHTML = `<div class="w-full text-center"><div class="mb-6">${getDots(w.score)}</div><div class="mb-10 text-6xl font-black italic text-emerald-900" onclick="speak('${w.en}')">${q}</div><input id="s-in" class="w-full p-6 border-4 border-emerald-100 rounded-[2.5rem] text-center text-2xl outline-none" placeholder="..." autocomplete="off"><button id="c-btn" onclick="checkGen('${a}', '${w.id}')" class="btn-primary mt-8">ՍՏՈՒԳԵԼ</button><button id="nx-btn" onclick="renderStage()" class="hidden btn-primary mt-8 !bg-slate-800">ՀԱՋՈՐԴԸ</button></div>`;
-            if(activeStage !== 6) speak(w.en); $('s-in').focus();
+        function saveProgress() {
+            const progress = {};
+            words.forEach(w => progress[w.id] = { s: w.score, i: w.isInstant, c: w.stagesCompleted });
+            localStorage.setItem('usanim_data', JSON.stringify(progress));
+            updateOverallProgress();
         }
 
-        function checkGen(a, id) {
-            const inVal = $('s-in').value.trim().toLowerCase(), w = words.find(x => x.id == id);
-            if(inVal === a.toLowerCase()) { w.score = Math.min(5, w.score + 1); if(w.score >= 5) { w.score = 0; w.stagesCompleted.push(activeStage); if(w.stagesCompleted.length >= 5) setNextRep(w); } setTimeout(renderStage, 600); }
-            else { w.score = Math.max(0, w.score - 1); w.errorCount++; $('s-in').className = "w-full p-6 border-4 border-rose-500 bg-rose-500 text-white rounded-[2.5rem] text-center text-2xl outline-none"; $('s-in').value = a; $('c-btn').classList.add('hidden'); $('nx-btn').classList.remove('hidden'); }
-            save();
+        function updateOverallProgress() {
+            const learned = words.filter(w => w.stagesCompleted.length >= 5 || w.isInstant).length;
+            const percent = words.length > 0 ? (learned / words.length) * 100 : 0;
+            document.getElementById('progress-text').innerText = `Յուրացված: ${learned} / ${words.length}`;
+            document.getElementById('progress-bar').style.width = percent + "%";
         }
 
-        const setNextRep = w => { const d = new Date(); let dCount = w.repLevel === 0 ? 7 : (w.repLevel === 1 ? 30 : 90); d.setDate(d.getDate() + dCount); w.nextRepDate = d.toISOString(); };
-
-        function openSmart() {
-            toggleView('app-content', 'smart-menu');
-            const now = new Date(), reps = words.filter(w => w.nextRepDate && new Date(w.nextRepDate) <= now), hards = words.filter(w => w.errorCount >= 5);
-            $('smart-cont').innerHTML = `<div class="bg-white p-6 rounded-[2.5rem] shadow-xl border-l-[12px] border-emerald-500"><h3 class="font-black text-emerald-900 uppercase">Կրկնություն</h3><button onclick="startR()" class="btn-primary !p-4 mt-4">Սկսել (${reps.length})</button></div><div class="bg-white p-6 rounded-[2.5rem] shadow-xl border-l-[12px] border-rose-500"><h3 class="font-black text-rose-900 uppercase">Շտկում</h3><button onclick="startC()" class="btn-primary !p-4 !bg-rose-600 mt-4">Սկսել (${hards.length})</button></div>`;
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.lang = 'en-US';
+            window.speechSynthesis.speak(msg);
         }
-        const startR = () => { activeList = words.filter(w => w.nextRepDate && new Date(w.nextRepDate) <= new Date()); if(!activeList.length) return; activeIndex = 0; toggleView('smart-menu', 'view'); renderRep(); };
-        function renderRep() { const w = activeList[activeIndex]; $('content').innerHTML = `<div class="w-full bg-white rounded-[3.5rem] p-12 text-center shadow-xl mb-10 border-b-8 border-emerald-500"><h2 class="text-6xl font-black mb-6">${w.en}</h2><h3 onclick="this.classList.toggle('revealed')" class="text-3xl font-bold text-emerald-100 blur-text">${w.hy}</h3></div><div class="grid grid-cols-2 gap-5 w-full"><button onclick="hR(true)" class="btn-primary">ԳԻՏԵՄ</button><button onclick="hR(false)" class="btn-primary !bg-rose-500">ՉԳԻՏԵՄ</button></div>`; speak(w.en); }
-        function hR(ok) { const w = activeList[activeIndex]; if(ok) { w.repLevel++; setNextRep(w); activeIndex++; if(activeIndex >= activeList.length) exitToMenu(); else renderRep(); } else { Object.assign(w, {score:0, stagesCompleted:[], isInstant:false, isSeen:false, repLevel:0, nextRepDate:null, errorCount:0}); exitToMenu(); } save(); }
-        const startC = () => { activeList = words.filter(w => w.errorCount >= 5); if(!activeList.length) return; activeIndex = 0; toggleView('smart-menu', 'view'); renderCor(); };
-        function renderCor() { const w = activeList[activeIndex % activeList.length]; $('content').innerHTML = `<div class="w-full text-center"><div class="mb-10 bg-white rounded-[3.5rem] p-12 shadow-xl border-b-8 border-rose-500"><h2 class="text-6xl mb-6">${w.en}</h2><h3 onclick="this.classList.toggle('revealed')" class="text-3xl font-bold text-rose-100 blur-text">${w.hy}</h3></div><div class="grid grid-cols-2 gap-5 w-full"><button onclick="hC(true)" class="btn-primary">ԳԻՏԵՄ</button><button onclick="hC(false)" class="btn-primary !bg-rose-500">ՉԳԻՏԵՄ</button></div></div>`; speak(w.en); }
-        function hC(ok) { const w = activeList[activeIndex % activeList.length]; if(ok) { w.score++; if(w.score >= 5) { w.errorCount = 0; w.score = 0; activeList.splice(activeIndex % activeList.length, 1); } else activeIndex++; } else { w.score = Math.max(0, w.score - 1); activeIndex++; } save(); if(activeList.length) renderCor(); else exitToMenu(); }
 
-        function openStats() { toggleView('app-content', 'smart-menu'); const l = words.filter(w => w.stagesCompleted.length >= 5 || w.isInstant).length, avg = examScores.length ? Math.round(examScores.reduce((a,b)=>a+b,0)/examScores.length) : 0; $('smart-cont').innerHTML = `<div class="bg-emerald-900 text-white p-10 rounded-[3.5rem] shadow-2xl"><h2 class="text-2xl font-black uppercase mb-8">Վիճակագրություն</h2><div class="space-y-4 text-left font-bold text-emerald-100"><div class="flex justify-between border-b border-emerald-800 pb-2"><span>Առաջընթաց:</span><span class="text-emerald-400">${Math.round((l/words.length)*100)}%</span></div><div class="flex justify-between border-b border-emerald-800 pb-2"><span>Սովորած:</span><span class="text-emerald-400">${l}</span></div><div class="flex justify-between border-b border-emerald-800 pb-2"><span>Քննություն:</span><span class="text-emerald-400">${avg}%</span></div><div class="flex justify-between"><span>Այսօր:</span><span class="text-emerald-400">${dailyCount}</span></div></div></div>`; }
-        function openExam() { activeList = [...words].sort(()=>0.5-Math.random()).slice(0,50); activeIndex = 0; let cor = 0; toggleView('app-content', 'view'); $('v-title').innerText = "Քննություն"; renderEx(cor); }
-        function renderEx(cor) { if(activeIndex >= activeList.length) { const pct = Math.round((cor/activeList.length)*100); examScores.push(pct); save(); return renderFin(`Արդյունք: ${pct}%`); } const w = activeList[activeIndex]; $('content').innerHTML = `<div class="w-full text-center"><p class="text-xs font-bold text-emerald-400 mb-6 uppercase">${activeIndex+1} / ${activeList.length}</p><h2 class="text-6xl font-black italic text-emerald-900 mb-10">${w.en}</h2><input id="ex-in" class="w-full p-6 border-4 border-emerald-100 rounded-3xl text-center text-xl outline-none" autofocus autocomplete="off"><button id="ex-btn" class="btn-primary mt-8">ՀԱՋՈՐԴԸ</button></div>`; $('ex-btn').onclick = () => { if($('ex-in').value.trim().toLowerCase() === w.hy.toLowerCase()) cor++; activeIndex++; renderEx(cor); }; }
-        const getDots = s => `<div class="flex justify-center gap-1">${Array(5).fill(0).map((_,i)=>s>i?`<span class="dot dot-active"></span>`:`<span class="dot"></span>`).join('')}</div>`;
-        const renderFin = (e="") => $('content').innerHTML = `<div class="text-center p-12 bg-white rounded-[3.5rem] shadow-2xl border-b-8 border-emerald-500"><div class="text-7xl mb-6">🏆</div><h2 class="text-3xl font-black text-emerald-900 italic">Գերազանց է</h2><p class="text-slate-500 font-bold mb-8">${e||"Ավարտվեց"}</p><button onclick="exitToMenu()" class="btn-primary">ՎԵՐԱԴԱՌՆԱԼ</button></div>`;
-        const confirmDelete = () => { localStorage.removeItem('usanim_v3_data'); location.reload(); };
-        init();
+        function getStars(word) {
+            let html = '<div class="flex flex-col items-center gap-1 mb-4">';
+            // Գլոբալ աստղեր ★ (Փուլերի համար)
+            html += '<div class="flex gap-1">';
+            for (let i = 2; i <= 6; i++) {
+                const color = word.stagesCompleted.includes(i) ? 'text-orange-500' : 'text-gray-200';
+                html += `<span class="global-star ${color}">★</span>`;
+            }
+            html += '</div>';
+            // Կանաչ աստղեր ● (Ընթացիկ փուլի score/2)
+            html += '<div class="flex gap-1">';
+            for (let i = 1; i <= 5; i++) {
+                const color = word.score >= (i * 2) ? 'text-emerald-500' : 'text-gray-200';
+                html += `<span class="local-dot ${color}">●</span>`;
+            }
+            html += '</div></div>';
+            return html;
+        }
+
+        function openStage(num) {
+            activeStage = num;
+            activeIndex = 0;
+            document.getElementById('menu').classList.add('hidden');
+            document.getElementById('view').classList.remove('hidden');
+            document.getElementById('view-title').innerText = num === 8 ? "ԱՐԴՅՈՒՆՔՆԵՐ" : `ՓՈՒԼ ${num}`;
+            initStageLogic();
+        }
+
+        function exitToMenu() {
+            document.getElementById('view').classList.add('hidden');
+            document.getElementById('menu').classList.remove('hidden');
+            window.speechSynthesis.cancel();
+        }
+
+        function initStageLogic() {
+            const container = document.getElementById('content');
+            container.innerHTML = "";
+            canProceed = false;
+
+            if (activeStage === 1) {
+                activeList = words.filter(w => !w.isInstant);
+                if (activeList.length === 0) { renderFinishedAll(); return; }
+                renderStage1();
+            } else if (activeStage >= 2 && activeStage <= 6) {
+                activeList = words.filter(w => !w.stagesCompleted.includes(activeStage) && !w.isInstant);
+                if (activeList.length === 0) { renderFinishedAll(); return; }
+                if (activeStage === 3) renderMatch5();
+                else renderLearningStages();
+            } else if (activeStage === 7) {
+                examScore = 0;
+                examList = shuffle([...words]).slice(0, 50);
+                renderExam();
+            } else if (activeStage === 8) renderStage8();
+        }
+
+        function renderFinishedAll() {
+            document.getElementById('content').innerHTML = `
+                <div class="text-center p-10 bg-emerald-50 rounded-3xl border-2 border-emerald-100 w-full max-lg">
+                    <span class="text-6xl mb-4 block">🎉</span>
+                    <h2 class="text-2xl font-black text-emerald-800">Փուլն ավարտված է:</h2>
+                    <button onclick="exitToMenu()" class="btn-primary bg-emerald-600 mt-6">ՎԵՐԱԴԱՌՆԱԼ</button>
+                </div>`;
+        }
+
+        function renderStage1() {
+            const word = activeList[activeIndex];
+            document.getElementById('content').innerHTML = `
+                <div class="w-full max-w-2xl bg-white border-2 border-indigo-100 rounded-3xl p-10 text-center shadow-lg mb-6">
+                    <div onclick="speak('${word.en}')" class="cursor-pointer mb-4">
+                        <h2 class="text-6xl font-black text-indigo-600">${word.en}</h2>
+                    </div>
+                    <hr class="my-6">
+                    <h3 onclick="this.classList.toggle('revealed')" class="text-4xl font-bold text-slate-800 blur-text">${word.hy}</h3>
+                </div>
+                <div class="grid grid-cols-2 gap-4 w-full max-w-2xl">
+                    <button onclick="flashcardAction(true)" class="bg-emerald-500 text-white font-bold py-6 rounded-2xl text-xl shadow-lg">ԳԻՏԵՄ</button>
+                    <button onclick="flashcardAction(false)" class="bg-rose-500 text-white font-bold py-6 rounded-2xl text-xl shadow-lg">ՉԳԻՏԵՄ</button>
+                </div>`;
+            speak(word.en);
+        }
+
+        function flashcardAction(known) {
+            if(known) { 
+                const word = activeList[activeIndex];
+                word.isInstant = true; 
+                word.stagesCompleted = [2,3,4,5,6];
+            }
+            saveProgress(); 
+            activeIndex++;
+            initStageLogic();
+        }
+
+        function renderLearningStages() {
+            const studyBatch = activeList.slice(0, 10);
+            const word = studyBatch[activeIndex % studyBatch.length];
+            const container = document.getElementById('content');
+            container.innerHTML = `<div id="task-area" class="w-full flex flex-col items-center max-w-2xl"></div>`;
+            const area = document.getElementById('task-area');
+
+            if(activeStage === 2) {
+                let options = shuffle([word.hy, ...shuffle(words.filter(w => w.id !== word.id)).slice(0, 3).map(w => w.hy)]);
+                area.innerHTML = `
+                    ${getStars(word)}
+                    <div class="text-center mb-8" onclick="speak('${word.en}')">
+                        <p class="text-6xl font-black text-indigo-600">${word.en}</p>
+                    </div>
+                    <div id="options-grid" class="grid grid-cols-1 gap-4 w-full">
+                        ${options.map(o => `<button onclick="checkChoice(this, '${o}', '${word.hy}')" class="bg-white border-4 p-5 rounded-2xl font-bold text-xl shadow-sm">${o}</button>`).join('')}
+                    </div>
+                    <button id="next-btn" onclick="nextWord()" class="hidden btn-next">ՀԱՋՈՐԴԸ ➔</button>`;
+                speak(word.en);
+            } else {
+                const isListen = activeStage === 6, isTrans = activeStage === 5;
+                const correctVal = isTrans ? word.hy : word.en;
+                area.innerHTML = `
+                    ${getStars(word)}
+                    <div class="text-center mb-6">
+                        ${isListen ? `<button onclick="speak('${word.en}')" class="text-8xl p-8 bg-indigo-50 rounded-full">🔊</button>` : `<p class="text-5xl font-bold text-slate-700">${isTrans ? word.en : word.hy}</p>`}
+                    </div>
+                    <input type="text" id="userInput" class="w-full p-6 border-4 rounded-2xl text-center text-3xl mb-4 outline-none border-gray-200" placeholder="..." autocomplete="off">
+                    <div id="feedback" class="hidden text-xl font-bold mb-4"></div>
+                    <button id="check-btn" onclick="checkWriting('${correctVal}')" class="btn-primary">ՍՏՈՒԳԵԼ</button>
+                    <button id="next-btn" onclick="nextWord()" class="hidden btn-next">ՀԱՋՈՐԴԸ ➔</button>`;
+                if(!isListen) speak(word.en);
+                setTimeout(() => document.getElementById('userInput').focus(), 200);
+            }
+        }
+
+        // ENTER ՍՏԵՂՆ
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const checkBtn = document.getElementById('check-btn');
+                const nextBtn = document.getElementById('next-btn');
+                if (checkBtn && !checkBtn.classList.contains('hidden')) checkBtn.click();
+                else if (nextBtn && !nextBtn.classList.contains('hidden')) nextBtn.click();
+            }
+        });
+
+        function checkChoice(btn, chosen, correct) {
+            if(canProceed) return;
+            const studyBatch = activeList.slice(0, 10);
+            const word = studyBatch[activeIndex % studyBatch.length];
+            if(chosen === correct) { 
+                btn.classList.add('bg-emerald-500', 'text-white'); 
+                word.score += 1; // +1 Միավոր (Կես աստղ)
+            } else { 
+                btn.classList.add('bg-rose-500', 'text-white'); 
+                word.score = Math.max(0, word.score - 1); // -1 Միավոր (Պակասում է կես աստղ)
+                document.querySelectorAll('#options-grid button').forEach(b => { if(b.innerText === correct) b.classList.add('border-emerald-500'); });
+            }
+            canProceed = true; document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        function checkWriting(correct) {
+            if(canProceed) return;
+            const input = document.getElementById('userInput'), feedback = document.getElementById('feedback');
+            const studyBatch = activeList.slice(0, 10);
+            const word = studyBatch[activeIndex % studyBatch.length];
+            if(input.value.trim().toLowerCase() === correct.toLowerCase()) { 
+                input.classList.add('bg-emerald-500', 'text-white'); 
+                word.score += 1;
+            } else { 
+                input.classList.add('bg-rose-500', 'text-white'); 
+                word.score = Math.max(0, word.score - 1);
+                feedback.innerHTML = `<span class="text-rose-600">Ճիշտը՝</span> <span class="text-emerald-600 underline">${correct}</span>`; 
+                feedback.classList.remove('hidden'); 
+            }
+            canProceed = true; document.getElementById('check-btn').classList.add('hidden'); document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        function nextWord() {
+            const studyBatch = activeList.slice(0, 10);
+            const word = studyBatch[activeIndex % studyBatch.length];
+
+            if (word.score >= 10) {
+                word.score = 0;
+                if(!word.stagesCompleted.includes(activeStage)) word.stagesCompleted.push(activeStage);
+                activeList = activeList.filter(w => w.id !== word.id);
+            } else {
+                activeIndex++;
+            }
+            saveProgress();
+            initStageLogic();
+        }
+
+        function renderMatch5() {
+            const batch = activeList.slice(0, 5);
+            const enL = shuffle([...batch]), hyL = shuffle([...batch]);
+            document.getElementById('content').innerHTML = `
+                <div class="grid grid-cols-2 gap-4 w-full max-w-2xl mt-4">
+                    <div class="flex flex-col gap-3">${enL.map(w => `<div class="match-box bg-white shadow-sm" data-type="en" data-id="${w.id}" onclick="handleM(this)">${w.en}</div>`).join('')}</div>
+                    <div class="flex flex-col gap-3">${hyL.map(w => `<div class="match-box bg-white shadow-sm" data-type="hy" data-id="${w.id}" onclick="handleM(this)">${w.hy}</div>`).join('')}</div>
+                </div>
+                <button id="next-btn" onclick="nextWord()" class="hidden btn-next">ՀԱՋՈՐԴԸ ➔</button>`;
+        }
+
+        function handleM(el) {
+            if(el.classList.contains('match-correct') || el === matchSelected || canProceed) return;
+            if(!matchSelected) { matchSelected = el; el.classList.add('match-selected'); }
+            else {
+                if(matchSelected.dataset.id === el.dataset.id && matchSelected.dataset.type !== el.dataset.type) {
+                    el.classList.add('match-correct'); matchSelected.classList.add('match-correct');
+                    matchSelected = null;
+                    if(document.querySelectorAll('.match-correct').length === (activeList.slice(0, 5).length * 2)) { 
+                        activeList.slice(0, 5).forEach(w => w.score = 10); 
+                        canProceed = true; document.getElementById('next-btn').classList.remove('hidden'); 
+                    }
+                } else {
+                    el.classList.add('match-wrong'); matchSelected.classList.add('match-wrong');
+                    const prev = matchSelected; setTimeout(() => { el.classList.remove('match-wrong', 'match-selected'); prev.classList.remove('match-wrong', 'match-selected'); }, 500);
+                    matchSelected = null;
+                }
+            }
+        }
+
+        function renderExam() {
+            if(activeIndex >= examList.length) {
+                document.getElementById('content').innerHTML = `<div class='text-center p-10 bg-indigo-50 rounded-3xl'><h2 class='text-3xl font-black mb-4'>ԱՐԴՅՈՒՆՔ</h2><p class='text-8xl font-black text-indigo-600 mb-6'>${examScore}/${examList.length}</p><button onclick='exitToMenu()' class='btn-primary'>ՎԵՐԱԴԱՌՆԱԼ</button></div>`;
+                return;
+            }
+            const word = examList[activeIndex];
+            const opts = shuffle([word.hy, ...shuffle(words.filter(w => w.id !== word.id)).slice(0, 3).map(w => w.hy)]);
+            document.getElementById('content').innerHTML = `<div class="mb-4 font-bold text-gray-400">ՀԱՐՑ ${activeIndex+1}/${examList.length}</div>
+            <div class="text-center mb-8"><p class="text-6xl font-black text-indigo-600">${word.en}</p></div>
+            <div class="grid grid-cols-1 gap-4 w-full max-w-2xl">${opts.map(o => `<button onclick="handleExamAns(this, '${o}', '${word.hy}')" class="bg-white border-2 p-5 rounded-2xl font-bold text-xl shadow-sm">${o}</button>`).join('')}</div>`;
+        }
+
+        function handleExamAns(btn, chosen, correct) {
+            if(chosen === correct) { examScore++; btn.classList.add('bg-emerald-500', 'text-white'); } else btn.classList.add('bg-rose-500', 'text-white');
+            setTimeout(() => { activeIndex++; renderExam(); }, 400);
+        }
+
+        function renderStage8() {
+            document.getElementById('content').innerHTML = `<div class="w-full space-y-2 pb-10 max-w-4xl">` + words.map((w, i) => `
+                <div class="flex justify-between items-center bg-white p-4 rounded-2xl border ${w.isInstant ? 'border-orange-200 bg-orange-50' : 'border-gray-100'}">
+                    <div onclick="speak('${w.en}')" class="cursor-pointer">
+                        <p class="font-bold text-indigo-700 text-lg">${i+1}. ${w.en}</p>
+                        <p class="text-sm text-gray-500">${w.hy}</p>
+                    </div>
+                    ${getStars(w)}
+                </div>`).join('') + `</div>`;
+        }
+
+        function resetData() {
+            if (confirm("Ջնջե՞լ ամբողջ առաջընթացը:")) {
+                const userInput = prompt("Գրեք 'DELETE'․");
+                if (userInput === "DELETE") { localStorage.clear(); location.reload(); }
+            }
+        }
+
+        initApp();
     </script>
 </body>
 </html>
