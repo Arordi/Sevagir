@@ -30,51 +30,51 @@
     <div id="welcome-screen" class="min-h-screen flex flex-col p-6 max-w-lg mx-auto">
         <div class="mt-20 mb-12 text-center">
             <h1 class="text-4xl font-black text-slate-800 tracking-tight mb-2 italic">Usanim</h1>
-            <p class="text-indigo-600 font-bold tracking-[0.2em] uppercase text-sm">Բառապաշար</p>
+            <p class="text-slate-400 font-bold tracking-[0.2em] uppercase text-sm">Բառապաշար</p>
         </div>
         <div class="space-y-4">
-            <div onclick="goToAppMenu()" class="home-card glass p-7 rounded-[2.5rem] shadow-xl flex items-center justify-between border-l-[10px] border-indigo-600 relative overflow-hidden">
+            <div onclick="goToAppMenu()" class="home-card glass p-7 rounded-[2.5rem] shadow-xl flex items-center justify-between border-l-[10px] border-slate-300 relative overflow-hidden">
                 <div class="flex items-center gap-5 z-10">
-                    <div class="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center text-3xl shadow-inner border border-indigo-100">🇬🇧</div>
+                    <div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center text-3xl shadow-inner border border-slate-100">🇬🇧</div>
                     <div>
                         <h2 class="text-2xl font-black text-slate-800 leading-tight">A1 Մակարդակ</h2>
                         <div class="flex items-center gap-2 mt-1">
                             <p id="home-word-count" class="text-slate-500 text-xs font-bold uppercase">...</p>
                             <span class="text-slate-300">|</span>
-                            <p id="home-progress-pct" class="text-indigo-600 text-xs font-black">0%</p>
+                            <p id="home-progress-pct" class="text-slate-600 text-xs font-black">0%</p>
                         </div>
                     </div>
                 </div>
-                <div class="z-10 w-10 h-10 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-600 shadow-sm">➔</div>
-                <div id="home-bg-progress" class="absolute left-0 bottom-0 h-1.5 bg-indigo-600 transition-all duration-1000" style="width: 0%"></div>
+                <div class="z-10 w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center text-slate-600 shadow-sm">➔</div>
+                <div id="home-bg-progress" class="absolute left-0 bottom-0 h-1.5 bg-slate-300 transition-all duration-1000" style="width: 0%"></div>
             </div>
         </div>
     </div>
 
     <div id="app-content" class="hidden">
-        <div class="bg-indigo-600 p-4 text-white sticky top-0 z-50 shadow-lg w-full">
+        <div class="bg-slate-200 p-4 text-slate-800 sticky top-0 z-50 shadow-lg w-full">
             <div class="max-w-4xl mx-auto flex justify-between items-center mb-2">
                 <div onclick="goToWelcome()" class="cursor-pointer flex items-center gap-2">
                     <span class="text-xl">🏠</span>
                     <h1 class="font-bold text-lg leading-none italic">Usanim A1</h1>
                 </div>
-                <button onclick="showDeleteModal()" class="text-[10px] bg-red-700 px-4 py-1.5 rounded-full font-black uppercase tracking-tighter">Reset</button>
+                <button onclick="showDeleteModal()" class="text-[10px] bg-red-600 text-white px-4 py-1.5 rounded-full font-black uppercase tracking-tighter">Reset</button>
             </div>
-            <div class="max-w-4xl mx-auto w-full bg-indigo-900/50 rounded-full h-1.5 overflow-hidden">
-                <div id="progress-bar" class="bg-emerald-400 h-full rounded-full transition-all duration-700" style="width: 0%"></div>
+            <div class="max-w-4xl mx-auto w-full bg-slate-300/50 rounded-full h-1.5 overflow-hidden">
+                <div id="progress-bar" class="bg-emerald-500 h-full rounded-full transition-all duration-700" style="width: 0%"></div>
             </div>
         </div>
 
         <div id="menu" class="max-w-4xl mx-auto p-4 grid grid-cols-2 md:grid-cols-3 gap-4">
-            <button onclick="openStage(1)" class="stage-card p-6 bg-white shadow-sm rounded-[2rem] flex flex-col items-center"><span class="text-3xl mb-1">🗂️</span><span class="font-bold text-[11px] text-slate-500 uppercase">Փուլ 1</span></button>
-            <button onclick="openStage(2)" class="stage-card p-6 bg-white shadow-sm rounded-[2rem] flex flex-col items-center"><span class="text-3xl mb-1">🔘</span><span class="font-bold text-[11px] text-slate-500 uppercase">Փուլ 2</span></button>
-            <button onclick="openStage(3)" class="stage-card p-6 bg-white shadow-sm rounded-[2rem] flex flex-col items-center"><span class="text-3xl mb-1">🧩</span><span class="font-bold text-[11px] text-slate-500 uppercase">Փուլ 3</span></button>
-            <button onclick="openStage(4)" class="stage-card p-6 bg-white shadow-sm rounded-[2rem] flex flex-col items-center"><span class="text-3xl mb-1">⌨️</span><span class="font-bold text-[11px] text-slate-500 uppercase">Փուլ 4</span></button>
-            <button onclick="openStage(5)" class="stage-card p-6 bg-white shadow-sm rounded-[2rem] flex flex-col items-center"><span class="text-3xl mb-1">🔄</span><span class="font-bold text-[11px] text-slate-500 uppercase">Փուլ 5</span></button>
-            <button onclick="openStage(6)" class="stage-card p-6 bg-white shadow-sm rounded-[2rem] flex flex-col items-center"><span class="text-3xl mb-1">🎧</span><span class="font-bold text-[11px] text-slate-500 uppercase">Փուլ 6</span></button>
-            <button onclick="openSmartStage()" class="stage-card p-6 bg-indigo-600 text-white rounded-[2rem] shadow-lg flex flex-col items-center"><span class="text-3xl mb-1">🎓</span><span class="font-bold text-[11px] uppercase">Փուլ 7</span></button>
-            <button onclick="openExam()" class="stage-card p-6 bg-emerald-600 text-white rounded-[2rem] shadow-lg flex flex-col items-center"><span class="text-3xl mb-1">📝</span><span class="font-bold text-[11px] uppercase">Փուլ 8</span></button>
-            <button onclick="openStatsStage()" class="stage-card p-6 bg-slate-800 text-white rounded-[2rem] shadow-lg flex flex-col items-center"><span class="text-3xl mb-1">📊</span><span class="font-bold text-[11px] uppercase text-slate-300">Փուլ 9</span></button>
+            <button onclick="openStage(1)" class="stage-card p-6 bg-slate-100 shadow-sm rounded-[2rem] flex flex-col items-center"><span class="text-3xl mb-1">🗂️</span><span class="font-bold text-[11px] text-slate-500 uppercase">Փուլ 1</span></button>
+            <button onclick="openStage(2)" class="stage-card p-6 bg-slate-100 shadow-sm rounded-[2rem] flex flex-col items-center"><span class="text-3xl mb-1">🔘</span><span class="font-bold text-[11px] text-slate-500 uppercase">Փուլ 2</span></button>
+            <button onclick="openStage(3)" class="stage-card p-6 bg-slate-100 shadow-sm rounded-[2rem] flex flex-col items-center"><span class="text-3xl mb-1">🧩</span><span class="font-bold text-[11px] text-slate-500 uppercase">Փուլ 3</span></button>
+            <button onclick="openStage(4)" class="stage-card p-6 bg-slate-100 shadow-sm rounded-[2rem] flex flex-col items-center"><span class="text-3xl mb-1">⌨️</span><span class="font-bold text-[11px] text-slate-500 uppercase">Փուլ 4</span></button>
+            <button onclick="openStage(5)" class="stage-card p-6 bg-slate-100 shadow-sm rounded-[2rem] flex flex-col items-center"><span class="text-3xl mb-1">🔄</span><span class="font-bold text-[11px] text-slate-500 uppercase">Փուլ 5</span></button>
+            <button onclick="openStage(6)" class="stage-card p-6 bg-slate-100 shadow-sm rounded-[2rem] flex flex-col items-center"><span class="text-3xl mb-1">🎧</span><span class="font-bold text-[11px] text-slate-500 uppercase">Փուլ 6</span></button>
+            <button onclick="openSmartStage()" class="stage-card p-6 bg-slate-200 text-slate-700 rounded-[2rem] shadow-md flex flex-col items-center"><span class="text-3xl mb-1">🎓</span><span class="font-bold text-[11px] uppercase">Փուլ 7</span></button>
+            <button onclick="openExam()" class="stage-card p-6 bg-slate-300 text-slate-800 rounded-[2rem] shadow-md flex flex-col items-center"><span class="text-3xl mb-1">📝</span><span class="font-bold text-[11px] uppercase">Փուլ 8</span></button>
+            <button onclick="openStatsStage()" class="stage-card p-6 bg-slate-400 text-white rounded-[2rem] shadow-md flex flex-col items-center"><span class="text-3xl mb-1">📊</span><span class="font-bold text-[11px] uppercase text-slate-100">Փուլ 9</span></button>
         </div>
     </div>
 
@@ -88,7 +88,7 @@
     </div>
 
     <div id="smart-menu" class="hidden max-w-2xl mx-auto p-6 space-y-6">
-        <button onclick="exitToMenu()" class="font-black text-indigo-600 text-xs uppercase tracking-widest">⬅ ԵԼՔ</button>
+        <button onclick="exitToMenu()" class="font-black text-slate-500 text-xs uppercase tracking-widest">⬅ ԵԼՔ</button>
         <div id="smart-container" class="space-y-4"></div>
     </div>
 
@@ -198,7 +198,7 @@
             document.getElementById('content').innerHTML = `
                 <div class="w-full bg-white rounded-[3rem] p-12 text-center shadow-xl mb-10">
                     <h2 class="text-6xl font-black text-slate-800 mb-6" onclick="speak('${word.en}')">${word.en}</h2>
-                    <h3 onclick="this.classList.toggle('revealed')" class="text-3xl font-bold text-indigo-600 blur-text">${word.hy}</h3>
+                    <h3 onclick="this.classList.toggle('revealed')" class="text-3xl font-bold text-slate-400 blur-text">${word.hy}</h3>
                 </div>
                 <div class="grid grid-cols-2 gap-5 w-full">
                     <button onclick="handleStage1(true)" class="btn-primary !bg-emerald-500">ԳԻՏԵՄ</button>
@@ -214,7 +214,7 @@
                 w.learnedDate = new Date().toISOString().split('T')[0];
                 dailyWordsCount++;
             } else {
-                w.isSeen = true; // Հիշում ենք որ տեսել է, որ հաջորդ անգամ չբերի
+                w.isSeen = true; 
             }
             saveProgress(); activeIndex++; renderStage1();
         }
@@ -263,17 +263,15 @@
 
             if(selectedEn && selectedHy) {
                 if(selectedEn.word.id === selectedHy.word.id) {
-                    // Correct
                     selectedEn.el.classList.add('match-correct');
                     selectedHy.el.classList.add('match-correct');
-                    selectedEn.word.score += 2; // Ամեն ճիշտը 2 միավոր (քանի որ 5 կետ է)
+                    selectedEn.word.score += 2; 
                     if(selectedEn.word.score >= 10) {
                         selectedEn.word.score = 0;
                         selectedEn.word.stagesCompleted.push(3);
                     }
                     saveProgress();
                 } else {
-                    // Wrong
                     selectedEn.el.classList.add('match-wrong');
                     selectedHy.el.classList.add('match-wrong');
                     selectedEn.word.score = Math.max(0, selectedEn.word.score - 2);
@@ -346,12 +344,11 @@
             const container = document.getElementById('smart-container');
             container.innerHTML = "";
 
-            // 1. Repetition Section
             const now = new Date();
             const repWords = words.filter(w => w.nextRepDate && new Date(w.nextRepDate) <= now);
             
             const repDiv = document.createElement('div');
-            repDiv.className = "bg-white p-6 rounded-[2rem] shadow-md border-t-4 border-indigo-500";
+            repDiv.className = "bg-white p-6 rounded-[2rem] shadow-md border-t-4 border-slate-400";
             repDiv.innerHTML = `
                 <h3 class="font-black text-lg mb-2">ԿՐԿՆՈՒԹՅՈՒՆ</h3>
                 <p class="text-sm text-slate-500 mb-4">Սովորած բառերի ամրապնդում</p>
@@ -359,7 +356,6 @@
             `;
             container.appendChild(repDiv);
 
-            // 2. Hard Words (Correction) Section
             const hardWords = words.filter(w => w.errorCount >= 5);
             const hardDiv = document.createElement('div');
             hardDiv.className = "bg-white p-6 rounded-[2rem] shadow-md border-t-4 border-rose-500";
@@ -371,7 +367,6 @@
             container.appendChild(hardDiv);
         }
 
-        // Correction Logic (Flashcard style with 10 pts)
         function startCorrection() {
             activeList = words.filter(w => w.errorCount >= 5);
             if(activeList.length === 0) return alert("Շտկելու բան չկա:");
@@ -403,7 +398,7 @@
             if(known) {
                 word.score += 2;
                 if(word.score >= 10) {
-                    word.errorCount = 0; // Reset errors
+                    word.errorCount = 0; 
                     word.score = 0;
                     activeList.splice(activeIndex % activeList.length, 1);
                 } else { activeIndex++; }
@@ -415,7 +410,6 @@
             if(activeList.length > 0) renderCorrectionCard(); else exitToMenu();
         }
 
-        // Repetition Logic
         function startRepetition() {
             const now = new Date();
             activeList = words.filter(w => w.nextRepDate && new Date(w.nextRepDate) <= now);
@@ -431,7 +425,7 @@
             document.getElementById('content').innerHTML = `
                 <div class="w-full bg-white rounded-[3rem] p-12 text-center shadow-xl mb-10">
                     <h2 class="text-6xl font-black mb-6">${word.en}</h2>
-                    <h3 onclick="this.classList.toggle('revealed')" class="text-3xl font-bold text-indigo-600 blur-text">${word.hy}</h3>
+                    <h3 onclick="this.classList.toggle('revealed')" class="text-3xl font-bold text-slate-400 blur-text">${word.hy}</h3>
                 </div>
                 <div class="grid grid-cols-2 gap-5 w-full">
                     <button onclick="handleRep(true)" class="btn-primary !bg-emerald-500">ԳԻՏԵՄ</button>
@@ -448,7 +442,6 @@
                 activeIndex++;
                 if(activeIndex >= activeList.length) exitToMenu(); else renderRepCard();
             } else {
-                // RESET IF UNKNOWN
                 word.score = 0; word.stagesCompleted = []; word.isInstant = false;
                 word.repLevel = 0; word.nextRepDate = null;
                 alert("Բառը զրոյացվեց: Պետք է նորից սովորել:");
@@ -466,7 +459,6 @@
             word.nextRepDate = now.toISOString();
         }
 
-        // --- STAGE 9 (STATS) ---
         function openStatsStage() {
             document.getElementById('app-content').classList.add('hidden');
             document.getElementById('smart-menu').classList.remove('hidden');
@@ -477,21 +469,20 @@
             const totalPct = Math.round((learned/words.length)*100);
 
             document.getElementById('smart-container').innerHTML = `
-                <div class="bg-slate-800 text-white p-8 rounded-[3.5rem] shadow-2xl text-center">
+                <div class="bg-slate-700 text-white p-8 rounded-[3.5rem] shadow-2xl text-center">
                     <div class="text-5xl mb-4">📊</div>
                     <h2 class="text-2xl font-black mb-6">ՎԻՃԱԿԱԳՐՈՒԹՅՈՒՆ</h2>
                     <div class="space-y-3 text-left">
-                        <div class="flex justify-between border-b border-slate-700 pb-2"><span>Ընդհանուր առաջընթաց:</span><span class="font-black text-indigo-400">${totalPct}%</span></div>
-                        <div class="flex justify-between border-b border-slate-700 pb-2"><span>Սովորած բառեր:</span><span class="font-black text-emerald-400">${learned}</span></div>
-                        <div class="flex justify-between border-b border-slate-700 pb-2"><span>Քննության միջին:</span><span class="font-black text-orange-400">${avgExam}%</span></div>
-                        <div class="flex justify-between border-b border-slate-700 pb-2"><span>Այսօր սովորած:</span><span class="font-black text-blue-400">${dailyWordsCount}</span></div>
+                        <div class="flex justify-between border-b border-slate-600 pb-2"><span>Ընդհանուր առաջընթաց:</span><span class="font-black text-slate-300">${totalPct}%</span></div>
+                        <div class="flex justify-between border-b border-slate-600 pb-2"><span>Սովորած բառեր:</span><span class="font-black text-emerald-400">${learned}</span></div>
+                        <div class="flex justify-between border-b border-slate-600 pb-2"><span>Քննության միջին:</span><span class="font-black text-orange-400">${avgExam}%</span></div>
+                        <div class="flex justify-between border-b border-slate-600 pb-2"><span>Այսօր սովորած:</span><span class="font-black text-blue-400">${dailyWordsCount}</span></div>
                         <div class="flex justify-between"><span>Ամենադժվար բառը:</span><span class="font-black text-rose-400">${worstWord && worstWord.errorCount > 0 ? worstWord.en : '—'}</span></div>
                     </div>
                 </div>
             `;
         }
 
-        // --- EXAM (STAGE 8) ---
         function openExam() {
             activeList = [...words].sort(() => 0.5 - Math.random()).slice(0, 50);
             activeIndex = 0; let correctCount = 0;
@@ -523,7 +514,6 @@
             };
         }
 
-        // --- HELPERS ---
         function getDots(score) {
             let html = '<div class="flex justify-center gap-1">';
             for(let i=0; i<5; i++) {
@@ -565,3 +555,4 @@
     </script>
 </body>
 </html>
+
