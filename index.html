@@ -10,7 +10,8 @@
         .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
         .home-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; border-left: 10px solid #10b981; }
         .home-card:active { transform: scale(0.96); }
-        /* Բոլոր փուլերի կոճակների միասնական ոճը */
+        
+        /* Բոլոր 9 փուլերի կոճակների ՄԻԱՍՆԱԿԱՆ ոճը */
         .stage-card { 
             transition: all 0.2s ease; 
             cursor: pointer; 
@@ -22,19 +23,34 @@
             align-items: center;
             padding: 1.5rem;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            width: 100%;
         }
         .stage-card:active { transform: scale(0.95); background-color: #6ee7b7; }
-        .stage-card span:last-child { color: #064e3b; font-weight: 800; font-size: 11px; text-transform: uppercase; margin-top: 4px; }
+        
+        /* Փուլի տեքստի ոճը */
+        .stage-card span:last-child { 
+            color: #064e3b; /* Dark Emerald */
+            font-weight: 800; 
+            font-size: 11px; 
+            text-transform: uppercase; 
+            margin-top: 8px; 
+            tracking-widest;
+        }
         
         .btn-primary { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 1.25rem; border-radius: 1.25rem; font-weight: bold; width: 100%; box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3); border: none; }
         .blur-text { filter: blur(8px); transition: all 0.3s ease; cursor: pointer; }
         .blur-text.revealed { filter: blur(0); }
+        
+        /* Matching (Փուլ 3) ոճեր */
         .match-item { border: 2px solid #d1fae5; border-radius: 20px; padding: 12px; text-align: center; cursor: pointer; min-height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 600; background: white; transition: 0.2s; }
         .match-selected { border-color: #10b981; background-color: #f0fdf4; color: #065f46; }
         .match-correct { border-color: #22c55e; background-color: #dcfce7; color: #16a34a; }
         .match-wrong { border-color: #ef4444; background-color: #fef2f2; animation: shake 0.3s; }
         @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
+        
         .hidden { display: none !important; }
+        
+        /* Միավորների կետեր (Dots) */
         .dot { width: 7px; height: 7px; border-radius: 50%; background: #e2e8f0; display: inline-block; margin: 0 2px; }
         .dot-active { background: #10b981; box-shadow: 0 0 5px #10b981; }
     </style>
@@ -88,7 +104,7 @@
             <button onclick="openStage(6)" class="stage-card"><span class="text-3xl">🎧</span><span>Փուլ 6</span></button>
             <button onclick="openSmartStage()" class="stage-card"><span class="text-3xl">🎓</span><span>Փուլ 7</span></button>
             <button onclick="openExam()" class="stage-card"><span class="text-3xl">📝</span><span>Փուլ 8</span></button>
-            <button onclick="openStatsStage()" class="stage-card !bg-emerald-800 !border-emerald-900"><span class="text-3xl">📊</span><span class="!text-emerald-50">Փուլ 9</span></button>
+            <button onclick="openStatsStage()" class="stage-card"><span class="text-3xl">📊</span><span>Փուլ 9</span></button>
         </div>
     </div>
 
@@ -246,6 +262,7 @@
             leftSide.forEach(w => {
                 const el = document.createElement('div');
                 el.className = 'match-item';
+                // Միավորները անգլերեն բառի տակ
                 el.innerHTML = `<span>${w.en}</span><div class="mt-1">${getDots(w.score)}</div>`;
                 el.onclick = () => selectMatch(el, 'en', w);
                 document.getElementById('en-list').appendChild(el);
@@ -390,6 +407,7 @@
                 activeIndex++;
                 if(activeIndex >= activeList.length) exitToMenu(); else renderRepCard();
             } else {
+                // Եթե սխալվում է կրկնության ժամանակ, ամբողջությամբ զրոյանում է
                 word.score = 0; word.stagesCompleted = []; word.isInstant = false; word.isSeen = false;
                 word.repLevel = 0; word.nextRepDate = null; word.errorCount = 0;
                 alert("Բառը զրոյացվեց: Այն կհայտնվի 1-ին փուլում:");
@@ -494,6 +512,7 @@
             };
         }
 
+        // Միավորների կետերի ստացում
         function getDots(score) {
             let html = '<div class="flex justify-center gap-1">';
             for(let i=0; i<5; i++) {
