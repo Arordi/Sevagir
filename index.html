@@ -27,38 +27,26 @@
 
     <div id="welcome-screen" class="min-h-screen flex flex-col p-6 max-w-lg mx-auto">
         <div class="mt-20 mb-12 text-center">
-            <h1 class="text-4xl font-black text-slate-800 tracking-tight mb-2">Լեզուների ուսուցում</h1>
+            <h1 class="text-4xl font-black text-slate-800 tracking-tight mb-2 italic">Լեզուների ուսուցում</h1>
             <p class="text-indigo-600 font-bold tracking-[0.2em] uppercase text-sm">Բառապաշար</p>
         </div>
 
         <div class="space-y-4">
             <p class="text-slate-400 font-bold text-[10px] uppercase ml-2 tracking-widest">Ընտրեք մակարդակը</p>
-            
             <div onclick="goToAppMenu()" class="home-card glass p-7 rounded-[2.5rem] shadow-xl flex items-center justify-between border-l-[10px] border-indigo-600 relative overflow-hidden">
                 <div class="flex items-center gap-5 z-10">
                     <div class="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center text-3xl shadow-inner border border-indigo-100">🇬🇧</div>
                     <div>
                         <h2 class="text-2xl font-black text-slate-800 leading-tight">A1 Մակարդակ</h2>
                         <div class="flex items-center gap-2 mt-1">
-                            <p id="home-word-count" class="text-slate-500 text-xs font-bold">...</p>
+                            <p id="home-word-count" class="text-slate-500 text-xs font-bold uppercase">...</p>
                             <span class="text-slate-300">|</span>
                             <p id="home-progress-pct" class="text-indigo-600 text-xs font-black">0%</p>
                         </div>
                     </div>
                 </div>
                 <div class="z-10 w-10 h-10 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-600 shadow-sm">➔</div>
-                
                 <div id="home-bg-progress" class="absolute left-0 bottom-0 h-1.5 bg-indigo-600 transition-all duration-1000" style="width: 0%"></div>
-            </div>
-            
-            <div class="home-card glass p-7 rounded-[2.5rem] opacity-40 grayscale border-l-[10px] border-slate-300">
-                <div class="flex items-center gap-5">
-                    <div class="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center text-3xl text-gray-400 italic">🔒</div>
-                    <div>
-                        <h2 class="text-2xl font-black text-slate-400">A2 Մակարդակ</h2>
-                        <p class="text-slate-400 text-[10px] font-bold uppercase mt-1 italic tracking-tighter">Շուտով կավելացվի</p>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -72,84 +60,52 @@
             <div class="max-w-4xl mx-auto flex justify-between items-center mb-2">
                 <div onclick="goToWelcome()" class="cursor-pointer flex items-center gap-2">
                     <span class="text-xl">🏠</span>
-                    <div>
-                        <h1 class="font-bold text-lg leading-none italic">A1 Vocabulary</h1>
-                        <p id="progress-text" class="text-[10px] opacity-70 font-mono">0 / 0</p>
-                    </div>
+                    <h1 class="font-bold text-lg leading-none italic">Usanim A1</h1>
                 </div>
-                <button onclick="deleteData()" class="text-[10px] bg-red-700 hover:bg-red-800 px-4 py-1.5 rounded-full font-black uppercase tracking-tighter shadow-md transition-colors">Delete All</button>
+                <button onclick="showDeleteModal()" class="text-[10px] bg-red-700 hover:bg-red-800 px-4 py-1.5 rounded-full font-black uppercase tracking-tighter shadow-md">Delete All</button>
             </div>
             <div class="max-w-4xl mx-auto w-full bg-indigo-900/50 rounded-full h-1.5 overflow-hidden">
                 <div id="progress-bar" class="bg-emerald-400 h-full rounded-full transition-all duration-700" style="width: 0%"></div>
             </div>
         </div>
 
-        <div id="menu" class="max-w-4xl mx-auto p-4 space-y-5">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <button onclick="openStage(1)" class="stage-card p-5 bg-white shadow-sm rounded-[2rem] flex flex-col items-center"><span class="text-3xl mb-1">🗂️</span><span class="font-bold text-[10px] text-slate-500 uppercase">Փուլ 1</span></button>
-                <button onclick="openStage(2)" class="stage-card p-5 bg-white shadow-sm rounded-[2rem] flex flex-col items-center"><span class="text-3xl mb-1">🔘</span><span class="font-bold text-[10px] text-slate-500 uppercase">Փուլ 2</span></button>
-                <button onclick="openStage(3)" class="stage-card p-5 bg-white shadow-sm rounded-[2rem] flex flex-col items-center"><span class="text-3xl mb-1">🧩</span><span class="font-bold text-[10px] text-slate-500 uppercase">Փուլ 3</span></button>
-                <button onclick="openStage(4)" class="stage-card p-5 bg-white shadow-sm rounded-[2rem] flex flex-col items-center"><span class="text-3xl mb-1">⌨️</span><span class="font-bold text-[10px] text-slate-500 uppercase">Փուլ 4</span></button>
-                <button onclick="openStage(5)" class="stage-card p-5 bg-white shadow-sm rounded-[2rem] flex flex-col items-center"><span class="text-3xl mb-1">🔄</span><span class="font-bold text-[10px] text-slate-500 uppercase">Փուլ 5</span></button>
-                <button onclick="openStage(6)" class="stage-card p-5 bg-white shadow-sm rounded-[2rem] flex flex-col items-center"><span class="text-3xl mb-1">🎧</span><span class="font-bold text-[10px] text-slate-500 uppercase">Փուլ 6</span></button>
-                <button onclick="openSmartStage()" class="stage-card p-5 bg-indigo-600 text-white rounded-[2rem] shadow-lg flex flex-col items-center"><span class="text-3xl mb-1">🎓</span><span class="font-bold text-[10px] uppercase">Փուլ 7</span></button>
-                <button onclick="openExam()" class="stage-card p-5 bg-emerald-600 text-white rounded-[2rem] shadow-lg flex flex-col items-center"><span class="text-3xl mb-1">📝</span><span class="font-bold text-[10px] uppercase">Փուլ 8</span></button>
-            </div>
-            
-            <div class="bg-white p-7 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
-                <h3 class="font-black text-slate-800 text-lg flex items-center gap-2 uppercase tracking-tight">📊 Իմ Արդյունքները <span id="total-percent" class="text-indigo-600 text-sm font-black ml-auto bg-indigo-50 px-3 py-1 rounded-full">0%</span></h3>
-                
-                <div class="bg-slate-50 p-5 rounded-3xl border border-slate-100">
-                    <div class="flex justify-between items-center mb-3">
-                        <span class="text-[11px] font-black text-slate-500 uppercase tracking-widest">Օրվա նպատակ</span>
-                        <div class="flex items-center gap-1">
-                           <input type="number" id="daily-target-input" onchange="updateDailyTarget(this.value)" class="w-10 bg-white border border-slate-200 rounded text-center font-black text-indigo-600 text-sm py-1 outline-none" value="10">
-                           <span class="text-[10px] font-bold text-slate-400">բառ</span>
-                        </div>
-                    </div>
-                    <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden shadow-inner">
-                        <div id="daily-progress-bar" class="bg-indigo-600 h-full transition-all duration-1000 shadow-[0_0_10px_rgba(79,70,229,0.5)]" style="width: 0%"></div>
-                    </div>
-                    <div class="flex justify-between mt-3 text-[10px] font-black text-indigo-400 uppercase tracking-tighter">
-                        <span id="daily-status-text">Սպասում</span>
-                        <span id="daily-count-text">0 / 10</span>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-emerald-50/50 p-4 rounded-3xl border border-emerald-100 text-center">
-                        <p class="text-[9px] text-emerald-600 uppercase font-black mb-1">Քննություն Avg</p>
-                        <p id="stat-exam-avg" class="text-2xl font-black text-emerald-700">0%</p>
-                    </div>
-                    <div class="bg-rose-50/50 p-4 rounded-3xl border border-rose-100 text-center overflow-hidden">
-                        <p class="text-[9px] text-rose-600 uppercase font-black mb-1">Դժվար բառ</p>
-                        <p id="stat-worst-word" class="text-sm font-black text-rose-700 truncate">—</p>
-                    </div>
-                </div>
-            </div>
+        <div id="menu" class="max-w-4xl mx-auto p-4 grid grid-cols-2 md:grid-cols-3 gap-4">
+            <button onclick="openStage(1)" class="stage-card p-6 bg-white shadow-sm rounded-[2rem] flex flex-col items-center"><span class="text-3xl mb-1">🗂️</span><span class="font-bold text-[11px] text-slate-500 uppercase">Փուլ 1</span></button>
+            <button onclick="openStage(2)" class="stage-card p-6 bg-white shadow-sm rounded-[2rem] flex flex-col items-center"><span class="text-3xl mb-1">🔘</span><span class="font-bold text-[11px] text-slate-500 uppercase">Փուլ 2</span></button>
+            <button onclick="openStage(3)" class="stage-card p-6 bg-white shadow-sm rounded-[2rem] flex flex-col items-center"><span class="text-3xl mb-1">🧩</span><span class="font-bold text-[11px] text-slate-500 uppercase">Փուլ 3</span></button>
+            <button onclick="openStage(4)" class="stage-card p-6 bg-white shadow-sm rounded-[2rem] flex flex-col items-center"><span class="text-3xl mb-1">⌨️</span><span class="font-bold text-[11px] text-slate-500 uppercase">Փուլ 4</span></button>
+            <button onclick="openStage(5)" class="stage-card p-6 bg-white shadow-sm rounded-[2rem] flex flex-col items-center"><span class="text-3xl mb-1">🔄</span><span class="font-bold text-[11px] text-slate-500 uppercase">Փուլ 5</span></button>
+            <button onclick="openStage(6)" class="stage-card p-6 bg-white shadow-sm rounded-[2rem] flex flex-col items-center"><span class="text-3xl mb-1">🎧</span><span class="font-bold text-[11px] text-slate-500 uppercase">Փուլ 6</span></button>
+            <button onclick="openSmartStage()" class="stage-card p-6 bg-indigo-600 text-white rounded-[2rem] shadow-lg flex flex-col items-center"><span class="text-3xl mb-1">🎓</span><span class="font-bold text-[11px] uppercase">Փուլ 7</span></button>
+            <button onclick="openExam()" class="stage-card p-6 bg-emerald-600 text-white rounded-[2rem] shadow-lg flex flex-col items-center"><span class="text-3xl mb-1">📝</span><span class="font-bold text-[11px] uppercase">Փուլ 8</span></button>
+            <button onclick="openStatsStage()" class="stage-card p-6 bg-slate-800 text-white rounded-[2rem] shadow-lg flex flex-col items-center"><span class="text-3xl mb-1">📊</span><span class="font-bold text-[11px] uppercase text-slate-300">Փուլ 9</span></button>
         </div>
     </div>
 
     <div id="view" class="hidden p-4 min-h-screen max-w-2xl mx-auto">
         <div class="flex justify-between items-center mb-8 pt-4">
-            <button onclick="exitToMenu()" class="text-3xl text-slate-300 font-light">&times;</button>
-            <div id="view-title" class="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em]"></div>
+            <button onclick="exitToMenu()" class="font-black text-slate-400 hover:text-indigo-600 text-xs uppercase tracking-widest">ԵԼՔ</button>
+            <div id="view-title" class="text-[10px] font-black text-slate-300 uppercase tracking-[0.4em]"></div>
             <div class="w-8"></div>
         </div>
         <div id="content" class="flex flex-col items-center"></div>
     </div>
 
-    <div id="smart-menu" class="hidden max-w-2xl mx-auto p-6 space-y-6">
-        <button onclick="exitToMenu()" class="font-black text-indigo-600 text-xs uppercase tracking-widest flex items-center gap-2">⬅ Վերադառնալ</button>
-        <div class="bg-white p-10 rounded-[3rem] shadow-xl border border-slate-50 text-center">
-            <div class="w-20 h-20 bg-rose-100 rounded-3xl flex items-center justify-center text-4xl mx-auto mb-6">⚠️</div>
-            <h3 class="font-black text-slate-800 text-2xl mb-2 uppercase tracking-tight">ՇՏԿՈՒՄ</h3>
-            <p class="text-slate-400 text-sm mb-8 leading-relaxed">Այստեղ հավաքված են այն բոլոր բառերը, որոնց վրա հաճախ ես սխալվել:</p>
-            <button onclick="openHardWords()" class="btn-primary !bg-rose-600 shadow-rose-200 flex justify-between px-10 items-center h-16">
-                <span class="tracking-widest">ՍԿՍԵԼ</span> 
-                <span id="hard-badge-inner" class="bg-white/20 px-4 py-1 rounded-full text-xs font-black">0</span>
-            </button>
+    <div id="delete-modal" class="hidden fixed inset-0 bg-slate-900/90 z-[100] flex items-center justify-center p-6 backdrop-blur-sm">
+        <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm text-center shadow-2xl">
+            <h2 class="text-xl font-black text-slate-800 mb-4">ՀԱՍՏԱՏՈՒՄ</h2>
+            <p class="text-slate-500 text-sm mb-6 leading-relaxed">Զրոյացնելու համար գրիր <b class="text-red-600 select-all font-mono">DELETE</b> բառը</p>
+            <input type="text" id="delete-confirm-input" class="w-full p-4 border-2 border-slate-100 rounded-2xl text-center mb-6 uppercase outline-none focus:border-red-500 font-black">
+            <div class="flex gap-3">
+                <button onclick="hideDeleteModal()" class="flex-1 p-4 bg-slate-100 rounded-2xl font-bold text-slate-600">Չեղարկել</button>
+                <button id="real-delete-btn" onclick="confirmFinalDelete()" disabled class="flex-1 p-4 bg-red-100 text-red-300 rounded-2xl font-bold cursor-not-allowed">Ջնջել</button>
+            </div>
         </div>
+    </div>
+
+    <div id="smart-menu" class="hidden max-w-2xl mx-auto p-6 space-y-6">
+        <button onclick="exitToMenu()" class="font-black text-indigo-600 text-xs uppercase tracking-widest">⬅ ԵԼՔ</button>
+        <div id="smart-container" class="bg-white p-8 rounded-[3rem] shadow-xl border border-slate-50 text-center"></div>
     </div>
 
     <script>
@@ -165,6 +121,15 @@
                 }));
                 loadProgress(); updateStats();
                 document.getElementById('home-word-count').innerText = `${words.length} բառ`;
+                
+                document.getElementById('delete-confirm-input').addEventListener('input', function(e) {
+                    const btn = document.getElementById('real-delete-btn');
+                    if(e.target.value.toUpperCase() === 'DELETE') {
+                        btn.disabled = false; btn.classList.replace('bg-red-100', 'bg-red-600'); btn.classList.replace('text-red-300', 'text-white'); btn.classList.replace('cursor-not-allowed', 'cursor-pointer');
+                    } else {
+                        btn.disabled = true; btn.classList.replace('bg-red-600', 'bg-red-100'); btn.classList.replace('text-white', 'text-red-300'); btn.classList.replace('cursor-pointer', 'cursor-not-allowed');
+                    }
+                });
             } catch (e) { console.error("Loading error:", e); }
         }
 
@@ -175,7 +140,6 @@
                 words.forEach(w => { if(p.words && p.words[w.id]) Object.assign(w, p.words[w.id]); });
                 examScores = p.examScores || []; dailyTarget = p.dailyTarget || 10;
             }
-            document.getElementById('daily-target-input').value = dailyTarget;
         }
 
         function saveProgress() {
@@ -187,46 +151,15 @@
         function updateStats() {
             const today = new Date().toISOString().split('T')[0];
             const learned = words.filter(w => w.stagesCompleted.length >= 5 || w.isInstant);
-            const todayLearned = learned.filter(w => w.learnedDate === today).length;
             const progressPct = Math.round((learned.length / words.length) * 100);
-            const worst = [...words].sort((a,b) => b.errorCount - a.errorCount)[0];
-            
-            // Welcome Screen Stats
             document.getElementById('home-progress-pct').innerText = progressPct + "%";
             document.getElementById('home-bg-progress').style.width = progressPct + "%";
-
-            // App Screen Stats
             document.getElementById('progress-bar').style.width = progressPct + "%";
-            document.getElementById('progress-text').innerText = `${learned.length} / ${words.length}`;
-            document.getElementById('total-percent').innerText = progressPct + "%";
-            document.getElementById('stat-worst-word').innerText = worst && worst.errorCount > 0 ? worst.en : "—";
-            
-            const avg = examScores.length > 0 ? Math.round(examScores.reduce((a,b)=>a+b, 0) / examScores.length) : 0;
-            document.getElementById('stat-exam-avg').innerText = avg + "%";
-
-            // Daily Target Logic
-            const dailyPct = Math.min(100, (todayLearned / dailyTarget) * 100);
-            document.getElementById('daily-progress-bar').style.width = dailyPct + "%";
-            document.getElementById('daily-count-text').innerText = `${todayLearned} / ${dailyTarget} բառ`;
-            document.getElementById('daily-status-text').innerText = dailyPct >= 100 ? "Հրաշալի է ✨" : (dailyPct > 0 ? "Ընթացքի մեջ" : "Սկսիր հիմա");
-            
-            if(document.getElementById('hard-badge-inner')) {
-                document.getElementById('hard-badge-inner').innerText = words.filter(w => w.isHard && w.hardScore < 10).length;
-            }
         }
 
-        // NAVIGATION
-        function goToAppMenu() {
-            document.getElementById('welcome-screen').classList.add('hidden');
-            document.getElementById('app-content').classList.remove('hidden');
-        }
-        function goToWelcome() {
-            document.getElementById('app-content').classList.add('hidden');
-            document.getElementById('welcome-screen').classList.remove('hidden');
-            updateStats();
-        }
+        function goToAppMenu() { document.getElementById('welcome-screen').classList.add('hidden'); document.getElementById('app-content').classList.remove('hidden'); }
+        function goToWelcome() { document.getElementById('app-content').classList.add('hidden'); document.getElementById('welcome-screen').classList.remove('hidden'); updateStats(); }
 
-        // STAGE LOGIC
         function openStage(num) {
             activeStage = num; activeIndex = 0;
             document.getElementById('app-content').classList.add('hidden');
@@ -235,103 +168,141 @@
             initStageLogic();
         }
 
-        function exitToMenu() {
-            document.querySelectorAll('#view, #smart-menu').forEach(el => el.classList.add('hidden'));
-            document.getElementById('app-content').classList.remove('hidden');
-            window.speechSynthesis.cancel();
-            updateStats();
-        }
-
         function initStageLogic() {
             canProceed = false; const container = document.getElementById('content'); container.innerHTML = "";
-            if (activeStage === 1) { activeList = words.filter(w => !w.isInstant && !w.isHard); renderStage1(); }
-            else { 
+            if (activeStage === 1) { 
+                activeList = words.filter(w => !w.isInstant && !w.isHard); 
+                renderStage1(); 
+            } else { 
                 activeList = words.filter(w => !w.stagesCompleted.includes(activeStage) && !w.isInstant && !w.isHard);
                 if (activeStage === 3) renderMatch5(); else renderLearningStages();
             }
         }
 
+        // ՓՈՒԼ 1 - ՄԵԿ ԱՆԳԱՄՅԱ ՆՇՈՒՄ
         function renderStage1() {
-            const word = activeList[activeIndex]; if(!word) return renderFinishedAll();
+            if (activeIndex >= activeList.length) return renderFinishPrompt();
+            const word = activeList[activeIndex];
             document.getElementById('content').innerHTML = `
-                <div class="w-full bg-white rounded-[3rem] p-12 text-center shadow-2xl mb-10 border border-slate-50 relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-full h-2 bg-indigo-500/10"></div>
+                <div class="w-full bg-white rounded-[3rem] p-12 text-center shadow-2xl mb-10 border border-slate-50">
                     <h2 class="text-6xl font-black text-slate-800 mb-6" onclick="speak('${word.en}')">${word.en}</h2>
-                    <div class="h-1 bg-indigo-50 w-20 mx-auto rounded-full mb-8"></div>
                     <h3 onclick="this.classList.toggle('revealed')" class="text-3xl font-bold text-indigo-600 blur-text">${word.hy}</h3>
                 </div>
                 <div class="grid grid-cols-2 gap-5 w-full">
-                    <button onclick="fAction(true)" class="btn-primary !bg-emerald-500 shadow-emerald-200 uppercase tracking-widest text-sm">Գիտեմ</button>
-                    <button onclick="fAction(false)" class="btn-primary !bg-rose-500 shadow-rose-200 uppercase tracking-widest text-sm">Չգիտեմ</button>
+                    <button onclick="fAction(true)" class="btn-primary !bg-emerald-500">ԳԻՏԵՄ</button>
+                    <button onclick="fAction(false)" class="btn-primary !bg-rose-500">ՉԳԻՏԵՄ</button>
                 </div>`;
             speak(word.en);
         }
 
-        function fAction(k) { if(k) { const w = activeList[activeIndex]; w.isInstant = true; w.stagesCompleted = [2,3,4,5,6]; w.repLevel = 1; w.lastDate = new Date().toISOString(); w.learnedDate = new Date().toISOString().split('T')[0]; } saveProgress(); activeIndex++; renderStage1(); }
+        function fAction(k) {
+            const w = activeList[activeIndex];
+            if(k) { 
+                w.isInstant = true; w.stagesCompleted = [2,3,4,5,6]; w.repLevel = 1; 
+                w.lastDate = new Date().toISOString(); w.learnedDate = new Date().toISOString().split('T')[0]; 
+            }
+            // "ՉԳԻՏԵՄ" սեղմելիս պարզապես անցնում է հաջորդին՝ առանց կրկնելու այս սեանսում
+            saveProgress(); activeIndex++; renderStage1();
+        }
 
+        // ՎԵՐՋՈՒՄ ՀԱՐՑՆԵԼՈՒ ՏՐԱՄԱԲԱՆՈՒԹՅՈՒՆ
+        function renderFinishPrompt() {
+            document.getElementById('content').innerHTML = `
+                <div class="text-center p-12 bg-white rounded-[3rem] shadow-xl w-full border border-slate-50">
+                    <div class="text-6xl mb-6">🏁</div>
+                    <h2 class="text-2xl font-black text-slate-800 mb-4">ՑԱՆԿԸ ՎԵՐՋԱՑԱՎ</h2>
+                    <p class="text-slate-500 mb-8">Կրկնե՞լ չսովորած բառերը նորից:</p>
+                    <div class="flex gap-4">
+                        <button onclick="initStageLogic()" class="btn-primary !bg-emerald-600">✅ ԱՅՈ</button>
+                        <button onclick="exitToMenu()" class="btn-primary !bg-slate-200 !text-slate-600 shadow-none">❌ ՈՉ (ԵԼՔ)</button>
+                    </div>
+                </div>`;
+        }
+
+        // ՄՆԱՑԱԾ ՓՈՒԼԵՐԻ ԼՈԳԻԿԱ (Բազային)
         function renderLearningStages() {
-            const batch = activeList.slice(0, 10); if(batch.length === 0) return renderFinishedAll();
-            const word = batch[activeIndex % batch.length]; const isListen = activeStage === 6;
+            const batch = activeList.slice(0, 10); if(batch.length === 0) return renderFinishPrompt();
+            const word = batch[activeIndex % batch.length];
+            const isListen = activeStage === 6;
             let q = (activeStage === 4) ? word.hy : word.en, a = (activeStage === 2 || activeStage === 5) ? word.hy : word.en;
             document.getElementById('content').innerHTML = `
                 <div class="w-full text-center">${getStars(word)}
-                    <div class="mb-12">${isListen ? `<button onclick="speak('${word.en}')" class="text-8xl p-12 bg-indigo-50 rounded-[3rem] shadow-inner text-indigo-600">🔊</button>` : `<p class="text-5xl font-black text-slate-800 tracking-tight">${q}</p>`}</div>
-                    ${activeStage===2 ? `<div class="grid grid-cols-1 gap-3 w-full">${[word.hy, ...words.filter(w=>w.id!==word.id).sort(()=>0.5-Math.random()).slice(0,3).map(w=>w.hy)].sort(()=>0.5-Math.random()).map(o=>`<button onclick="checkC(this, '${o}', '${word.hy}')" class="bg-white border-2 border-slate-100 p-5 rounded-3xl font-bold text-lg active:bg-indigo-50 transition-all text-slate-700 shadow-sm">${o}</button>`).join('')}</div>` : 
-                    `<input type="text" id="uIn" class="w-full p-6 border-2 border-slate-100 rounded-[2rem] text-center text-2xl mb-6 outline-none focus:border-indigo-500 shadow-sm transition-all" placeholder="..." autocomplete="off"><button id="cBtn" onclick="checkW('${a}')" class="btn-primary">ՍՏՈՒԳԵԼ</button>`}
-                    <button id="nBtn" onclick="nextW()" class="hidden btn-primary !bg-slate-800 shadow-slate-200">ՀԱՋՈՐԴԸ ➔</button>
+                    <div class="mb-12">${isListen ? `<button onclick="speak('${word.en}')" class="text-8xl p-12 bg-indigo-50 rounded-[3rem] text-indigo-600">🔊</button>` : `<p class="text-5xl font-black text-slate-800">${q}</p>`}</div>
+                    ${activeStage===2 ? `<div class="grid grid-cols-1 gap-3 w-full">${[word.hy, ...words.filter(w=>w.id!==word.id).sort(()=>0.5-Math.random()).slice(0,3).map(w=>w.hy)].sort(()=>0.5-Math.random()).map(o=>`<button onclick="checkC(this, '${o}', '${word.hy}')" class="bg-white border-2 p-5 rounded-3xl font-bold text-lg active:bg-indigo-50">${o}</button>`).join('')}</div>` : 
+                    `<input type="text" id="uIn" class="w-full p-6 border-2 border-slate-100 rounded-[2rem] text-center text-2xl mb-6 outline-none focus:border-indigo-500" placeholder="..." autocomplete="off"><button id="cBtn" onclick="checkW('${a}')" class="btn-primary">ՍՏՈՒԳԵԼ</button>`}
+                    <button id="nBtn" onclick="nextW()" class="hidden btn-primary !bg-slate-800">ՀԱՋՈՐԴԸ ➔</button>
                 </div>`;
             if(!isListen) speak(word.en);
         }
 
-        function checkC(btn, ch, co) { if(canProceed) return; canProceed = true; const w = activeList.slice(0, 10)[activeIndex % 10]; if(ch === co) { w.score++; btn.classList.add('!bg-emerald-500', 'text-white', 'border-emerald-500'); setTimeout(nextW, 400); } else { w.score = Math.max(0, w.score - 1); w.errorCount++; if(w.errorCount >= 5) w.isHard = true; btn.classList.add('!bg-rose-500', 'text-white', 'border-rose-500'); document.getElementById('nBtn').classList.remove('hidden'); } }
+        function checkC(btn, ch, co) { if(canProceed) return; canProceed = true; const w = activeList.slice(0, 10)[activeIndex % 10]; if(ch === co) { w.score++; btn.classList.add('!bg-emerald-500', 'text-white'); setTimeout(nextW, 400); } else { w.score = Math.max(0, w.score - 1); w.errorCount++; if(w.errorCount >= 5) w.isHard = true; btn.classList.add('!bg-rose-500', 'text-white'); document.getElementById('nBtn').classList.remove('hidden'); } }
         function checkW(co) { if(canProceed) return; const input = document.getElementById('uIn'), w = activeList.slice(0, 10)[activeIndex % 10]; if(input.value.trim().toLowerCase() === co.toLowerCase()) { canProceed = true; w.score++; input.classList.add('!bg-emerald-500', 'text-white'); setTimeout(nextW, 400); } else { canProceed = true; w.score = Math.max(0, w.score - 1); w.errorCount++; if(w.errorCount >= 5) w.isHard = true; input.classList.add('!bg-rose-500', 'text-white'); input.value = co; document.getElementById('cBtn').classList.add('hidden'); document.getElementById('nBtn').classList.remove('hidden'); } }
-        
-        function nextW() { 
-            const w = activeList.slice(0, 10)[activeIndex % 10]; 
-            if(w && w.score >= 10) { 
-                w.score = 0; w.stagesCompleted.push(activeStage); w.lastDate = new Date().toISOString(); 
-                if(w.stagesCompleted.length >= 5) w.learnedDate = new Date().toISOString().split('T')[0];
-                activeList = activeList.filter(x => x.id !== w.id); 
-            } else activeIndex++; 
-            saveProgress(); initStageLogic(); 
-        }
+        function nextW() { const w = activeList.slice(0, 10)[activeIndex % 10]; if(w && w.score >= 10) { w.score = 0; w.stagesCompleted.push(activeStage); w.lastDate = new Date().toISOString(); if(w.stagesCompleted.length >= 5) w.learnedDate = new Date().toISOString().split('T')[0]; activeList = activeList.filter(x => x.id !== w.id); } else activeIndex++; saveProgress(); initStageLogic(); }
 
         function renderMatch5() {
-            const batch = activeList.slice(0, 5); if(batch.length === 0) return renderFinishedAll();
+            const batch = activeList.slice(0, 5); if(batch.length === 0) return renderFinishPrompt();
             const enL = [...batch].sort(() => 0.5 - Math.random()), hyL = [...batch].sort(() => 0.5 - Math.random());
             document.getElementById('content').innerHTML = `<div class="grid grid-cols-2 gap-3 w-full">${enL.map(w => `<div class="match-box" data-type="en" data-id="${w.id}" onclick="hM(this)">${w.en}</div>`).join('')}</div><div class="grid grid-cols-2 gap-3 w-full mt-3">${hyL.map(w => `<div class="match-box" data-type="hy" data-id="${w.id}" onclick="hM(this)">${w.hy}</div>`).join('')}</div><button id="nBtn" onclick="nextW()" class="hidden btn-primary mt-8">ՀԱՋՈՐԴԸ ➔</button>`;
         }
-        function hM(el) { let sel = document.querySelector('.match-selected'); if(el.classList.contains('match-correct') || canProceed) return; if(!sel) el.classList.add('match-selected'); else { if(sel.dataset.id === el.dataset.id && sel.dataset.type !== el.dataset.type) { el.classList.replace('match-selected', 'match-correct'); sel.classList.replace('match-selected', 'match-correct'); if(document.querySelectorAll('.match-correct').length === activeList.slice(0, 5).length * 2) { activeList.slice(0, 5).forEach(w => w.score = 10); canProceed = true; document.getElementById('nBtn').classList.remove('hidden'); } } else { el.classList.add('match-wrong'); sel.classList.add('match-wrong'); setTimeout(() => { el.classList.remove('match-wrong', 'match-selected'); sel.classList.remove('match-wrong', 'match-selected'); }, 400); } } }
+        function hM(el) { let sel = document.querySelector('.match-selected'); if(el.classList.contains('match-correct') || canProceed) return; if(!sel) el.classList.add('match-selected'); else { if(sel.dataset.id === el.dataset.id && sel.dataset.type !== el.dataset.type) { el.classList.replace('match-selected', 'match-correct'); sel.classList.replace('match-selected', 'match-correct'); if(document.querySelectorAll('.match-correct').length === batch.length * 2) { batch.forEach(w => w.score = 10); canProceed = true; document.getElementById('nBtn').classList.remove('hidden'); } } else { el.classList.add('match-wrong'); sel.classList.add('match-wrong'); setTimeout(() => { el.classList.remove('match-wrong', 'match-selected'); sel.classList.remove('match-wrong', 'match-selected'); }, 400); } } }
 
-        function openExam() {
-            mode = 'exam'; activeList = [...words].sort(() => 0.5 - Math.random()).slice(0, 100); activeIndex = 0;
+        function exitToMenu() { document.querySelectorAll('#view, #smart-menu').forEach(el => el.classList.add('hidden')); document.getElementById('app-content').classList.remove('hidden'); window.speechSynthesis.cancel(); updateStats(); }
+
+        // ՓՈՒԼ 9 - ԱՐԴՅՈՒՆՔՆԵՐ
+        function openStatsStage() {
+            const learned = words.filter(w => w.stagesCompleted.length >= 5 || w.isInstant).length;
+            const avg = examScores.length > 0 ? Math.round(examScores.reduce((a,b)=>a+b, 0) / examScores.length) : 0;
+            const worst = [...words].sort((a,b) => b.errorCount - a.errorCount)[0];
+            
             document.getElementById('app-content').classList.add('hidden');
-            document.getElementById('view').classList.remove('hidden');
-            document.getElementById('view-title').innerText = `Քննություն`; renderExamStep();
+            document.getElementById('smart-menu').classList.remove('hidden');
+            document.getElementById('smart-container').innerHTML = `
+                <div class="w-20 h-20 bg-slate-100 rounded-3xl flex items-center justify-center text-4xl mx-auto mb-6">📊</div>
+                <h3 class="font-black text-2xl mb-8">ԻՄ ԱՐԴՅՈՒՆՔՆԵՐԸ</h3>
+                <div class="space-y-4 text-left">
+                    <div class="flex justify-between p-4 bg-slate-50 rounded-2xl"><span class="font-bold text-slate-500">Սովորած բառեր:</span><span class="font-black text-indigo-600">${learned} / ${words.length}</span></div>
+                    <div class="flex justify-between p-4 bg-slate-50 rounded-2xl"><span class="font-bold text-slate-500">Քննության միջին:</span><span class="font-black text-emerald-600">${avg}%</span></div>
+                    <div class="flex justify-between p-4 bg-slate-50 rounded-2xl"><span class="font-bold text-slate-500">Ամենադժվար բառը:</span><span class="font-black text-rose-600">${worst && worst.errorCount > 0 ? worst.en : "—"}</span></div>
+                    <div class="p-4 bg-indigo-50 rounded-2xl">
+                        <p class="text-[10px] font-black text-indigo-400 mb-2 uppercase tracking-widest">Օրվա նպատակ</p>
+                        <input type="number" id="daily-target-input" onchange="updateDailyTarget(this.value)" class="w-full bg-white border border-indigo-100 p-2 rounded-xl text-center font-black" value="${dailyTarget}">
+                    </div>
+                </div>
+            `;
         }
-        function renderExamStep() {
-            if(activeIndex >= activeList.length) { saveProgress(); return renderFinishedAll(`Քննությունն ավարտված է`); }
-            const word = activeList[activeIndex]; document.getElementById('content').innerHTML = `<p class="text-[10px] font-black text-slate-400 mb-2">${activeIndex+1} / 100</p><p class="text-4xl font-black mb-10 text-slate-800">${word.en}</p><input type="text" id="exIn" class="w-full p-6 border-2 border-slate-100 rounded-[2rem] text-center text-2xl mb-6 focus:border-emerald-500 outline-none transition-all shadow-sm" placeholder="Թարգմանիր..."><button onclick="checkEx('${word.hy}')" class="btn-primary !bg-emerald-600">Հաջորդը</button>`;
-        }
-        function checkEx(co) { const i = document.getElementById('exIn'); if(i.value.trim().toLowerCase() === co.toLowerCase()) { activeIndex++; renderExamStep(); } else { i.classList.add('bg-rose-50', 'border-rose-200'); i.value = co; setTimeout(() => { activeIndex++; renderExamStep(); }, 1200); } }
 
-        function openSmartStage() { document.getElementById('app-content').classList.add('hidden'); document.getElementById('smart-menu').classList.remove('hidden'); updateStats(); }
-        function openHardWords() { mode = 'hard'; activeList = words.filter(w => w.isHard && w.hardScore < 10); if(activeList.length === 0) return alert("Շտկելու բան չկա"); startSession("Շտկում"); }
+        function openSmartStage() {
+            const hList = words.filter(w => w.isHard && w.hardScore < 10);
+            document.getElementById('app-content').classList.add('hidden');
+            document.getElementById('smart-menu').classList.remove('hidden');
+            document.getElementById('smart-container').innerHTML = `
+                <div class="w-20 h-20 bg-rose-100 rounded-3xl flex items-center justify-center text-4xl mx-auto mb-6">⚠️</div>
+                <h3 class="font-black text-2xl mb-4">ՇՏԿՈՒՄ</h3>
+                <p class="text-slate-400 text-sm mb-8">Կրկնիր քո սխալները:</p>
+                <button onclick="openHardWords()" class="btn-primary !bg-rose-600 flex justify-between px-8 items-center h-16">
+                    <span>ՍԿՍԵԼ</span> <span class="bg-white/20 px-3 py-1 rounded-full text-xs">${hList.length}</span>
+                </button>
+            `;
+        }
+
+        // ՔՆՆՈՒԹՅՈՒՆ ԵՎ ԱՅԼՆ
+        function openExam() { mode = 'exam'; activeList = [...words].sort(() => 0.5 - Math.random()).slice(0, 100); activeIndex = 0; document.getElementById('app-content').classList.add('hidden'); document.getElementById('view').classList.remove('hidden'); document.getElementById('view-title').innerText = `Քննություն`; renderExamStep(); }
+        function renderExamStep() { if(activeIndex >= activeList.length) return renderFinishPrompt(); const word = activeList[activeIndex]; document.getElementById('content').innerHTML = `<p class="text-4xl font-black mb-10">${word.en}</p><input type="text" id="exIn" class="w-full p-6 border-2 border-slate-100 rounded-[2rem] text-center text-2xl mb-6 outline-none" placeholder="Թարգմանիր..."><button onclick="checkEx('${word.hy}')" class="btn-primary !bg-emerald-600">Հաջորդը</button>`; }
+        function checkEx(co) { const i = document.getElementById('exIn'); if(i.value.trim().toLowerCase() === co.toLowerCase()) { activeIndex++; renderExamStep(); } else { i.classList.add('bg-rose-50'); i.value = co; setTimeout(() => { activeIndex++; renderExamStep(); }, 1200); } }
+
+        // DELETE LOGIC
+        function showDeleteModal() { document.getElementById('delete-modal').classList.remove('hidden'); }
+        function hideDeleteModal() { document.getElementById('delete-modal').classList.add('hidden'); document.getElementById('delete-confirm-input').value = ""; }
+        function confirmFinalDelete() { localStorage.removeItem('usanim_master_v2'); location.reload(); }
+
+        function openHardWords() { activeList = words.filter(w => w.isHard && w.hardScore < 10); if(activeList.length === 0) return alert("Շտկելու բան չկա"); startSession("Շտկում"); }
         function startSession(title) { activeIndex = 0; document.getElementById('smart-menu').classList.add('hidden'); document.getElementById('view').classList.remove('hidden'); document.getElementById('view-title').innerText = title; renderSmartCard(); }
-        function renderSmartCard() { const word = activeList[activeIndex % activeList.length]; document.getElementById('content').innerHTML = `<div class="w-full bg-white rounded-[3rem] p-12 text-center shadow-2xl mb-10 border border-slate-50"><h2 class="text-6xl font-black text-slate-800 mb-6" onclick="speak('${word.en}')">${word.en}</h2><div class="h-1 bg-rose-50 w-20 mx-auto rounded-full mb-8"></div><h3 onclick="this.classList.toggle('revealed')" class="text-3xl font-bold text-rose-600 blur-text">${word.hy}</h3></div><div class="grid grid-cols-2 gap-5 w-full"><button onclick="hSA(true)" class="btn-primary !bg-emerald-500 uppercase tracking-widest text-xs">Գիտեմ</button><button onclick="hSA(false)" class="btn-primary !bg-rose-500 uppercase tracking-widest text-xs">Չգիտեմ</button></div>`; speak(word.en); }
-        function hSA(k) { const w = activeList[activeIndex % activeList.length]; if(k) { w.hardScore++; if(w.hardScore>=10) { w.isHard=false; w.repLevel=1; w.lastDate=new Date().toISOString(); activeList.splice(activeIndex%activeList.length,1); } } else w.hardScore=0; saveProgress(); if(activeList.length>0) renderSmartCard(); else exitToMenu(); }
+        function renderSmartCard() { const word = activeList[activeIndex % activeList.length]; document.getElementById('content').innerHTML = `<div class="w-full bg-white rounded-[3rem] p-12 text-center shadow-2xl mb-10 border border-slate-50"><h2 class="text-6xl font-black text-slate-800 mb-6">${word.en}</h2><h3 onclick="this.classList.toggle('revealed')" class="text-3xl font-bold text-rose-600 blur-text">${word.hy}</h3></div><div class="grid grid-cols-2 gap-5 w-full"><button onclick="hSA(true)" class="btn-primary !bg-emerald-500">ԳԻՏԵՄ</button><button onclick="hSA(false)" class="btn-primary !bg-rose-500">ՉԳԻՏԵՄ</button></div>`; speak(word.en); }
+        function hSA(k) { const w = activeList[activeIndex % activeList.length]; if(k) { w.hardScore++; if(w.hardScore>=10) { w.isHard=false; activeList.splice(activeIndex%activeList.length,1); } } else w.hardScore=0; saveProgress(); if(activeList.length>0) renderSmartCard(); else exitToMenu(); }
 
-        function renderFinishedAll(msg = "ԱՎԱՐՏՎԱԾ Է") { document.getElementById('content').innerHTML = `<div class="text-center p-12 bg-emerald-50 rounded-[3rem] border-2 border-emerald-100 w-full"><h2 class="text-3xl font-black text-emerald-800 mb-8 uppercase tracking-tight">${msg}</h2><button onclick="exitToMenu()" class="btn-primary !bg-emerald-600 shadow-emerald-200 uppercase tracking-widest">Հետ դեպի Մենյու</button></div>`; }
         function getStars(w) { return `<div class="flex gap-1.5 justify-center mb-8">${Array(5).fill(0).map((_,i)=>`<span class="text-2xl ${w.stagesCompleted.includes(i+2)?'text-orange-400':'text-slate-200'}">★</span>`).join('')}</div>`; }
         function speak(t) { window.speechSynthesis.cancel(); const m = new SpeechSynthesisUtterance(t); m.lang = 'en-US'; window.speechSynthesis.speak(m); }
         function updateDailyTarget(val) { dailyTarget = parseInt(val) || 10; saveProgress(); }
-        
-        function deleteData() {
-            if (confirm("🚨 ԶԳՈՒՇԱՑՈՒՄ 🚨\n\nՑանկանո՞ւմ ես ջնջել քո ամբողջ առաջընթացը, միավորները և սովորած բառերը։ Այս գործողությունը հնարավոր չէ չեղարկել։")) {
-                localStorage.removeItem('usanim_master_v2');
-                location.reload();
-            }
-        }
         
         initApp();
     </script>
