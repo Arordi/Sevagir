@@ -231,17 +231,42 @@
             document.getElementById('app-content').classList.add('hidden');
             document.getElementById('view').classList.remove('hidden');
             document.getElementById('view-title').innerText = `Փուլ ${num}`;
+            
+            if (num === 1) {
+                // Փուլ 1-ի համար վերցնում ենք ԲՈԼՈՐ չսովորած բառերը (առանց կտրման)
+                activeList = words.filter(w => !w.isInstant && !w.stagesCompleted.includes(1));
+            } else {
+                activeList = words.filter(w => !w.isInstant && !w.stagesCompleted.includes(activeStage)).slice(0, 10);
+            }
             initStageLogic();
         }
 
         function initStageLogic() {
             const container = document.getElementById('content');
             container.innerHTML = "";
-            activeList = words.filter(w => !w.isInstant && !w.stagesCompleted.includes(activeStage)).slice(0, 10);
-            if (activeList.length === 0) return renderFinish();
+            if (activeList.length === 0) {
+                if (activeStage === 1) renderStage1Finish(); // Փուլ 1-ի հատուկ ավարտ
+                else renderFinish();
+                return;
+            }
             if (activeStage === 1) renderStage1();
             else if (activeStage === 3) renderStage3();
             else renderGenericStage();
+        }
+
+        function renderStage1Finish() {
+            // Երբ ամբողջ ցանկն անցնենք, առաջարկում ենք կրկնել չսովորածները
+            const notLearnedCount = words.filter(w => !w.isInstant && !w.stagesCompleted.includes(1)).length;
+            document.getElementById('content').innerHTML = `
+                <div class="text-center p-12 bg-emerald-800 rounded-[3.5rem] shadow-2xl w-full border-b-8 border-emerald-500">
+                    <div class="text-7xl mb-6">🎉</div>
+                    <h2 class="text-2xl font-black mb-4 text-white italic">Փուլ 1-ի ցիկլն ավարտված է</h2>
+                    ${notLearnedCount > 0 ? `<p class="text-emerald-200 mb-6 font-bold">Դեռ չսովորած բառեր՝ ${notLearnedCount}</p>` : '<p class="text-emerald-200 mb-6 font-bold">Բոլոր բառերը սովորել ես։ Հիանալի է։</p>'}
+                    <div class="flex flex-col gap-3">
+                        ${notLearnedCount > 0 ? `<button onclick="openStage(1)" class="btn-primary !bg-amber-600">🔄 ԿՐԿՆԵԼ ՉՍՈՎՈՐԱԾԸ</button>` : ''}
+                        <button onclick="exitToMenu()" class="btn-primary">🏠 ԳԼԽԱՎՈՐ</button>
+                    </div>
+                </div>`;
         }
 
         function renderStage1() {
@@ -261,18 +286,29 @@
         function handleStage1(known) {
             const w = activeList[activeIndex % activeList.length];
             if(known) {
-                w.isInstant = true; w.isSeen = true;
+                w.isInstant = true; 
+                w.isSeen = true;
                 w.learnedDate = new Date().toISOString().split('T')[0];
                 dailyWordsCount++;
+                saveProgress();
+                activeIndex++;
+                if (activeIndex >= activeList.length) {
+                    initStageLogic(); // կանցնի renderStage1Finish()
+                } else {
+                    renderStage1();
+                }
             } else { 
-                // Հին օրենքով վերականգնում՝ բառը պարզապես մնում է ուսուցման մեջ
                 w.isSeen = true; 
                 w.stagesCompleted = []; 
                 w.score = 0;
+                saveProgress();
+                activeIndex++;
+                if (activeIndex >= activeList.length) {
+                    initStageLogic(); // ավարտ
+                } else {
+                    renderStage1();
+                }
             }
-            saveProgress();
-            activeIndex++; // Անցնել հաջորդ բառին
-            initStageLogic();
         }
 
         function renderStage3() {
@@ -324,15 +360,27 @@
             if(activeStage === 4) { question = word.hy; answer = word.en; }
             if(activeStage === 5) { question = word.en; answer = word.hy; }
             if(activeStage === 6) { question = "🔊"; answer = word.en; }
+            
+            let speakerButton = '';
+            if (activeStage === 6) {
+                speakerButton = `<button onclick="speak('${word.en}')" class="text-4xl mb-4 bg-emerald-700 p-3 rounded-full">🔊</button>`;
+            }
+            
             document.getElementById('content').innerHTML = `
                 <div class="w-full text-center">
                     <div class="mb-2">${getStars(word)}</div>
+                    ${speakerButton}
                     <div class="mb-10 text-6xl font-black text-white italic" onclick="speak('${word.en}')">${question}</div>
                     <input type="text" id="stage-input" autofocus class="w-full p-6 border-4 border-emerald-800 rounded-[2.5rem] text-center text-2xl outline-none focus:border-emerald-400 transition-all shadow-inner" placeholder="..." autocomplete="off">
                     <button id="check-btn" onclick="checkGeneric('${answer}')" class="btn-primary mt-8">ՍՏՈՒԳԵԼ</button>
                     <button id="next-btn" onclick="initStageLogic()" class="hidden btn-primary mt-8 !bg-emerald-900">ՀԱՋՈՐԴԸ</button>
                 </div>`;
-            if(activeStage !== 6) speak(word.en);
+            if (activeStage === 6) {
+                // Ավտոմատ արտասանություն լսողական փուլի համար
+                setTimeout(() => speak(word.en), 200);
+            } else {
+                speak(word.en);
+            }
             setTimeout(() => document.getElementById('stage-input')?.focus(), 50);
         }
 
@@ -597,4 +645,3 @@
     </script>
 </body>
 </html>
-
