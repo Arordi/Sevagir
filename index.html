@@ -10,8 +10,22 @@
         .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
         .home-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; border-left: 10px solid #10b981; }
         .home-card:active { transform: scale(0.96); }
-        .stage-card { transition: all 0.2s ease; cursor: pointer; border: 1px solid #dcfce7; }
-        .stage-card:active { transform: scale(0.95); }
+        /* Բոլոր փուլերի կոճակների միասնական ոճը */
+        .stage-card { 
+            transition: all 0.2s ease; 
+            cursor: pointer; 
+            background-color: #a7f3d0; /* Emerald-200 */
+            border: 2px solid #6ee7b7; /* Emerald-300 */
+            border-radius: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .stage-card:active { transform: scale(0.95); background-color: #6ee7b7; }
+        .stage-card span:last-child { color: #064e3b; font-weight: 800; font-size: 11px; text-transform: uppercase; margin-top: 4px; }
+        
         .btn-primary { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 1.25rem; border-radius: 1.25rem; font-weight: bold; width: 100%; box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3); border: none; }
         .blur-text { filter: blur(8px); transition: all 0.3s ease; cursor: pointer; }
         .blur-text.revealed { filter: blur(0); }
@@ -66,15 +80,15 @@
         </div>
 
         <div id="menu" class="max-w-4xl mx-auto p-4 grid grid-cols-2 md:grid-cols-3 gap-4 py-8">
-            <button onclick="openStage(1)" class="stage-card p-6 bg-white shadow-sm rounded-[2rem] flex flex-col items-center"><span class="text-3xl mb-1">🗂️</span><span class="font-bold text-[11px] text-slate-500 uppercase">Փուլ 1</span></button>
-            <button onclick="openStage(2)" class="stage-card p-6 bg-white shadow-sm rounded-[2rem] flex flex-col items-center"><span class="text-3xl mb-1">🔘</span><span class="font-bold text-[11px] text-slate-500 uppercase">Փուլ 2</span></button>
-            <button onclick="openStage(3)" class="stage-card p-6 bg-white shadow-sm rounded-[2rem] flex flex-col items-center"><span class="text-3xl mb-1">🧩</span><span class="font-bold text-[11px] text-slate-500 uppercase">Փուլ 3</span></button>
-            <button onclick="openStage(4)" class="stage-card p-6 bg-white shadow-sm rounded-[2rem] flex flex-col items-center"><span class="text-3xl mb-1">⌨️</span><span class="font-bold text-[11px] text-slate-500 uppercase">Փուլ 4</span></button>
-            <button onclick="openStage(5)" class="stage-card p-6 bg-white shadow-sm rounded-[2rem] flex flex-col items-center"><span class="text-3xl mb-1">🔄</span><span class="font-bold text-[11px] text-slate-500 uppercase">Փուլ 5</span></button>
-            <button onclick="openStage(6)" class="stage-card p-6 bg-white shadow-sm rounded-[2rem] flex flex-col items-center"><span class="text-3xl mb-1">🎧</span><span class="font-bold text-[11px] text-slate-500 uppercase">Փուլ 6</span></button>
-            <button onclick="openSmartStage()" class="stage-card p-6 bg-emerald-100 text-emerald-800 rounded-[2rem] shadow-md flex flex-col items-center border-emerald-200"><span class="text-3xl mb-1">🎓</span><span class="font-bold text-[11px] uppercase">Փուլ 7</span></button>
-            <button onclick="openExam()" class="stage-card p-6 bg-emerald-200 text-emerald-900 rounded-[2rem] shadow-md flex flex-col items-center border-emerald-300"><span class="text-3xl mb-1">📝</span><span class="font-bold text-[11px] uppercase">Փուլ 8</span></button>
-            <button onclick="openStatsStage()" class="stage-card p-6 bg-emerald-800 text-white rounded-[2rem] shadow-md flex flex-col items-center border-emerald-900"><span class="text-3xl mb-1">📊</span><span class="font-bold text-[11px] uppercase text-emerald-100">Փուլ 9</span></button>
+            <button onclick="openStage(1)" class="stage-card"><span class="text-3xl">🗂️</span><span>Փուլ 1</span></button>
+            <button onclick="openStage(2)" class="stage-card"><span class="text-3xl">🔘</span><span>Փուլ 2</span></button>
+            <button onclick="openStage(3)" class="stage-card"><span class="text-3xl">🧩</span><span>Փուլ 3</span></button>
+            <button onclick="openStage(4)" class="stage-card"><span class="text-3xl">⌨️</span><span>Փուլ 4</span></button>
+            <button onclick="openStage(5)" class="stage-card"><span class="text-3xl">🔄</span><span>Փուլ 5</span></button>
+            <button onclick="openStage(6)" class="stage-card"><span class="text-3xl">🎧</span><span>Փուլ 6</span></button>
+            <button onclick="openSmartStage()" class="stage-card"><span class="text-3xl">🎓</span><span>Փուլ 7</span></button>
+            <button onclick="openExam()" class="stage-card"><span class="text-3xl">📝</span><span>Փուլ 8</span></button>
+            <button onclick="openStatsStage()" class="stage-card !bg-emerald-800 !border-emerald-900"><span class="text-3xl">📊</span><span class="!text-emerald-50">Փուլ 9</span></button>
         </div>
     </div>
 
@@ -195,8 +209,8 @@
             const word = activeList[activeIndex];
             document.getElementById('content').innerHTML = `
                 <div class="w-full bg-white rounded-[3rem] p-12 text-center shadow-xl mb-10 border-b-8 border-emerald-500">
-                    <h2 class="text-6xl font-black text-slate-800 mb-6" onclick="speak('${word.en}')">${word.en}</h2>
-                    <h3 onclick="this.classList.toggle('revealed')" class="text-3xl font-bold text-emerald-200 blur-text">${word.hy}</h3>
+                    <h2 class="text-6xl font-black text-slate-800 mb-6 italic" onclick="speak('${word.en}')">${word.en}</h2>
+                    <h3 onclick="this.classList.toggle('revealed')" class="text-3xl font-bold text-emerald-200 blur-text italic">${word.hy}</h3>
                 </div>
                 <div class="grid grid-cols-2 gap-5 w-full">
                     <button onclick="handleStage1(true)" class="btn-primary !bg-emerald-500">ԳԻՏԵՄ</button>
@@ -288,7 +302,7 @@
             document.getElementById('content').innerHTML = `
                 <div class="w-full text-center">
                     <div class="mb-6">${getDots(word.score)}</div>
-                    <div class="mb-10 text-6xl font-black text-emerald-900" onclick="speak('${word.en}')">${question}</div>
+                    <div class="mb-10 text-6xl font-black text-emerald-900 italic" onclick="speak('${word.en}')">${question}</div>
                     <input type="text" id="stage-input" class="w-full p-6 border-4 border-emerald-100 rounded-[2.5rem] text-center text-2xl outline-none focus:border-emerald-500 transition-all shadow-inner" placeholder="..." autocomplete="off">
                     <button id="check-btn" onclick="checkGeneric('${answer}')" class="btn-primary mt-8">ՍՏՈՒԳԵԼ</button>
                     <button id="next-btn" onclick="initStageLogic()" class="hidden btn-primary mt-8 !bg-slate-800">ՀԱՋՈՐԴԸ</button>
@@ -436,7 +450,6 @@
             document.getElementById('smart-menu').classList.remove('hidden');
             const learned = words.filter(w => w.stagesCompleted.length >= 5 || w.isInstant).length;
             const avgExam = examScores.length ? Math.round(examScores.reduce((a,b)=>a+b,0)/examScores.length) : 0;
-            const worstWord = [...words].sort((a,b) => b.errorCount - a.errorCount)[0];
             const totalPct = Math.round((learned/words.length)*100);
 
             document.getElementById('smart-container').innerHTML = `
