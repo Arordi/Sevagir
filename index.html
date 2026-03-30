@@ -60,14 +60,12 @@
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #059669; border-radius: 10px; }
 
+        /* Chart Styles */
         .bar-container { display: flex; align-items: flex-end; justify-content: space-between; height: 80px; gap: 4px; padding-top: 10px; }
         .bar-wrapper { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; }
         .bar-fill { width: 100%; background: #10b981; border-top-left-radius: 4px; border-top-right-radius: 4px; min-height: 2px; transition: height 0.5s ease; position: relative; }
         .bar-fill:hover::after { content: attr(data-val); position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; font-weight: bold; color: #34d399; }
         .bar-label { font-size: 7px; font-weight: 800; text-transform: uppercase; color: #059669; }
-
-        /* Նոր ոճ նկարների համար */
-        .word-image-main { width: 120px; height: 120px; object-fit: contain; margin: 0 auto 15px; border-radius: 20px; background: rgba(255,255,255,0.1); padding: 10px; }
     </style>
 </head>
 <body class="min-h-screen">
@@ -178,17 +176,13 @@
 
         async function initApp() {
             try {
-                // Կարդում ենք JSON ֆայլը
                 const response = await fetch('./vocabulary.json');
                 const data = await response.json();
                 
-                // Քարտեզագրում ենք տվյալները քո JSON-ի դաշտերին համապատասխան
                 words = data.map((item, index) => ({
                     id: item.id || index, 
                     en: item.word, 
                     hy: item.translation,
-                    img: item.img || '', // Նկարի հասցեն
-                    audio: item.audio || '', // Աուդիոյի հասցեն
                     score: 0, 
                     stagesCompleted: [], 
                     isInstant: false, 
@@ -355,13 +349,9 @@
         function renderStage1() {
             const word = activeList[activeIndex];
             if (!word) return renderFinish();
-            
-            let imgHtml = word.img ? `<img src="${word.img}" class="word-image-main" onerror="this.style.display='none'">` : '';
-
             document.getElementById('content').innerHTML = `
-                <div class="w-full bg-emerald-800 rounded-[3rem] p-8 text-center shadow-xl mb-10 border-b-8 border-emerald-500 min-h-[300px] flex flex-col justify-center overflow-hidden">
-                    ${imgHtml}
-                    <h2 class="text-4xl font-black text-white mb-6 italic break-words" onclick="handleSpeech('${word.id}')">${word.en}</h2>
+                <div class="w-full bg-emerald-800 rounded-[3rem] p-8 text-center shadow-xl mb-10 border-b-8 border-emerald-500 min-h-[250px] flex flex-col justify-center overflow-hidden">
+                    <h2 class="text-4xl font-black text-white mb-6 italic break-words" onclick="speak('${word.en}')">${word.en}</h2>
                     <h3 onclick="this.classList.toggle('revealed')" class="text-2xl font-bold text-emerald-600 blur-text italic break-words">${word.hy}</h3>
                 </div>
                 <div class="grid grid-cols-2 gap-5 w-full">
@@ -369,7 +359,12 @@
                     <button onclick="handleStage1(false)" class="btn-primary !bg-emerald-900 border border-emerald-700">ՉԳԻՏԵՄ</button>
                 </div>`;
             
-            handleSpeech(word.id);
+            // Ուղղում "I" բառի համար
+            if(word.en === "I") {
+                speak("eye");
+            } else {
+                speak(word.en);
+            }
         }
 
         function handleStage1(known) {
@@ -417,7 +412,7 @@
             el.classList.add('match-selected');
             if(type === 'en') { 
                 selectedEn = { el, word }; 
-                handleSpeech(word.id);
+                if(word.en === "I") speak("eye"); else speak(word.en); 
             }
             else selectedHy = { el, word };
             
@@ -425,8 +420,8 @@
                 if(selectedEn.word.id === selectedHy.word.id) {
                     selectedEn.el.className = 'match-item match-correct'; 
                     selectedHy.el.className = 'match-item match-correct';
-                    selectedEn.word.score = Math.min(20, selectedEn.word.score + 1); // Փոխված է 20 միավորի
-                    if(selectedEn.word.score >= 20) { 
+                    selectedEn.word.score = Math.min(10, selectedEn.word.score + 1);
+                    if(selectedEn.word.score >= 10) { 
                         selectedEn.word.score = 0; 
                         selectedEn.word.stagesCompleted.push(3); 
                         if(isWordLearned(selectedEn.word)) {
@@ -462,13 +457,15 @@
             document.getElementById('content').innerHTML = `
                 <div class="w-full text-center">
                     <div class="mb-2">${activeStage !== 7 ? getStars(word) : `<div class='text-emerald-400 font-bold'>ERROR COUNT: ${word.errorCount}</div>`}</div>
-                    <div class="mb-10 text-4xl font-black text-white italic break-words px-4" onclick="handleSpeech('${word.id}')">${question}</div>
+                    <div class="mb-10 text-4xl font-black text-white italic break-words px-4" onclick="speak('${word.en === "I" ? "eye" : word.en}')">${question}</div>
                     <input type="text" id="stage-input" autofocus class="w-full p-6 border-4 border-emerald-800 rounded-[2.5rem] text-center text-2xl outline-none focus:border-emerald-400 transition-all shadow-inner" placeholder="..." autocomplete="off">
                     <button id="check-btn" onclick="checkGeneric('${answer}')" class="btn-primary mt-8">ՍՏՈՒԳԵԼ</button>
                     <button id="next-btn" onclick="initStageLogic()" class="hidden btn-primary mt-8 !bg-emerald-900">ՀԱՋՈՐԴԸ</button>
                 </div>`;
             
-            if(activeStage !== 4) handleSpeech(word.id);
+            if(activeStage !== 4) {
+                if(word.en === "I") speak("eye"); else speak(word.en);
+            }
             setTimeout(() => document.getElementById('stage-input')?.focus(), 50);
         }
 
@@ -477,26 +474,22 @@
             let otherWords = words.filter(w => w.id !== word.id).sort(() => 0.5 - Math.random());
             options.push(...otherWords.slice(0, 3).map(w => w.hy));
             options.sort(() => 0.5 - Math.random());
-
-            let imgHtml = word.img ? `<img src="${word.img}" class="word-image-main mb-4" onerror="this.style.display='none'">` : '';
-
             document.getElementById('content').innerHTML = `
                 <div class="w-full text-center">
                     <div class="mb-2">${getStars(word)}</div>
-                    ${imgHtml}
-                    <div class="mb-10 text-4xl font-black text-white italic break-words px-4" onclick="handleSpeech('${word.id}')">${word.en}</div>
+                    <div class="mb-10 text-4xl font-black text-white italic break-words px-4" onclick="speak('${word.en === "I" ? "eye" : word.en}')">${word.en}</div>
                     <div class="grid grid-cols-1 gap-3 w-full">
                         ${options.map(opt => `<button onclick="checkChoice('${opt}', '${word.hy}')" class="choice-btn p-5 border-2 border-emerald-800 rounded-2xl font-bold text-lg break-words px-4">${opt}</button>`).join('')}
                     </div>
                 </div>`;
-            handleSpeech(word.id);
+            if(word.en === "I") speak("eye"); else speak(word.en);
         }
 
         function checkChoice(selected, correct) {
             const word = activeList[activeIndex % activeList.length];
             if(cleanText(selected) === cleanText(correct)) {
-                word.score = Math.min(20, word.score + 1); // 20 միավոր
-                if(word.score >= 20) { 
+                word.score = Math.min(10, word.score + 1);
+                if(word.score >= 10) { 
                     word.score = 0; 
                     word.stagesCompleted.push(2); 
                     if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; }
@@ -514,12 +507,14 @@
             const input = document.getElementById('stage-input');
             const word = activeList[activeIndex % activeList.length];
             if(cleanText(input.value) === cleanText(correct)) {
-                if(activeStage === 4) handleSpeech(word.id);
+                if(activeStage === 4) {
+                    if(word.en === "I") speak("eye"); else speak(word.en);
+                }
                 
-                word.score = Math.min(20, word.score + 1); // 20 միավոր
+                word.score = Math.min(10, word.score + 1);
                 input.className = "w-full p-6 border-4 border-emerald-500 bg-emerald-600 text-white rounded-[2.5rem] text-center text-2xl outline-none";
                 
-                if(activeStage !== 7 && word.score >= 20) { 
+                if(activeStage !== 7 && word.score >= 10) { 
                     word.score = 0; 
                     word.stagesCompleted.push(activeStage);
                     if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; }
@@ -544,11 +539,13 @@
             const last7Days = [];
             const learnedCounts = [];
             const today = new Date();
+            
             for (let i = 6; i >= 0; i--) {
                 const d = new Date();
                 d.setDate(today.getDate() - i);
                 const dateStr = d.toISOString().split('T')[0];
                 const dayName = d.toLocaleDateString('hy-AM', { weekday: 'short' });
+                
                 const count = words.filter(w => w.learnedDate === dateStr).length;
                 last7Days.push(dayName);
                 learnedCounts.push(count);
@@ -564,6 +561,7 @@
             const totalLearned = learnedWords.length;
             const totalPercent = Math.round((totalLearned / words.length) * 100);
             const goalProgress = Math.min(100, Math.round((dailyWordsCount / dailyGoal) * 100));
+            
             const weekly = getWeeklyData();
             const maxVal = Math.max(...weekly.data, 5);
 
@@ -578,6 +576,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="bg-emerald-900/50 p-3 rounded-[2rem] shadow-lg border border-emerald-700">
                     <h3 class="font-black text-emerald-300 text-[8px] mb-2 uppercase tracking-widest text-center italic">Շաբաթվա ակտիվություն</h3>
                     <div class="bar-container">
@@ -589,6 +588,7 @@
                         `).join('')}
                     </div>
                 </div>
+
                 <div class="bg-emerald-900 p-3 rounded-[2rem] shadow-xl border border-emerald-700 text-center">
                     <h2 class="text-xs font-black mb-2 italic uppercase text-emerald-300">Օրական Նպատակ</h2>
                     <div class="flex items-center justify-center gap-6">
@@ -608,6 +608,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="bg-emerald-900 p-3 rounded-[2rem] shadow-xl border border-emerald-700">
                     <h3 class="font-black text-emerald-300 text-[8px] mb-2 uppercase tracking-widest italic text-center">Սովորած բառերի ցանկ</h3>
                     <div class="max-h-40 overflow-y-auto space-y-1.5 pr-1 custom-scroll">
@@ -672,26 +673,9 @@
             window.speechSynthesis.cancel(); updateStats();
         }
 
-        // Խելացի ձայնային ֆունկցիա (նվագարկում է MP3 կամ օգտագործում է TTS)
-        function handleSpeech(wordId) {
-            window.speechSynthesis.cancel();
-            const word = words.find(w => w.id == wordId);
-            if (!word) return;
-
-            // Եթե կա MP3 հղում, նվագարկել այն
-            if (word.audio && word.audio.trim() !== "") {
-                const audio = new Audio(word.audio);
-                audio.play().catch(() => speak(word.en)); // Եթե MP3-ը չբեռնվի, օգտագործել TTS
-            } else {
-                speak(word.en);
-            }
-        }
-
         function speak(text) {
-            const msg = new SpeechSynthesisUtterance(text);
-            msg.lang = 'en-US';
-            // Ուղղում "I" տառի համար
-            if(text.trim() === "I") msg.text = "eye";
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text); msg.lang = 'en-US';
             window.speechSynthesis.speak(msg);
         }
 
