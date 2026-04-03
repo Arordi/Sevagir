@@ -357,7 +357,7 @@
             let html = '<div class="flex justify-center gap-1 mb-2">';
             stages.forEach(s => {
                 const isCompleted = word.stagesCompleted.includes(s);
-                const isActive = (activeStage === s);
+                const isActive = (activeStage === s || (activeStage === 7 && !isCompleted));
                 let colorClass = isCompleted ? 'text-yellow-400' : 'text-emerald-800';
                 if (isActive && !isCompleted) colorClass = 'text-emerald-500';
                 html += `<div class="star-box"><span class="star-icon ${colorClass}">★</span>${isActive && !isCompleted ? `<span class="star-text !text-white">${word.score}</span>` : ''}${isCompleted ? `<span class="star-text">✓</span>` : ''}</div>`;
@@ -491,7 +491,7 @@
             
             document.getElementById('content').innerHTML = `
                 <div class="w-full text-center flex flex-col items-center">
-                    <div class="mb-1">${activeStage !== 7 ? getStars(word) : `<div class='text-emerald-400 font-bold text-xs'>ERROR: ${word.errorCount}</div>`}</div>
+                    <div class="mb-1">${getStars(word)}</div>
                     <div class="mb-6 text-3xl font-black text-white italic break-words px-4" onclick="speak('${word.en === "I" ? "eye" : word.en}')">${question}</div>
                     <input type="text" id="stage-input" autofocus class="w-full p-5 border-4 border-emerald-800 rounded-[2rem] text-center text-xl outline-none focus:border-emerald-400 transition-all shadow-inner" placeholder="..." autocomplete="off">
                     <button id="check-btn" onclick="checkGeneric('${answer}')" class="btn-primary mt-6">ՍՏՈՒԳԵԼ</button>
@@ -530,9 +530,13 @@
             if(cleanText(selected) === cleanText(correct)) {
                 btn.classList.add('choice-correct');
                 word.score = Math.min(10, word.score + 1);
-                if(word.score >= 10) { 
+                if(activeStage !== 7 && word.score >= 10) { 
                     word.score = 0; word.stagesCompleted.push(2); 
                     if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; } 
+                } else if (activeStage === 7 && word.score >= 10) {
+                    word.score = 0; 
+                    if(smartMode === 'repetition') setNextRep(word);
+                    setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
                 }
             } else { 
                 btn.classList.add('choice-wrong');
@@ -549,9 +553,19 @@
                 if(activeStage === 4) speak(word.en === "I" ? "eye" : word.en);
                 word.score = Math.min(10, word.score + 1);
                 input.className = "w-full p-5 border-4 border-emerald-500 bg-emerald-600 text-white rounded-[2rem] text-center text-xl outline-none";
-                if(activeStage !== 7 && word.score >= 10) { word.score = 0; word.stagesCompleted.push(activeStage); if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; } } 
-                else if (activeStage === 7 && smartMode === 'repetition') setNextRep(word);
-                setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
+                
+                if(word.score >= 10) {
+                    word.score = 0;
+                    if(activeStage !== 7) {
+                        word.stagesCompleted.push(activeStage);
+                        if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; }
+                    } else {
+                        if (smartMode === 'repetition') setNextRep(word);
+                    }
+                    setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
+                } else {
+                    setTimeout(() => { activeIndex++; initStageLogic(); }, 400);
+                }
             } else {
                 word.score = Math.max(0, word.score - 1); word.errorCount++;
                 input.className = "w-full p-5 border-4 border-rose-600 bg-rose-900 text-white rounded-[2rem] text-center text-xl outline-none";
