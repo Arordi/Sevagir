@@ -354,14 +354,28 @@
 
         function getStars(word) {
             const stages = [2, 3, 4, 5, 6];
-            let html = '<div class="flex justify-center gap-1 mb-2">';
+            let html = '<div class="flex flex-col items-center mb-2">';
+            html += '<div class="flex justify-center gap-1 mb-1">';
             stages.forEach(s => {
                 const isCompleted = word.stagesCompleted.includes(s);
-                const isActive = (activeStage === s || (activeStage === 7 && !isCompleted));
+                const isActive = (activeStage === s);
                 let colorClass = isCompleted ? 'text-yellow-400' : 'text-emerald-800';
                 if (isActive && !isCompleted) colorClass = 'text-emerald-500';
                 html += `<div class="star-box"><span class="star-icon ${colorClass}">★</span>${isActive && !isCompleted ? `<span class="star-text !text-white">${word.score}</span>` : ''}${isCompleted ? `<span class="star-text">✓</span>` : ''}</div>`;
             });
+            html += '</div>';
+            
+            // Փուլ 7-ի համար առանձին աստղ ցույց տալու հատվածը
+            if(activeStage === 7) {
+                html += `
+                <div class="flex flex-col items-center mt-1">
+                    <div class="star-box">
+                        <span class="star-icon text-emerald-400">★</span>
+                        <span class="star-text !text-white !text-[12px]">${word.score}</span>
+                    </div>
+                </div>`;
+            }
+            
             return html + '</div>';
         }
 
@@ -397,6 +411,8 @@
             if (activeStage === 7) {
                 if(smartMode === 'difficult') activeList = words.filter(w => w.errorCount >= 5 && !isWordLearned(w)).slice(0, 10);
                 else { const today = new Date().toISOString().split('T')[0]; activeList = words.filter(w => isWordLearned(w) && w.nextRepDate && w.nextRepDate <= today).slice(0, 10); }
+                // Փուլ 7-ում սկզբնական score-ը զրոյացնում ենք հաշվիչի համար
+                activeList.forEach(w => w.score = 0);
             } else if (activeStage === 1) activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
             else activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(activeStage)).slice(0, 10);
 
@@ -534,9 +550,11 @@
                     word.score = 0; word.stagesCompleted.push(2); 
                     if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; } 
                 } else if (activeStage === 7 && word.score >= 10) {
-                    word.score = 0; 
                     if(smartMode === 'repetition') setNextRep(word);
                     setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
+                } else if (activeStage === 7) {
+                    // Եթե դեռ 10-ի չի հասել 7-րդ փուլում, թարմացնում ենք էկրանը որ score-ը երևա
+                    setTimeout(() => initStageLogic(), 600);
                 }
             } else { 
                 btn.classList.add('choice-wrong');
@@ -555,8 +573,8 @@
                 input.className = "w-full p-5 border-4 border-emerald-500 bg-emerald-600 text-white rounded-[2rem] text-center text-xl outline-none";
                 
                 if(word.score >= 10) {
-                    word.score = 0;
                     if(activeStage !== 7) {
+                        word.score = 0;
                         word.stagesCompleted.push(activeStage);
                         if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; }
                     } else {
@@ -564,7 +582,10 @@
                     }
                     setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
                 } else {
-                    setTimeout(() => { activeIndex++; initStageLogic(); }, 400);
+                    setTimeout(() => { 
+                        if(activeStage === 7) initStageLogic(); 
+                        else { activeIndex++; initStageLogic(); }
+                    }, 400);
                 }
             } else {
                 word.score = Math.max(0, word.score - 1); word.errorCount++;
