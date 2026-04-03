@@ -365,7 +365,6 @@
             });
             html += '</div>';
             
-            // Փուլ 7-ի համար առանձին աստղ ցույց տալու հատվածը
             if(activeStage === 7) {
                 html += `
                 <div class="flex flex-col items-center mt-1">
@@ -411,7 +410,6 @@
             if (activeStage === 7) {
                 if(smartMode === 'difficult') activeList = words.filter(w => w.errorCount >= 5 && !isWordLearned(w)).slice(0, 10);
                 else { const today = new Date().toISOString().split('T')[0]; activeList = words.filter(w => isWordLearned(w) && w.nextRepDate && w.nextRepDate <= today).slice(0, 10); }
-                // Փուլ 7-ում սկզբնական score-ը զրոյացնում ենք հաշվիչի համար
                 activeList.forEach(w => w.score = 0);
             } else if (activeStage === 1) activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
             else activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(activeStage)).slice(0, 10);
@@ -452,6 +450,13 @@
             saveProgress();
             activeIndex++; 
             if (activeIndex >= activeList.length) renderFinish(); else renderStage1();
+        }
+
+        function restartStage1() {
+            if(confirm("Ցանկանու՞մ եք կրկնել չսովորած բառերը։")) {
+                activeIndex = 0;
+                initStageLogic();
+            }
         }
 
         function renderStage3() {
@@ -553,7 +558,6 @@
                     if(smartMode === 'repetition') setNextRep(word);
                     setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
                 } else if (activeStage === 7) {
-                    // Եթե դեռ 10-ի չի հասել 7-րդ փուլում, թարմացնում ենք էկրանը որ score-ը երևա
                     setTimeout(() => initStageLogic(), 600);
                 }
             } else { 
@@ -693,12 +697,16 @@
         }
 
         function renderFinish(extra = "") {
+            const isStage1 = (activeStage === 1);
             document.getElementById('content').innerHTML = `
                 <div class="text-center p-8 bg-emerald-800 rounded-[2.5rem] shadow-2xl w-full border-b-8 border-emerald-500">
                     <div class="text-6xl mb-4">🏆</div>
                     <h2 class="text-2xl font-black mb-2 text-white italic">Գերազանց է</h2>
                     <p class="text-emerald-200 mb-6 font-bold text-sm">${extra || "Բաժինը հաջողությամբ անցաք:"}</p>
-                    <button onclick="exitToMenu()" class="btn-primary">ՎԵՐԱԴԱՌՆԱԼ</button>
+                    <div class="flex flex-col gap-3">
+                        ${isStage1 ? `<button onclick="restartStage1()" class="btn-primary">ԿՐԿՆԵԼ</button>` : ''}
+                        <button onclick="exitToMenu()" class="${isStage1 ? 'text-emerald-300 font-bold text-xs uppercase tracking-widest mt-2' : 'btn-primary'}">ՎԵՐԱԴԱՌՆԱԼ</button>
+                    </div>
                 </div>`;
             saveProgress();
         }
