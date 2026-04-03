@@ -23,12 +23,13 @@
             padding: 1rem;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
             color: white;
+            min-height: 100px;
+            justify-content: center;
         }
         .stage-card:active { transform: scale(0.95); background-color: #059669; }
-        .stage-card span:last-child { color: #a7f3d0; font-weight: 800; font-size: 10px; text-transform: uppercase; margin-top: 4px; }
+        .stage-card span:nth-child(2) { color: white; font-weight: 800; font-size: 11px; text-transform: uppercase; margin-top: 6px; }
+        .stage-card .sub-label { color: #a7f3d0; font-weight: 600; font-size: 9px; text-transform: lowercase; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: center; }
         
-        .sub-label { font-size: 8px; opacity: 0.8; font-weight: normal; margin-top: 2px; text-transform: none; }
-
         .btn-primary { background: linear-gradient(135deg, #059669 0%, #064e3b 100%); color: white; padding: 1rem; border-radius: 1.25rem; font-weight: bold; width: 100%; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); border: none; }
         
         .btn-next-step { 
@@ -134,15 +135,15 @@
         </div>
 
         <div id="menu" class="max-w-4xl mx-auto p-4 grid grid-cols-2 md:grid-cols-3 gap-3 py-4 flex-grow content-start">
-            <button onclick="openStage(1)" class="stage-card"><span class="text-2xl">🗂️</span><span>Փուլ 1</span></button>
+            <button onclick="openStage(1)" class="stage-card"><span class="text-2xl">🗂️</span><span>Փուլ 1</span><span class="sub-label">բառերի ստուգում</span></button>
             <button onclick="openStage(2)" class="stage-card"><span class="text-2xl">🔘</span><span>Փուլ 2</span><span class="sub-label">ընտրել տարբերակը</span></button>
-            <button onclick="openStage(3)" class="stage-card"><span class="text-2xl">🧩</span><span>Փուլ 3</span></button>
-            <button onclick="openStage(4)" class="stage-card"><span class="text-2xl">⌨️</span><span>Փուլ 4</span></button>
-            <button onclick="openStage(5)" class="stage-card"><span class="text-2xl">🔄</span><span>Փուլ 5</span></button>
-            <button onclick="openStage(6)" class="stage-card"><span class="text-2xl">🎧</span><span>Փուլ 6</span></button>
-            <button onclick="openSmartMenu()" class="stage-card"><span class="text-2xl">🎓</span><span>Փուլ 7</span></button>
-            <button onclick="openExam()" class="stage-card"><span class="text-2xl">📝</span><span>Փուլ 8</span></button>
-            <button onclick="openStatsStage()" class="stage-card"><span class="text-2xl">📊</span><span>Փուլ 9</span></button>
+            <button onclick="openStage(3)" class="stage-card"><span class="text-2xl">🧩</span><span>Փուլ 3</span><span class="sub-label">դասավորել բառերը</span></button>
+            <button onclick="openStage(4)" class="stage-card"><span class="text-2xl">⌨️</span><span>Փուլ 4</span><span class="sub-label">գտնել բառը</span></button>
+            <button onclick="openStage(5)" class="stage-card"><span class="text-2xl">🔄</span><span>Փուլ 5</span><span class="sub-label">գտնել բառը</span></button>
+            <button onclick="openStage(6)" class="stage-card"><span class="text-2xl">🎧</span><span>Փուլ 6</span><span class="sub-label">գտնել բառը</span></button>
+            <button onclick="openSmartMenu()" class="stage-card"><span class="text-2xl">🎓</span><span>Փուլ 7</span><span class="sub-label">կրկնություն</span></button>
+            <button onclick="openExam()" class="stage-card"><span class="text-2xl">📝</span><span>Փուլ 8</span><span class="sub-label">քննություն</span></button>
+            <button onclick="openStatsStage()" class="stage-card"><span class="text-2xl">📊</span><span>Փուլ 9</span><span class="sub-label">վիճակագրություն</span></button>
         </div>
     </div>
 
