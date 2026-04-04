@@ -538,7 +538,7 @@
         }
 
         function renderGenericStage() {
-            const word = activeList[activeIndex % activeList.length];
+            const word = activeList[activeIndex];
             if (activeStage === 2) { renderMultipleChoice(word); return; }
             let question = word.en, answer = word.hy;
             if(activeStage === 4) { question = word.hy; answer = word.en; }
@@ -559,7 +559,11 @@
         }
 
         function renderStage7() {
-            const word = activeList[activeIndex % activeList.length];
+            if (activeIndex >= activeList.length) {
+                renderFinish();
+                return;
+            }
+            const word = activeList[activeIndex];
             document.getElementById('content').innerHTML = `
                 <div class="w-full text-center flex flex-col items-center">
                     <div class="mb-1">${getStars(word)}</div>
@@ -572,7 +576,7 @@
                     
                     <div id="speech-status" class="mt-8 font-black text-xs uppercase tracking-widest text-emerald-400">Սպասում է...</div>
                     <div id="accuracy-display" class="mt-2 text-[14px] font-black text-white/90 uppercase"></div>
-                    <button id="next-btn" onclick="skipGeneric()" class="btn-next-step">ՀԱՋՈՐԴԸ</button>
+                    <button id="next-btn" onclick="skipStage7()" class="btn-next-step">ՀԱՋՈՐԴԸ</button>
                 </div>`;
             speak(word.en === "I" ? "eye" : word.en);
         }
@@ -589,7 +593,7 @@
             const micBtn = document.getElementById('mic-btn');
             const status = document.getElementById('speech-status');
             const accDisp = document.getElementById('accuracy-display');
-            const word = activeList[activeIndex % activeList.length];
+            const word = activeList[activeIndex];
 
             recognition.start();
 
@@ -616,10 +620,9 @@
                         word.score = 0; 
                         if (!word.stagesCompleted.includes(7)) word.stagesCompleted.push(7);
                         if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; }
-                        setTimeout(() => { activeIndex++; initStageLogic(); }, 1500);
-                    } else {
-                        setTimeout(() => { activeIndex++; initStageLogic(); }, 1500);
                     }
+                    saveProgress();
+                    setTimeout(() => { activeIndex++; renderStage7(); }, 1500);
                 } else {
                     status.innerText = `ՍԽԱԼ Է ❌ ("${result}")`;
                     status.style.color = "#f87171";
@@ -627,9 +630,9 @@
                     accDisp.style.color = "#fca5a5";
                     word.score = Math.max(0, word.score - 1); 
                     word.errorCount++;
-                    setTimeout(() => initStageLogic(), 2000);
+                    saveProgress();
+                    setTimeout(() => { activeIndex++; renderStage7(); }, 2000);
                 }
-                saveProgress();
             };
 
             recognition.onerror = (event) => { 
@@ -641,6 +644,11 @@
             recognition.onend = () => { 
                 micBtn.classList.remove('mic-active'); 
             };
+        }
+
+        function skipStage7() {
+            activeIndex++;
+            renderStage7();
         }
 
         function skipGeneric() {
@@ -666,7 +674,7 @@
         }
 
         function checkChoice(btn, selected, correct) {
-            const word = activeList[activeIndex % activeList.length];
+            const word = activeList[activeIndex];
             const buttons = document.querySelectorAll('.choice-btn');
             buttons.forEach(b => b.disabled = true);
             if(cleanText(selected) === cleanText(correct)) {
@@ -694,7 +702,7 @@
 
         function checkGeneric(correct) {
             const input = document.getElementById('stage-input');
-            const word = activeList[activeIndex % activeList.length];
+            const word = activeList[activeIndex];
             if(cleanText(input.value) === cleanText(correct)) {
                 if(activeStage === 4) speak(word.en === "I" ? "eye" : word.en);
                 word.score = Math.min(10, word.score + 1);
