@@ -416,8 +416,10 @@
                 activeList.forEach(w => w.score = 0);
             } else if (activeStage === 1) {
                 activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
+                activeList.forEach(w => w.score = 0); // Միավորները զրոյացնել նոր փուլի համար
             } else {
                 activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(activeStage)).slice(0, 10);
+                activeList.forEach(w => w.score = 0); // Միավորները զրոյացնել նոր փուլի համար
             }
 
             if (activeList.length === 0) return renderFinish();
@@ -536,7 +538,6 @@
                 }
             });
 
-            // Փուլ 4-ի համար CheckButton-ի տրամաբանություն եթե պետք լինի, բայց այստեղ ավտոմատ է
             if(activeStage !== 4) speak(word.en === "I" ? "eye" : word.en);
             setTimeout(() => document.getElementById('stage-input')?.focus(), 50);
         }
@@ -581,7 +582,6 @@
                 btn.classList.add('choice-wrong');
                 buttons.forEach(b => { if(cleanText(b.innerText) === cleanText(correct)) b.classList.add('choice-correct'); });
                 word.score = Math.max(0, word.score - 1); word.errorCount++; 
-                // Սխալի դեպքում չի փոխվում ավտոմատ, սպասում է օգտատիրոջը
             }
             saveProgress(); 
         }
@@ -605,7 +605,6 @@
                 }
                 setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
             } else if (!isAuto) {
-                // Այս հատվածը կաշխատի միայն եթե օգտատերը ինչ-որ կերպ սխալն ավարտի
                 word.score = Math.max(0, word.score - 1); word.errorCount++;
                 input.className = "w-full p-5 border-4 border-rose-600 bg-rose-900 text-white rounded-[2rem] text-center text-xl outline-none";
                 input.value = correct;
