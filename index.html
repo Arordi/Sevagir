@@ -378,7 +378,6 @@
             return html + '</div>';
         }
 
-        // Հեշտացված համեմատություն
         function cleanText(text) { 
             if (!text) return "";
             return text.toString().trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()\s]/g, ""); 
@@ -690,13 +689,19 @@
 
         function openExam() {
             activeList = [...words].sort(() => 0.5 - Math.random()).slice(0, 50);
-            activeIndex = 0; smartMode = null;
-            document.getElementById('app-content').classList.add('hidden'); document.getElementById('view').classList.remove('hidden');
-            renderExamStep(0);
+            activeIndex = 0; 
+            let examCorrectCount = 0;
+            document.getElementById('app-content').classList.add('hidden'); 
+            document.getElementById('view').classList.remove('hidden');
+            document.getElementById('view-title').innerText = 'Փուլ 8: Քննություն';
+            renderExamStep(examCorrectCount);
         }
 
         function renderExamStep(correctCount) {
-            if(activeIndex >= activeList.length) return renderFinish(`Արդյունք: ${Math.round((correctCount/activeList.length)*100)}%`);
+            if(activeIndex >= activeList.length) {
+                const percentage = Math.round((correctCount/activeList.length)*100);
+                return renderFinish(`Արդյունք: ${percentage}% (${correctCount}/${activeList.length})`);
+            }
             const word = activeList[activeIndex];
             document.getElementById('content').innerHTML = `
                 <div class="w-full text-center flex flex-col items-center">
@@ -716,7 +721,15 @@
             });
 
             setTimeout(() => document.getElementById('exam-in').focus(), 50);
-            document.getElementById('ex-btn').onclick = () => { if(cleanText(document.getElementById('exam-in').value) === cleanText(word.hy)) correctCount++; else word.errorCount++; activeIndex++; renderExamStep(correctCount); };
+            document.getElementById('ex-btn').onclick = () => { 
+                if(cleanText(document.getElementById('exam-in').value) === cleanText(word.hy)) {
+                    correctCount++;
+                } else {
+                    word.errorCount++;
+                }
+                activeIndex++; 
+                renderExamStep(correctCount); 
+            };
         }
 
         function renderFinish(extra = "") {
