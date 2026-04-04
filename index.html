@@ -96,7 +96,6 @@
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #059669; border-radius: 10px; }
 
-        /* Stats Optimization */
         #stats-view { height: 100vh; width: 100%; position: fixed; inset: 0; background-color: #064e3b; z-index: 60; display: flex; flex-direction: column; }
         .bar-container { display: flex; align-items: flex-end; justify-content: space-between; height: 70px; gap: 4px; padding-top: 12px; }
         .bar-wrapper { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; }
@@ -105,7 +104,6 @@
         .bar-fill::after { content: attr(data-val); position: absolute; top: -14px; left: 50%; transform: translateX(50%); font-size: 8px; font-weight: 800; color: white; opacity: 0.9; }
         .bar-label { font-size: 7px; font-weight: 800; text-transform: uppercase; color: #34d399; margin-top: 2px; }
 
-        /* Mic Animation */
         .mic-active { animation: pulse-mic 1.5s infinite; background-color: #ef4444 !important; }
         @keyframes pulse-mic { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
     </style>
@@ -592,6 +590,17 @@
             const accDisp = document.getElementById('accuracy-display');
             const word = activeList[activeIndex % activeList.length];
 
+            // Սպասել 3 վայրկյան լսելուց հետո
+            status.innerText = "Պատրաստվեք (3վ)...";
+            micBtn.style.opacity = "0.5";
+            micBtn.disabled = true;
+
+            setTimeout(() => {
+                micBtn.style.opacity = "1";
+                micBtn.disabled = false;
+                recognition.start();
+            }, 3000);
+
             recognition.onstart = () => {
                 micBtn.classList.add('mic-active');
                 status.innerText = "Լսում եմ...";
@@ -608,11 +617,12 @@
                     status.classList.remove('text-emerald-400', 'text-rose-400');
                     status.classList.add('text-yellow-400');
                     accDisp.innerText = `Որակը՝ ${percentage}%`;
-                    accDisp.style.color = "#fbbf24"; // Gold color for good accuracy
+                    accDisp.style.color = "#fbbf24";
                     
                     word.score = Math.min(10, word.score + 1);
                     if (word.score >= 10) {
-                        word.score = 0; word.stagesCompleted.push(7);
+                        word.score = 0; 
+                        if (!word.stagesCompleted.includes(7)) word.stagesCompleted.push(7);
                         if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; }
                         setTimeout(() => { activeIndex++; initStageLogic(); }, 1200);
                     } else {
@@ -623,15 +633,19 @@
                     status.classList.remove('text-emerald-400', 'text-yellow-400');
                     status.classList.add('text-rose-400');
                     accDisp.innerText = `Որակը՝ ${percentage}% (Պահանջվում է 90%+)`;
-                    accDisp.style.color = "#f87171"; // Red color for low accuracy
-                    word.score = Math.max(0, word.score - 1); word.errorCount++;
+                    accDisp.style.color = "#f87171";
+                    word.score = Math.max(0, word.score - 1); 
+                    word.errorCount++;
+                    setTimeout(() => initStageLogic(), 2000);
                 }
                 saveProgress();
             };
 
-            recognition.onerror = () => { status.innerText = "Փորձեք նորից..."; micBtn.classList.remove('mic-active'); };
+            recognition.onerror = () => { 
+                status.innerText = "Ձայնը չի լսվում, փորձեք նորից"; 
+                micBtn.classList.remove('mic-active'); 
+            };
             recognition.onend = () => { micBtn.classList.remove('mic-active'); };
-            recognition.start();
         }
 
         function skipGeneric() {
@@ -664,7 +678,7 @@
                 btn.classList.add('choice-correct');
                 word.score = Math.min(10, word.score + 1);
                 if(activeStage !== 8 && word.score >= 10) { 
-                    word.score = 0; word.stagesCompleted.push(activeStage); 
+                    word.score = 0; if (!word.stagesCompleted.includes(activeStage)) word.stagesCompleted.push(activeStage); 
                     if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; } 
                 } else if (activeStage === 8 && word.score >= 10) {
                     if(smartMode === 'repetition') setNextRep(word);
@@ -678,6 +692,7 @@
                 btn.classList.add('choice-wrong');
                 buttons.forEach(b => { if(cleanText(b.innerText) === cleanText(correct)) b.classList.add('choice-correct'); });
                 word.score = Math.max(0, word.score - 1); word.errorCount++; 
+                setTimeout(() => { activeIndex++; initStageLogic(); }, 1200);
             }
             saveProgress(); 
         }
@@ -693,7 +708,7 @@
                 if(word.score >= 10) {
                     if(activeStage !== 8) {
                         word.score = 0;
-                        word.stagesCompleted.push(activeStage);
+                        if (!word.stagesCompleted.includes(activeStage)) word.stagesCompleted.push(activeStage);
                         if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; }
                     } else {
                         if (smartMode === 'repetition') setNextRep(word);
