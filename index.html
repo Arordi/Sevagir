@@ -590,16 +590,8 @@
             const accDisp = document.getElementById('accuracy-display');
             const word = activeList[activeIndex % activeList.length];
 
-            // Սպասել 3 վայրկյան լսելուց հետո
-            status.innerText = "Պատրաստվեք (3վ)...";
-            micBtn.style.opacity = "0.5";
-            micBtn.disabled = true;
-
-            setTimeout(() => {
-                micBtn.style.opacity = "1";
-                micBtn.disabled = false;
-                recognition.start();
-            }, 3000);
+            // Սկսել ճանաչումը անմիջապես սեղմելիս
+            recognition.start();
 
             recognition.onstart = () => {
                 micBtn.classList.add('mic-active');
@@ -612,7 +604,7 @@
                 const similarity = getSimilarity(cleanText(result), cleanText(targetWord));
                 const percentage = Math.round(similarity * 100);
 
-                if (percentage >= 90) {
+                if (percentage >= 85) { // Մի փոքր իջեցրել եմ շեմը՝ ավելի լավ աշխատանքի համար
                     status.innerText = `ՃԻՇՏ Է! ✅ ("${result}")`;
                     status.classList.remove('text-emerald-400', 'text-rose-400');
                     status.classList.add('text-yellow-400');
@@ -632,7 +624,7 @@
                     status.innerText = `ՍԽԱԼ Է ❌ ("${result}")`;
                     status.classList.remove('text-emerald-400', 'text-yellow-400');
                     status.classList.add('text-rose-400');
-                    accDisp.innerText = `Որակը՝ ${percentage}% (Պահանջվում է 90%+)`;
+                    accDisp.innerText = `Որակը՝ ${percentage}% (Պահանջվում է 85%+)`;
                     accDisp.style.color = "#f87171";
                     word.score = Math.max(0, word.score - 1); 
                     word.errorCount++;
@@ -641,8 +633,9 @@
                 saveProgress();
             };
 
-            recognition.onerror = () => { 
+            recognition.onerror = (event) => { 
                 status.innerText = "Ձայնը չի լսվում, փորձեք նորից"; 
+                console.error("Speech Recognition Error:", event.error);
                 micBtn.classList.remove('mic-active'); 
             };
             recognition.onend = () => { micBtn.classList.remove('mic-active'); };
