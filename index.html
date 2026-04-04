@@ -522,6 +522,14 @@
                     <button id="check-btn" onclick="checkGeneric('${answer}')" class="btn-primary mt-6">ՍՏՈՒԳԵԼ</button>
                     <button id="next-btn" onclick="skipGeneric()" class="btn-next-step">ՀԱՋՈՐԴԸ</button>
                 </div>`;
+            
+            const inputEl = document.getElementById('stage-input');
+            inputEl.addEventListener('input', (e) => {
+                if(cleanText(e.target.value) === cleanText(answer)) {
+                    checkGeneric(answer);
+                }
+            });
+
             if(activeStage !== 4) speak(word.en === "I" ? "eye" : word.en);
             setTimeout(() => document.getElementById('stage-input')?.focus(), 50);
         }
@@ -696,6 +704,16 @@
                     <input type="text" id="exam-in" autofocus class="w-full p-5 border-4 border-emerald-800 rounded-3xl text-center text-lg mb-6 outline-none" placeholder="..." autocomplete="off">
                     <button id="ex-btn" class="btn-next-step">ՀԱՋՈՐԴԸ</button>
                 </div>`;
+            
+            const examIn = document.getElementById('exam-in');
+            examIn.addEventListener('input', (e) => {
+                if(cleanText(e.target.value) === cleanText(word.hy)) {
+                    correctCount++;
+                    activeIndex++;
+                    renderExamStep(correctCount);
+                }
+            });
+
             setTimeout(() => document.getElementById('exam-in').focus(), 50);
             document.getElementById('ex-btn').onclick = () => { if(cleanText(document.getElementById('exam-in').value) === cleanText(word.hy)) correctCount++; else word.errorCount++; activeIndex++; renderExamStep(correctCount); };
         }
