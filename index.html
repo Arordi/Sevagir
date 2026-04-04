@@ -572,7 +572,7 @@
                     </button>
                     
                     <div id="speech-status" class="mt-8 font-black text-xs uppercase tracking-widest text-emerald-400">Սպասում է...</div>
-                    <div id="accuracy-display" class="mt-2 text-[10px] font-black text-white/50 uppercase"></div>
+                    <div id="accuracy-display" class="mt-2 text-[12px] font-black text-white/70 uppercase"></div>
                     <button id="next-btn" onclick="skipGeneric()" class="btn-next-step">ՀԱՋՈՐԴԸ</button>
                 </div>`;
             speak(word.en === "I" ? "eye" : word.en);
@@ -604,24 +604,26 @@
                 const percentage = Math.round(similarity * 100);
 
                 if (percentage >= 90) {
-                    status.innerText = `ՃԻՇՏ Է! ✅ (${result})`;
+                    status.innerText = `ՃԻՇՏ Է! ✅ ("${result}")`;
                     status.classList.remove('text-emerald-400', 'text-rose-400');
                     status.classList.add('text-yellow-400');
-                    accDisp.innerText = `Ճշգրտություն՝ ${percentage}%`;
+                    accDisp.innerText = `Որակը՝ ${percentage}%`;
+                    accDisp.style.color = "#fbbf24"; // Gold color for good accuracy
                     
                     word.score = Math.min(10, word.score + 1);
                     if (word.score >= 10) {
                         word.score = 0; word.stagesCompleted.push(7);
                         if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; }
-                        setTimeout(() => { activeIndex++; initStageLogic(); }, 1000);
+                        setTimeout(() => { activeIndex++; initStageLogic(); }, 1200);
                     } else {
-                        setTimeout(() => initStageLogic(), 1000);
+                        setTimeout(() => initStageLogic(), 1200);
                     }
                 } else {
-                    status.innerText = `Ասացիր՝ "${result}" ❌`;
+                    status.innerText = `ՍԽԱԼ Է ❌ ("${result}")`;
                     status.classList.remove('text-emerald-400', 'text-yellow-400');
                     status.classList.add('text-rose-400');
-                    accDisp.innerText = `Ճշգրտություն՝ ${percentage}% (Պահանջվում է 90%+)`;
+                    accDisp.innerText = `Որակը՝ ${percentage}% (Պահանջվում է 90%+)`;
+                    accDisp.style.color = "#f87171"; // Red color for low accuracy
                     word.score = Math.max(0, word.score - 1); word.errorCount++;
                 }
                 saveProgress();
