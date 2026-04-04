@@ -160,10 +160,10 @@
             <button onclick="openStage(4)" class="stage-card"><span>⌨️</span><span>Փուլ 4</span><span class="sub-label">գտնել</span></button>
             <button onclick="openStage(5)" class="stage-card"><span>🔄</span><span>Փուլ 5</span><span class="sub-label">գտնել</span></button>
             <button onclick="openStage(6)" class="stage-card"><span>🎧</span><span>Փուլ 6</span><span class="sub-label">գտնել</span></button>
-            <button onclick="openSmartMenu()" class="stage-card"><span>🎓</span><span>Փուլ 7</span><span class="sub-label">կրկնություն</span></button>
-            <button onclick="openExam()" class="stage-card"><span>📝</span><span>Փուլ 8</span><span class="sub-label">քննություն</span></button>
-            <button onclick="openStatsStage()" class="stage-card"><span>📊</span><span>Փուլ 9</span><span class="sub-label">վիճակագրություն</span></button>
-            <button onclick="openStage(10)" class="stage-card"><span>🎤</span><span>Փուլ 10</span><span class="sub-label">արտասանություն</span></button>
+            <button onclick="openStage(7)" class="stage-card"><span>🎤</span><span>Փուլ 7</span><span class="sub-label">արտասանություն</span></button>
+            <button onclick="openSmartMenu()" class="stage-card"><span>🎓</span><span>Փուլ 8</span><span class="sub-label">կրկնություն</span></button>
+            <button onclick="openExam()" class="stage-card"><span>📝</span><span>Փուլ 9</span><span class="sub-label">քննություն</span></button>
+            <button onclick="openStatsStage()" class="stage-card"><span>📊</span><span>Փուլ 10</span><span class="sub-label">վիճակագրություն</span></button>
         </div>
     </div>
 
@@ -180,7 +180,7 @@
          <div class="flex justify-start mb-4">
             <button onclick="exitToMenu()" class="font-black text-emerald-400 text-[10px] uppercase tracking-widest bg-emerald-900/50 px-3 py-1.5 rounded-full border border-emerald-700">⬅ ԵԼՔ</button>
         </div>
-        <h2 class="text-xl font-black text-emerald-300 italic uppercase">Փուլ 7: Ընտրացանկ</h2>
+        <h2 class="text-xl font-black text-emerald-300 italic uppercase">Փուլ 8: Ընտրացանկ</h2>
         <div class="grid grid-cols-1 gap-4 pt-2">
             <button onclick="openSmartStage('difficult')" class="btn-primary flex items-center justify-between p-6">
                 <span>🔥 Դժվար բառեր</span>
@@ -332,7 +332,7 @@
 
         function isWordLearned(w) {
             if (w.isInstant) return true;
-            return [2, 3, 4, 5, 6, 10].every(s => w.stagesCompleted.includes(s));
+            return [2, 3, 4, 5, 6, 7].every(s => w.stagesCompleted.includes(s));
         }
 
         function setNextRep(word) {
@@ -358,7 +358,7 @@
         }
 
         function getStars(word) {
-            const stages = [2, 3, 4, 5, 6, 10];
+            const stages = [2, 3, 4, 5, 6, 7];
             let html = '<div class="flex flex-col items-center mb-2">';
             html += '<div class="flex justify-center gap-1 mb-1">';
             stages.forEach(s => {
@@ -370,7 +370,7 @@
             });
             html += '</div>';
             
-            if(activeStage === 7) {
+            if(activeStage === 8) {
                 html += `
                 <div class="flex flex-col items-center mt-1">
                     <div class="star-box">
@@ -397,7 +397,7 @@
         }
 
         function openSmartStage(mode) {
-            smartMode = mode; activeStage = 7; activeIndex = 0;
+            smartMode = mode; activeStage = 8; activeIndex = 0;
             document.getElementById('smart-menu-view').classList.add('hidden');
             document.getElementById('view').classList.remove('hidden');
             document.getElementById('view-title').innerText = mode === 'difficult' ? 'ԴԺՎԱՐ ԲԱՌԵՐ' : 'ԿՐԿՆՈՒԹՅՈՒՆ';
@@ -408,14 +408,14 @@
             activeStage = num; activeIndex = 0; smartMode = null;
             document.getElementById('app-content').classList.add('hidden');
             document.getElementById('view').classList.remove('hidden');
-            document.getElementById('view-title').innerText = num === 10 ? 'ԱՐՏԱՍԱՆՈՒԹՅՈՒՆ' : `Փուլ ${num}`;
+            document.getElementById('view-title').innerText = num === 7 ? 'ԱՐՏԱՍԱՆՈՒԹՅՈՒՆ' : `Փուլ ${num}`;
             initStageLogic();
         }
 
         function initStageLogic() {
             const container = document.getElementById('content');
             container.innerHTML = "";
-            if (activeStage === 7) {
+            if (activeStage === 8) {
                 if(smartMode === 'difficult') activeList = words.filter(w => w.errorCount >= 5 && !isWordLearned(w)).slice(0, 10);
                 else { const today = new Date().toISOString().split('T')[0]; activeList = words.filter(w => isWordLearned(w) && w.nextRepDate && w.nextRepDate <= today).slice(0, 10); }
                 activeList.forEach(w => w.score = 0);
@@ -425,7 +425,7 @@
             if (activeList.length === 0) return renderFinish();
             if (activeStage === 1) renderStage1();
             else if (activeStage === 3) renderStage3();
-            else if (activeStage === 10) renderStage10();
+            else if (activeStage === 7) renderStage7();
             else renderGenericStage();
         }
 
@@ -517,7 +517,7 @@
             if(activeStage === 4) { question = word.hy; answer = word.en; }
             else if(activeStage === 5) { question = word.en; answer = word.hy; }
             else if(activeStage === 6) { question = "🔊"; answer = word.en; }
-            else if(activeStage === 7) { question = word.en; answer = word.hy; }
+            else if(activeStage === 8) { question = word.en; answer = word.hy; }
             
             document.getElementById('content').innerHTML = `
                 <div class="w-full text-center flex flex-col items-center">
@@ -531,7 +531,7 @@
             setTimeout(() => document.getElementById('stage-input')?.focus(), 50);
         }
 
-        function renderStage10() {
+        function renderStage7() {
             const word = activeList[activeIndex % activeList.length];
             document.getElementById('content').innerHTML = `
                 <div class="w-full text-center flex flex-col items-center">
@@ -571,7 +571,7 @@
                     status.classList.replace('text-emerald-400', 'text-yellow-400');
                     word.score = Math.min(10, word.score + 1);
                     if (word.score >= 10) {
-                        word.score = 0; word.stagesCompleted.push(10);
+                        word.score = 0; word.stagesCompleted.push(7);
                         if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; }
                         setTimeout(() => { activeIndex++; initStageLogic(); }, 800);
                     } else {
@@ -619,13 +619,13 @@
             if(cleanText(selected) === cleanText(correct)) {
                 btn.classList.add('choice-correct');
                 word.score = Math.min(10, word.score + 1);
-                if(activeStage !== 7 && word.score >= 10) { 
+                if(activeStage !== 8 && word.score >= 10) { 
                     word.score = 0; word.stagesCompleted.push(activeStage); 
                     if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; } 
-                } else if (activeStage === 7 && word.score >= 10) {
+                } else if (activeStage === 8 && word.score >= 10) {
                     if(smartMode === 'repetition') setNextRep(word);
                     setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
-                } else if (activeStage === 7) {
+                } else if (activeStage === 8) {
                     setTimeout(() => initStageLogic(), 600);
                 } else {
                     setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
@@ -647,7 +647,7 @@
                 input.className = "w-full p-5 border-4 border-emerald-500 bg-emerald-600 text-white rounded-[2rem] text-center text-xl outline-none";
                 
                 if(word.score >= 10) {
-                    if(activeStage !== 7) {
+                    if(activeStage !== 8) {
                         word.score = 0;
                         word.stagesCompleted.push(activeStage);
                         if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; }
@@ -657,7 +657,7 @@
                     setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
                 } else {
                     setTimeout(() => { 
-                        if(activeStage === 7) initStageLogic(); 
+                        if(activeStage === 8) initStageLogic(); 
                         else { activeIndex++; initStageLogic(); }
                     }, 400);
                 }
