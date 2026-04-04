@@ -563,14 +563,14 @@
                 <div class="w-full text-center flex flex-col items-center">
                     <div class="mb-1">${getStars(word)}</div>
                     <div class="mb-6 text-4xl font-black text-white italic break-words px-4" onclick="speak('${word.en}')">${word.en}</div>
-                    <p class="text-emerald-300 text-[10px] uppercase font-bold mb-8 italic">Լսիր և ճիշտ արտասանիր (90%+)</p>
+                    <p class="text-emerald-300 text-[10px] uppercase font-bold mb-8 italic">Լսիր և ճիշտ արտասանիր (85%+)</p>
                     
                     <button id="mic-btn" onclick="startSpeechRecognition('${word.en}')" class="w-24 h-24 bg-emerald-600 rounded-full flex items-center justify-center text-4xl shadow-2xl border-4 border-emerald-400 transition-all active:scale-90">
                         🎤
                     </button>
                     
                     <div id="speech-status" class="mt-8 font-black text-xs uppercase tracking-widest text-emerald-400">Սպասում է...</div>
-                    <div id="accuracy-display" class="mt-2 text-[12px] font-black text-white/70 uppercase"></div>
+                    <div id="accuracy-display" class="mt-2 text-[14px] font-black text-white/90 uppercase"></div>
                     <button id="next-btn" onclick="skipGeneric()" class="btn-next-step">ՀԱՋՈՐԴԸ</button>
                 </div>`;
             speak(word.en === "I" ? "eye" : word.en);
@@ -590,7 +590,6 @@
             const accDisp = document.getElementById('accuracy-display');
             const word = activeList[activeIndex % activeList.length];
 
-            // Սկսել ճանաչումը անմիջապես սեղմելիս
             recognition.start();
 
             recognition.onstart = () => {
@@ -604,28 +603,26 @@
                 const similarity = getSimilarity(cleanText(result), cleanText(targetWord));
                 const percentage = Math.round(similarity * 100);
 
-                if (percentage >= 85) { // Մի փոքր իջեցրել եմ շեմը՝ ավելի լավ աշխատանքի համար
+                if (percentage >= 85) { 
                     status.innerText = `ՃԻՇՏ Է! ✅ ("${result}")`;
-                    status.classList.remove('text-emerald-400', 'text-rose-400');
-                    status.classList.add('text-yellow-400');
-                    accDisp.innerText = `Որակը՝ ${percentage}%`;
-                    accDisp.style.color = "#fbbf24";
+                    status.style.color = "#fbbf24";
+                    accDisp.innerText = `Ճշտություն՝ ${percentage}%`;
+                    accDisp.style.color = "#4ade80";
                     
                     word.score = Math.min(10, word.score + 1);
                     if (word.score >= 10) {
                         word.score = 0; 
                         if (!word.stagesCompleted.includes(7)) word.stagesCompleted.push(7);
                         if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; }
-                        setTimeout(() => { activeIndex++; initStageLogic(); }, 1200);
+                        setTimeout(() => { activeIndex++; initStageLogic(); }, 1500);
                     } else {
-                        setTimeout(() => initStageLogic(), 1200);
+                        setTimeout(() => initStageLogic(), 1500);
                     }
                 } else {
                     status.innerText = `ՍԽԱԼ Է ❌ ("${result}")`;
-                    status.classList.remove('text-emerald-400', 'text-yellow-400');
-                    status.classList.add('text-rose-400');
-                    accDisp.innerText = `Որակը՝ ${percentage}% (Պահանջվում է 85%+)`;
-                    accDisp.style.color = "#f87171";
+                    status.style.color = "#f87171";
+                    accDisp.innerText = `Ճշտություն՝ ${percentage}% (Պահանջվում է 85%+)`;
+                    accDisp.style.color = "#fca5a5";
                     word.score = Math.max(0, word.score - 1); 
                     word.errorCount++;
                     setTimeout(() => initStageLogic(), 2000);
@@ -634,8 +631,7 @@
             };
 
             recognition.onerror = (event) => { 
-                status.innerText = "Ձայնը չի լսվում, փորձեք նորից"; 
-                console.error("Speech Recognition Error:", event.error);
+                status.innerText = "Սխալ տեղի ունեցավ, փորձեք նորից"; 
                 micBtn.classList.remove('mic-active'); 
             };
             recognition.onend = () => { micBtn.classList.remove('mic-active'); };
