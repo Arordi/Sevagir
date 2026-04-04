@@ -14,7 +14,7 @@
         #menu {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
+            grid-template-rows: repeat(4, 1fr);
             gap: 8px;
             padding: 8px;
             height: calc(100vh - 100px);
@@ -65,14 +65,14 @@
         .blur-text { filter: blur(8px); transition: all 0.3s ease; cursor: pointer; }
         .blur-text.revealed { filter: blur(0); }
         
-        .star-box { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 35px; height: 35px; }
-        .star-icon { font-size: 30px; transition: all 0.3s ease; }
+        .star-box { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; }
+        .star-icon { font-size: 24px; transition: all 0.3s ease; }
         .star-text { 
             position: absolute; 
             top: 55%; 
             left: 50%; 
             transform: translate(-50%, -50%); 
-            font-size: 10px; 
+            font-size: 9px; 
             font-weight: 900; 
             color: #064e3b; 
             pointer-events: none;
@@ -104,6 +104,10 @@
         .bar-fill.time-bar { background: #60a5fa; }
         .bar-fill::after { content: attr(data-val); position: absolute; top: -14px; left: 50%; transform: translateX(50%); font-size: 8px; font-weight: 800; color: white; opacity: 0.9; }
         .bar-label { font-size: 7px; font-weight: 800; text-transform: uppercase; color: #34d399; margin-top: 2px; }
+
+        /* Mic Animation */
+        .mic-active { animation: pulse-mic 1.5s infinite; background-color: #ef4444 !important; }
+        @keyframes pulse-mic { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -156,6 +160,7 @@
             <button onclick="openStage(4)" class="stage-card"><span>⌨️</span><span>Փուլ 4</span><span class="sub-label">գտնել</span></button>
             <button onclick="openStage(5)" class="stage-card"><span>🔄</span><span>Փուլ 5</span><span class="sub-label">գտնել</span></button>
             <button onclick="openStage(6)" class="stage-card"><span>🎧</span><span>Փուլ 6</span><span class="sub-label">գտնել</span></button>
+            <button onclick="openStage(10)" class="stage-card"><span>🎤</span><span>Փուլ 10</span><span class="sub-label">արտասանություն</span></button>
             <button onclick="openSmartMenu()" class="stage-card"><span>🎓</span><span>Փուլ 7</span><span class="sub-label">կրկնություն</span></button>
             <button onclick="openExam()" class="stage-card"><span>📝</span><span>Փուլ 8</span><span class="sub-label">քննություն</span></button>
             <button onclick="openStatsStage()" class="stage-card"><span>📊</span><span>Փուլ 9</span><span class="sub-label">վիճակագրություն</span></button>
@@ -327,7 +332,7 @@
 
         function isWordLearned(w) {
             if (w.isInstant) return true;
-            return [2, 3, 4, 5, 6].every(s => w.stagesCompleted.includes(s));
+            return [2, 3, 4, 5, 6, 10].every(s => w.stagesCompleted.includes(s));
         }
 
         function setNextRep(word) {
@@ -353,7 +358,7 @@
         }
 
         function getStars(word) {
-            const stages = [2, 3, 4, 5, 6];
+            const stages = [2, 3, 4, 5, 6, 10];
             let html = '<div class="flex flex-col items-center mb-2">';
             html += '<div class="flex justify-center gap-1 mb-1">';
             stages.forEach(s => {
@@ -403,7 +408,7 @@
             activeStage = num; activeIndex = 0; smartMode = null;
             document.getElementById('app-content').classList.add('hidden');
             document.getElementById('view').classList.remove('hidden');
-            document.getElementById('view-title').innerText = `Փուլ ${num}`;
+            document.getElementById('view-title').innerText = num === 10 ? 'ԱՐՏԱՍԱՆՈՒԹՅՈՒՆ' : `Փուլ ${num}`;
             initStageLogic();
         }
 
@@ -420,6 +425,7 @@
             if (activeList.length === 0) return renderFinish();
             if (activeStage === 1) renderStage1();
             else if (activeStage === 3) renderStage3();
+            else if (activeStage === 10) renderStage10();
             else renderGenericStage();
         }
 
@@ -525,6 +531,65 @@
             setTimeout(() => document.getElementById('stage-input')?.focus(), 50);
         }
 
+        function renderStage10() {
+            const word = activeList[activeIndex % activeList.length];
+            document.getElementById('content').innerHTML = `
+                <div class="w-full text-center flex flex-col items-center">
+                    <div class="mb-1">${getStars(word)}</div>
+                    <div class="mb-6 text-4xl font-black text-white italic break-words px-4" onclick="speak('${word.en}')">${word.en}</div>
+                    <p class="text-emerald-300 text-[10px] uppercase font-bold mb-8">Լսիր և արտասանիր</p>
+                    
+                    <button id="mic-btn" onclick="startSpeechRecognition('${word.en}')" class="w-24 h-24 bg-emerald-600 rounded-full flex items-center justify-center text-4xl shadow-2xl border-4 border-emerald-400 transition-all active:scale-90">
+                        🎤
+                    </button>
+                    
+                    <div id="speech-status" class="mt-8 font-black text-xs uppercase tracking-widest text-emerald-400">Սպասում է...</div>
+                    <button id="next-btn" onclick="skipGeneric()" class="btn-next-step">ՀԱՋՈՐԴԸ</button>
+                </div>`;
+            speak(word.en === "I" ? "eye" : word.en);
+        }
+
+        function startSpeechRecognition(targetWord) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) { alert("Ձեր բրաուզերը չի աջակցում ձայնի ճանաչումը։"); return; }
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            const micBtn = document.getElementById('mic-btn');
+            const status = document.getElementById('speech-status');
+            const word = activeList[activeIndex % activeList.length];
+
+            recognition.onstart = () => {
+                micBtn.classList.add('mic-active');
+                status.innerText = "Լսում եմ...";
+            };
+
+            recognition.onresult = (event) => {
+                const result = event.results[0][0].transcript.toLowerCase();
+                if (cleanText(result).includes(cleanText(targetWord))) {
+                    status.innerText = "ՃԻՇՏ Է! ✅";
+                    status.classList.replace('text-emerald-400', 'text-yellow-400');
+                    word.score = Math.min(10, word.score + 1);
+                    if (word.score >= 10) {
+                        word.score = 0; word.stagesCompleted.push(10);
+                        if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; }
+                        setTimeout(() => { activeIndex++; initStageLogic(); }, 800);
+                    } else {
+                        setTimeout(() => initStageLogic(), 800);
+                    }
+                } else {
+                    status.innerText = `Ասացիր՝ "${result}" ❌`;
+                    status.classList.replace('text-emerald-400', 'text-rose-400');
+                    word.score = Math.max(0, word.score - 1); word.errorCount++;
+                }
+                saveProgress();
+            };
+
+            recognition.onerror = () => { status.innerText = "Սխալ տեղի ունեցավ..."; };
+            recognition.onend = () => { micBtn.classList.remove('mic-active'); };
+            recognition.start();
+        }
+
         function skipGeneric() {
             activeIndex++;
             initStageLogic();
@@ -555,13 +620,15 @@
                 btn.classList.add('choice-correct');
                 word.score = Math.min(10, word.score + 1);
                 if(activeStage !== 7 && word.score >= 10) { 
-                    word.score = 0; word.stagesCompleted.push(2); 
+                    word.score = 0; word.stagesCompleted.push(activeStage); 
                     if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; } 
                 } else if (activeStage === 7 && word.score >= 10) {
                     if(smartMode === 'repetition') setNextRep(word);
                     setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
                 } else if (activeStage === 7) {
                     setTimeout(() => initStageLogic(), 600);
+                } else {
+                    setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
                 }
             } else { 
                 btn.classList.add('choice-wrong');
@@ -670,7 +737,7 @@
 
                 <div class="bg-emerald-900 p-3 rounded-[1.5rem] border border-emerald-700">
                     <h3 class="font-black text-[9px] mb-3 uppercase italic text-center tracking-widest">Սովորած բառեր (${learnedWords.length})</h3>
-                    <div class="max-h-48 overflow-y-auto space-y-1.5 custom-scroll pr-1">${learnedWords.length === 0 ? '<p class="text-center italic py-4 text-[9px] opacity-40">Դեռ բառեր չեք սովորել</p>' : learnedWords.map(w => `<div class="flex justify-between items-center p-2 bg-emerald-800/30 rounded-xl border border-emerald-700/20 transition-all"><div class="max-w-[70%]"><div class="font-black text-white text-[10px] leading-tight">${w.en}</div><div class="text-[8px] text-emerald-400 font-bold mt-0.5">${w.hy}</div></div><div class="text-yellow-400 text-[8px] tracking-tighter">★★★★★</div></div>`).join('')}</div>
+                    <div class="max-h-48 overflow-y-auto space-y-1.5 custom-scroll pr-1">${learnedWords.length === 0 ? '<p class="text-center italic py-4 text-[9px] opacity-40">Դեռ բառեր չեք սովորել</p>' : learnedWords.map(w => `<div class="flex justify-between items-center p-2 bg-emerald-800/30 rounded-xl border border-emerald-700/20 transition-all"><div class="max-w-[70%]"><div class="font-black text-white text-[10px] leading-tight">${w.en}</div><div class="text-[8px] text-emerald-400 font-bold mt-0.5">${w.hy}</div></div><div class="text-yellow-400 text-[8px] tracking-tighter">★★★★★★</div></div>`).join('')}</div>
                 </div>
             `;
         }
