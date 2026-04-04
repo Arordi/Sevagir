@@ -14,7 +14,7 @@
         #menu {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(4, 1fr);
+            grid-template-rows: repeat(3, 1fr);
             gap: 8px;
             padding: 8px;
             height: calc(100vh - 100px);
@@ -65,14 +65,14 @@
         .blur-text { filter: blur(8px); transition: all 0.3s ease; cursor: pointer; }
         .blur-text.revealed { filter: blur(0); }
         
-        .star-box { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; }
-        .star-icon { font-size: 24px; transition: all 0.3s ease; }
+        .star-box { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 35px; height: 35px; }
+        .star-icon { font-size: 30px; transition: all 0.3s ease; }
         .star-text { 
             position: absolute; 
             top: 55%; 
             left: 50%; 
             transform: translate(-50%, -50%); 
-            font-size: 9px; 
+            font-size: 10px; 
             font-weight: 900; 
             color: #064e3b; 
             pointer-events: none;
@@ -96,17 +96,14 @@
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #059669; border-radius: 10px; }
 
+        /* Stats Optimization */
         #stats-view { height: 100vh; width: 100%; position: fixed; inset: 0; background-color: #064e3b; z-index: 60; display: flex; flex-direction: column; }
         .bar-container { display: flex; align-items: flex-end; justify-content: space-between; height: 70px; gap: 4px; padding-top: 12px; }
         .bar-wrapper { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; }
         .bar-fill { width: 100%; background: #10b981; border-top-left-radius: 4px; border-top-right-radius: 4px; min-height: 2px; transition: height 0.5s ease; position: relative; }
         .bar-fill.time-bar { background: #60a5fa; }
-        .bar-fill::after { content: attr(data-val); position: absolute; top: -14px; left: 50%; transform: translateX(50%); font-size: 8px; font-weight: 800; color: white; opacity: 0.9; }
+        .bar-fill::after { content: attr(data-val); position: absolute; top: -14px; left: 50%; transform: translateX(-50%); font-size: 8px; font-weight: 800; color: white; opacity: 0.9; }
         .bar-label { font-size: 7px; font-weight: 800; text-transform: uppercase; color: #34d399; margin-top: 2px; }
-
-        /* Speech Recognition Animation */
-        .mic-active { animation: pulse-mic 1.5s infinite !important; background-color: #ef4444 !important; border-color: #fecaca !important; }
-        @keyframes pulse-mic { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { transform: scale(1.1); box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -159,10 +156,9 @@
             <button onclick="openStage(4)" class="stage-card"><span>⌨️</span><span>Փուլ 4</span><span class="sub-label">գտնել</span></button>
             <button onclick="openStage(5)" class="stage-card"><span>🔄</span><span>Փուլ 5</span><span class="sub-label">գտնել</span></button>
             <button onclick="openStage(6)" class="stage-card"><span>🎧</span><span>Փուլ 6</span><span class="sub-label">գտնել</span></button>
-            <button onclick="openStage(7)" class="stage-card"><span>🎤</span><span>Փուլ 7</span><span class="sub-label">արտասանություն</span></button>
-            <button onclick="openSmartMenu()" class="stage-card"><span>🎓</span><span>Փուլ 8</span><span class="sub-label">կրկնություն</span></button>
-            <button onclick="openExam()" class="stage-card"><span>📝</span><span>Փուլ 9</span><span class="sub-label">քննություն</span></button>
-            <button onclick="openStatsStage()" class="stage-card"><span>📊</span><span>Փուլ 10</span><span class="sub-label">վիճակագրություն</span></button>
+            <button onclick="openSmartMenu()" class="stage-card"><span>🎓</span><span>Փուլ 7</span><span class="sub-label">կրկնություն</span></button>
+            <button onclick="openExam()" class="stage-card"><span>📝</span><span>Փուլ 8</span><span class="sub-label">քննություն</span></button>
+            <button onclick="openStatsStage()" class="stage-card"><span>📊</span><span>Փուլ 9</span><span class="sub-label">վիճակագրություն</span></button>
         </div>
     </div>
 
@@ -179,7 +175,7 @@
          <div class="flex justify-start mb-4">
             <button onclick="exitToMenu()" class="font-black text-emerald-400 text-[10px] uppercase tracking-widest bg-emerald-900/50 px-3 py-1.5 rounded-full border border-emerald-700">⬅ ԵԼՔ</button>
         </div>
-        <h2 class="text-xl font-black text-emerald-300 italic uppercase">Փուլ 8: Ընտրացանկ</h2>
+        <h2 class="text-xl font-black text-emerald-300 italic uppercase">Փուլ 7: Ընտրացանկ</h2>
         <div class="grid grid-cols-1 gap-4 pt-2">
             <button onclick="openSmartStage('difficult')" class="btn-primary flex items-center justify-between p-6">
                 <span>🔥 Դժվար բառեր</span>
@@ -331,7 +327,7 @@
 
         function isWordLearned(w) {
             if (w.isInstant) return true;
-            return [2, 3, 4, 5, 6, 7].every(s => w.stagesCompleted.includes(s));
+            return [2, 3, 4, 5, 6].every(s => w.stagesCompleted.includes(s));
         }
 
         function setNextRep(word) {
@@ -357,7 +353,7 @@
         }
 
         function getStars(word) {
-            const stages = [2, 3, 4, 5, 6, 7];
+            const stages = [2, 3, 4, 5, 6];
             let html = '<div class="flex flex-col items-center mb-2">';
             html += '<div class="flex justify-center gap-1 mb-1">';
             stages.forEach(s => {
@@ -369,7 +365,7 @@
             });
             html += '</div>';
             
-            if(activeStage === 8) {
+            if(activeStage === 7) {
                 html += `
                 <div class="flex flex-col items-center mt-1">
                     <div class="star-box">
@@ -382,38 +378,7 @@
             return html + '</div>';
         }
 
-        function cleanText(text) { 
-            return text.trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~() ]/g,""); 
-        }
-
-        function getSimilarity(s1, s2) {
-            let longer = s1; let shorter = s2;
-            if (s1.length < s2.length) { longer = s2; shorter = s1; }
-            let longerLength = longer.length;
-            if (longerLength === 0) return 1.0;
-            return (longerLength - editDistance(longer, shorter)) / parseFloat(longerLength);
-        }
-
-        function editDistance(s1, s2) {
-            s1 = s1.toLowerCase(); s2 = s2.toLowerCase();
-            let costs = new Array();
-            for (let i = 0; i <= s1.length; i++) {
-                let lastValue = i;
-                for (let j = 0; j <= s2.length; j++) {
-                    if (i == 0) costs[j] = j;
-                    else {
-                        if (j > 0) {
-                            let newValue = costs[j - 1];
-                            if (s1.charAt(i - 1) != s2.charAt(j - 1)) newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
-                            costs[j - 1] = lastValue; lastValue = newValue;
-                        }
-                    }
-                }
-                if (i > 0) costs[s2.length] = lastValue;
-            }
-            return costs[s2.length];
-        }
-
+        function cleanText(text) { return text.trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,""); }
         function goToAppMenu() { document.getElementById('welcome-screen').classList.add('hidden'); document.getElementById('app-content').classList.remove('hidden'); updateStats(); }
         function goToWelcome() { document.getElementById('app-content').classList.add('hidden'); document.getElementById('welcome-screen').classList.remove('hidden'); updateStats(); }
 
@@ -424,7 +389,7 @@
         }
 
         function openSmartStage(mode) {
-            smartMode = mode; activeStage = 8; activeIndex = 0;
+            smartMode = mode; activeStage = 7; activeIndex = 0;
             document.getElementById('smart-menu-view').classList.add('hidden');
             document.getElementById('view').classList.remove('hidden');
             document.getElementById('view-title').innerText = mode === 'difficult' ? 'ԴԺՎԱՐ ԲԱՌԵՐ' : 'ԿՐԿՆՈՒԹՅՈՒՆ';
@@ -435,14 +400,14 @@
             activeStage = num; activeIndex = 0; smartMode = null;
             document.getElementById('app-content').classList.add('hidden');
             document.getElementById('view').classList.remove('hidden');
-            document.getElementById('view-title').innerText = num === 7 ? 'ԱՐՏԱՍԱՆՈՒԹՅՈՒՆ' : `Փուլ ${num}`;
+            document.getElementById('view-title').innerText = `Փուլ ${num}`;
             initStageLogic();
         }
 
         function initStageLogic() {
             const container = document.getElementById('content');
             container.innerHTML = "";
-            if (activeStage === 8) {
+            if (activeStage === 7) {
                 if(smartMode === 'difficult') activeList = words.filter(w => w.errorCount >= 5 && !isWordLearned(w)).slice(0, 10);
                 else { const today = new Date().toISOString().split('T')[0]; activeList = words.filter(w => isWordLearned(w) && w.nextRepDate && w.nextRepDate <= today).slice(0, 10); }
                 activeList.forEach(w => w.score = 0);
@@ -452,7 +417,6 @@
             if (activeList.length === 0) return renderFinish();
             if (activeStage === 1) renderStage1();
             else if (activeStage === 3) renderStage3();
-            else if (activeStage === 7) renderStage7();
             else renderGenericStage();
         }
 
@@ -538,13 +502,13 @@
         }
 
         function renderGenericStage() {
-            const word = activeList[activeIndex];
+            const word = activeList[activeIndex % activeList.length];
             if (activeStage === 2) { renderMultipleChoice(word); return; }
             let question = word.en, answer = word.hy;
             if(activeStage === 4) { question = word.hy; answer = word.en; }
             else if(activeStage === 5) { question = word.en; answer = word.hy; }
             else if(activeStage === 6) { question = "🔊"; answer = word.en; }
-            else if(activeStage === 8) { question = word.en; answer = word.hy; }
+            else if(activeStage === 7) { question = word.en; answer = word.hy; }
             
             document.getElementById('content').innerHTML = `
                 <div class="w-full text-center flex flex-col items-center">
@@ -556,99 +520,6 @@
                 </div>`;
             if(activeStage !== 4) speak(word.en === "I" ? "eye" : word.en);
             setTimeout(() => document.getElementById('stage-input')?.focus(), 50);
-        }
-
-        function renderStage7() {
-            if (activeIndex >= activeList.length) {
-                renderFinish();
-                return;
-            }
-            const word = activeList[activeIndex];
-            document.getElementById('content').innerHTML = `
-                <div class="w-full text-center flex flex-col items-center">
-                    <div class="mb-1">${getStars(word)}</div>
-                    <div class="mb-6 text-4xl font-black text-white italic break-words px-4" onclick="speak('${word.en}')">${word.en}</div>
-                    <p class="text-emerald-300 text-[10px] uppercase font-bold mb-8 italic">Լսիր և ճիշտ արտասանիր (85%+)</p>
-                    
-                    <button id="mic-btn" onclick="startSpeechRecognition('${word.en}')" class="w-24 h-24 bg-emerald-600 rounded-full flex items-center justify-center text-4xl shadow-2xl border-4 border-emerald-400 transition-all active:scale-90">
-                        🎤
-                    </button>
-                    
-                    <div id="speech-status" class="mt-8 font-black text-xs uppercase tracking-widest text-emerald-400">Սպասում է...</div>
-                    <div id="accuracy-display" class="mt-2 text-[14px] font-black text-white/90 uppercase"></div>
-                    <button id="next-btn" onclick="skipStage7()" class="btn-next-step">ՀԱՋՈՐԴԸ</button>
-                </div>`;
-            speak(word.en === "I" ? "eye" : word.en);
-        }
-
-        function startSpeechRecognition(targetWord) {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) { alert("Ձեր բրաուզերը չի աջակցում ձայնի ճանաչումը։"); return; }
-
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'en-US';
-            recognition.interimResults = false;
-            recognition.maxAlternatives = 1;
-
-            const micBtn = document.getElementById('mic-btn');
-            const status = document.getElementById('speech-status');
-            const accDisp = document.getElementById('accuracy-display');
-            const word = activeList[activeIndex];
-
-            recognition.start();
-
-            recognition.onstart = () => {
-                micBtn.classList.add('mic-active');
-                status.innerText = "Լսում եմ...";
-                status.style.color = "#34d399";
-                accDisp.innerText = "";
-            };
-
-            recognition.onresult = (event) => {
-                const result = event.results[0][0].transcript.toLowerCase();
-                const similarity = getSimilarity(cleanText(result), cleanText(targetWord));
-                const percentage = Math.round(similarity * 100);
-
-                if (percentage >= 85) { 
-                    status.innerText = `ՃԻՇՏ Է! ✅ ("${result}")`;
-                    status.style.color = "#fbbf24";
-                    accDisp.innerText = `Ճշտություն՝ ${percentage}%`;
-                    accDisp.style.color = "#4ade80";
-                    
-                    word.score = Math.min(10, word.score + 1);
-                    if (word.score >= 10) {
-                        word.score = 0; 
-                        if (!word.stagesCompleted.includes(7)) word.stagesCompleted.push(7);
-                        if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; }
-                    }
-                    saveProgress();
-                    setTimeout(() => { activeIndex++; renderStage7(); }, 1500);
-                } else {
-                    status.innerText = `ՍԽԱԼ Է ❌ ("${result}")`;
-                    status.style.color = "#f87171";
-                    accDisp.innerText = `Ճշտություն՝ ${percentage}% (Պահանջվում է 85%+)`;
-                    accDisp.style.color = "#fca5a5";
-                    word.score = Math.max(0, word.score - 1); 
-                    word.errorCount++;
-                    saveProgress();
-                    setTimeout(() => { activeIndex++; renderStage7(); }, 2000);
-                }
-            };
-
-            recognition.onerror = (event) => { 
-                status.innerText = "Սխալ տեղի ունեցավ, փորձեք նորից"; 
-                status.style.color = "#fca5a5";
-                micBtn.classList.remove('mic-active'); 
-            };
-            
-            recognition.onend = () => { 
-                micBtn.classList.remove('mic-active'); 
-            };
-        }
-
-        function skipStage7() {
-            activeIndex++;
-            renderStage7();
         }
 
         function skipGeneric() {
@@ -674,44 +545,41 @@
         }
 
         function checkChoice(btn, selected, correct) {
-            const word = activeList[activeIndex];
+            const word = activeList[activeIndex % activeList.length];
             const buttons = document.querySelectorAll('.choice-btn');
             buttons.forEach(b => b.disabled = true);
             if(cleanText(selected) === cleanText(correct)) {
                 btn.classList.add('choice-correct');
                 word.score = Math.min(10, word.score + 1);
-                if(activeStage !== 8 && word.score >= 10) { 
-                    word.score = 0; if (!word.stagesCompleted.includes(activeStage)) word.stagesCompleted.push(activeStage); 
+                if(activeStage !== 7 && word.score >= 10) { 
+                    word.score = 0; word.stagesCompleted.push(2); 
                     if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; } 
-                } else if (activeStage === 8 && word.score >= 10) {
+                } else if (activeStage === 7 && word.score >= 10) {
                     if(smartMode === 'repetition') setNextRep(word);
                     setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
-                } else if (activeStage === 8) {
+                } else if (activeStage === 7) {
                     setTimeout(() => initStageLogic(), 600);
-                } else {
-                    setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
                 }
             } else { 
                 btn.classList.add('choice-wrong');
                 buttons.forEach(b => { if(cleanText(b.innerText) === cleanText(correct)) b.classList.add('choice-correct'); });
                 word.score = Math.max(0, word.score - 1); word.errorCount++; 
-                setTimeout(() => { activeIndex++; initStageLogic(); }, 1200);
             }
             saveProgress(); 
         }
 
         function checkGeneric(correct) {
             const input = document.getElementById('stage-input');
-            const word = activeList[activeIndex];
+            const word = activeList[activeIndex % activeList.length];
             if(cleanText(input.value) === cleanText(correct)) {
                 if(activeStage === 4) speak(word.en === "I" ? "eye" : word.en);
                 word.score = Math.min(10, word.score + 1);
                 input.className = "w-full p-5 border-4 border-emerald-500 bg-emerald-600 text-white rounded-[2rem] text-center text-xl outline-none";
                 
                 if(word.score >= 10) {
-                    if(activeStage !== 8) {
+                    if(activeStage !== 7) {
                         word.score = 0;
-                        if (!word.stagesCompleted.includes(activeStage)) word.stagesCompleted.push(activeStage);
+                        word.stagesCompleted.push(activeStage);
                         if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; }
                     } else {
                         if (smartMode === 'repetition') setNextRep(word);
@@ -719,7 +587,7 @@
                     setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
                 } else {
                     setTimeout(() => { 
-                        if(activeStage === 8) initStageLogic(); 
+                        if(activeStage === 7) initStageLogic(); 
                         else { activeIndex++; initStageLogic(); }
                     }, 400);
                 }
@@ -799,7 +667,7 @@
 
                 <div class="bg-emerald-900 p-3 rounded-[1.5rem] border border-emerald-700">
                     <h3 class="font-black text-[9px] mb-3 uppercase italic text-center tracking-widest">Սովորած բառեր (${learnedWords.length})</h3>
-                    <div class="max-h-48 overflow-y-auto space-y-1.5 custom-scroll pr-1">${learnedWords.length === 0 ? '<p class="text-center italic py-4 text-[9px] opacity-40">Դեռ բառեր չեք սովորել</p>' : learnedWords.map(w => `<div class="flex justify-between items-center p-2 bg-emerald-800/30 rounded-xl border border-emerald-700/20 transition-all"><div class="max-w-[70%]"><div class="font-black text-white text-[10px] leading-tight">${w.en}</div><div class="text-[8px] text-emerald-400 font-bold mt-0.5">${w.hy}</div></div><div class="text-yellow-400 text-[8px] tracking-tighter">★★★★★★</div></div>`).join('')}</div>
+                    <div class="max-h-48 overflow-y-auto space-y-1.5 custom-scroll pr-1">${learnedWords.length === 0 ? '<p class="text-center italic py-4 text-[9px] opacity-40">Դեռ բառեր չեք սովորել</p>' : learnedWords.map(w => `<div class="flex justify-between items-center p-2 bg-emerald-800/30 rounded-xl border border-emerald-700/20 transition-all"><div class="max-w-[70%]"><div class="font-black text-white text-[10px] leading-tight">${w.en}</div><div class="text-[8px] text-emerald-400 font-bold mt-0.5">${w.hy}</div></div><div class="text-yellow-400 text-[8px] tracking-tighter">★★★★★</div></div>`).join('')}</div>
                 </div>
             `;
         }
