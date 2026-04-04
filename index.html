@@ -198,7 +198,7 @@
     </div>
 
     <div id="delete-modal" class="hidden fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-6 backdrop-blur-md">
-        <div class="bg-emerald-900 p-8 rounded-[2.5rem] w-full max-w-sm text-center shadow-2xl border border-emerald-700">
+        <div class="bg-emerald-900 p-8 rounded-[2.5rem] w-full max-sm text-center shadow-2xl border border-emerald-700">
             <h2 class="text-lg font-black text-white mb-4 uppercase">Ջնջել ամբողջը</h2>
             <p class="text-emerald-300 text-xs mb-6">Գրիր <b class="text-white">DELETE</b> հաստատելու համար</p>
             <input type="text" id="delete-confirm-input" class="w-full p-4 border-2 border-emerald-700 rounded-2xl text-center mb-6 uppercase outline-none focus:border-emerald-400 transition-all">
@@ -380,7 +380,6 @@
 
         function cleanText(text) { 
             if (!text) return "";
-            // Հեռացնում է բացատները, կետադրական նշանները և դարձնում փոքրատառ
             return text.toString().trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()\s]/g, ""); 
         }
 
