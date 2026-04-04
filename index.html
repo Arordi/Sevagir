@@ -96,7 +96,6 @@
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #059669; border-radius: 10px; }
 
-        /* Stats Optimization */
         #stats-view { height: 100vh; width: 100%; position: fixed; inset: 0; background-color: #064e3b; z-index: 60; display: flex; flex-direction: column; }
         .bar-container { display: flex; align-items: flex-end; justify-content: space-between; height: 70px; gap: 4px; padding-top: 12px; }
         .bar-wrapper { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; }
@@ -415,8 +414,11 @@
                 if(smartMode === 'difficult') activeList = words.filter(w => w.errorCount >= 5 && !isWordLearned(w)).slice(0, 10);
                 else { const today = new Date().toISOString().split('T')[0]; activeList = words.filter(w => isWordLearned(w) && w.nextRepDate && w.nextRepDate <= today).slice(0, 10); }
                 activeList.forEach(w => w.score = 0);
-            } else if (activeStage === 1) activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
-            else activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(activeStage)).slice(0, 10);
+            } else if (activeStage === 1) {
+                activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
+            } else {
+                activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(activeStage)).slice(0, 10);
+            }
 
             if (activeList.length === 0) return renderFinish();
             if (activeStage === 1) renderStage1();
@@ -449,8 +451,12 @@
             const w = activeList[activeIndex];
             w.isSeen = true;
             if (!w.stagesCompleted.includes(1)) w.stagesCompleted.push(1);
-            if(known) { w.isInstant = true; w.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(w); dailyWordsCount++; } 
-            else w.score = 0;
+            if(known) { 
+                w.isInstant = true; 
+                w.learnedDate = new Date().toISOString().split('T')[0]; 
+                setNextRep(w); 
+                dailyWordsCount++; 
+            } 
             saveProgress();
             activeIndex++; 
             if (activeIndex >= activeList.length) renderFinish(); else renderStage1();
@@ -565,17 +571,19 @@
                 word.score = Math.min(10, word.score + 1);
                 if(activeStage !== 7 && word.score >= 10) { 
                     word.score = 0; word.stagesCompleted.push(2); 
-                    if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; } 
+                    if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; }
+                    setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
                 } else if (activeStage === 7 && word.score >= 10) {
                     if(smartMode === 'repetition') setNextRep(word);
                     setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
-                } else if (activeStage === 7) {
-                    setTimeout(() => initStageLogic(), 600);
+                } else {
+                    setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
                 }
             } else { 
                 btn.classList.add('choice-wrong');
                 buttons.forEach(b => { if(cleanText(b.innerText) === cleanText(correct)) b.classList.add('choice-correct'); });
                 word.score = Math.max(0, word.score - 1); word.errorCount++; 
+                setTimeout(() => { activeIndex++; initStageLogic(); }, 1200);
             }
             saveProgress(); 
         }
@@ -596,18 +604,14 @@
                     } else {
                         if (smartMode === 'repetition') setNextRep(word);
                     }
-                    setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
-                } else {
-                    setTimeout(() => { 
-                        if(activeStage === 7) initStageLogic(); 
-                        else { activeIndex++; initStageLogic(); }
-                    }, 400);
                 }
+                setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
             } else {
                 word.score = Math.max(0, word.score - 1); word.errorCount++;
                 input.className = "w-full p-5 border-4 border-rose-600 bg-rose-900 text-white rounded-[2rem] text-center text-xl outline-none";
                 input.value = correct;
                 document.getElementById('check-btn').classList.add('hidden');
+                setTimeout(() => { activeIndex++; initStageLogic(); }, 1200);
             }
             saveProgress();
         }
@@ -755,7 +759,8 @@
 
         function speak(text) {
             window.speechSynthesis.cancel();
-            const msg = new SpeechSynthesisUtterance(text); msg.lang = 'en-US';
+            const msg = new SpeechSynthesisUtterance(text === "I" ? "eye" : text); 
+            msg.lang = 'en-US';
             window.speechSynthesis.speak(msg);
         }
 
