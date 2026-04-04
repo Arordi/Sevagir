@@ -525,17 +525,18 @@
                     <div class="mb-1">${getStars(word)}</div>
                     <div class="mb-6 text-3xl font-black text-white italic break-words px-4" onclick="speak('${word.en === "I" ? "eye" : word.en}')">${question}</div>
                     <input type="text" id="stage-input" autofocus class="w-full p-5 border-4 border-emerald-800 rounded-[2rem] text-center text-xl outline-none focus:border-emerald-400 transition-all shadow-inner" placeholder="..." autocomplete="off">
-                    <button id="check-btn" onclick="checkGeneric('${answer}')" class="btn-primary mt-6">ՍՏՈՒԳԵԼ</button>
+                    <div class="h-10"></div>
                     <button id="next-btn" onclick="skipGeneric()" class="btn-next-step">ՀԱՋՈՐԴԸ</button>
                 </div>`;
             
             const inputEl = document.getElementById('stage-input');
             inputEl.addEventListener('input', (e) => {
                 if(cleanText(e.target.value) === cleanText(answer)) {
-                    checkGeneric(answer);
+                    checkGeneric(answer, true);
                 }
             });
 
+            // Փուլ 4-ի համար CheckButton-ի տրամաբանություն եթե պետք լինի, բայց այստեղ ավտոմատ է
             if(activeStage !== 4) speak(word.en === "I" ? "eye" : word.en);
             setTimeout(() => document.getElementById('stage-input')?.focus(), 50);
         }
@@ -572,23 +573,20 @@
                 if(activeStage !== 7 && word.score >= 10) { 
                     word.score = 0; word.stagesCompleted.push(2); 
                     if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; }
-                    setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
                 } else if (activeStage === 7 && word.score >= 10) {
                     if(smartMode === 'repetition') setNextRep(word);
-                    setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
-                } else {
-                    setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
                 }
+                setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
             } else { 
                 btn.classList.add('choice-wrong');
                 buttons.forEach(b => { if(cleanText(b.innerText) === cleanText(correct)) b.classList.add('choice-correct'); });
                 word.score = Math.max(0, word.score - 1); word.errorCount++; 
-                setTimeout(() => { activeIndex++; initStageLogic(); }, 1200);
+                // Սխալի դեպքում չի փոխվում ավտոմատ, սպասում է օգտատիրոջը
             }
             saveProgress(); 
         }
 
-        function checkGeneric(correct) {
+        function checkGeneric(correct, isAuto = false) {
             const input = document.getElementById('stage-input');
             const word = activeList[activeIndex % activeList.length];
             if(cleanText(input.value) === cleanText(correct)) {
@@ -606,12 +604,11 @@
                     }
                 }
                 setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
-            } else {
+            } else if (!isAuto) {
+                // Այս հատվածը կաշխատի միայն եթե օգտատերը ինչ-որ կերպ սխալն ավարտի
                 word.score = Math.max(0, word.score - 1); word.errorCount++;
                 input.className = "w-full p-5 border-4 border-rose-600 bg-rose-900 text-white rounded-[2rem] text-center text-xl outline-none";
                 input.value = correct;
-                document.getElementById('check-btn').classList.add('hidden');
-                setTimeout(() => { activeIndex++; initStageLogic(); }, 1200);
             }
             saveProgress();
         }
@@ -718,9 +715,12 @@
             const examIn = document.getElementById('exam-in');
             examIn.addEventListener('input', (e) => {
                 if(cleanText(e.target.value) === cleanText(word.hy)) {
-                    correctCount++;
-                    activeIndex++;
-                    renderExamStep(correctCount);
+                    examIn.className = "w-full p-5 border-4 border-emerald-500 bg-emerald-600 text-white rounded-3xl text-center text-lg mb-6 outline-none";
+                    setTimeout(() => {
+                        correctCount++;
+                        activeIndex++;
+                        renderExamStep(correctCount);
+                    }, 400);
                 }
             });
 
