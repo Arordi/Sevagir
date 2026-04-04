@@ -378,7 +378,12 @@
             return html + '</div>';
         }
 
-        function cleanText(text) { return text.trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,""); }
+        function cleanText(text) { 
+            if (!text) return "";
+            // Հեռացնում է բացատները, կետադրական նշանները և դարձնում փոքրատառ
+            return text.toString().trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()\s]/g, ""); 
+        }
+
         function goToAppMenu() { document.getElementById('welcome-screen').classList.add('hidden'); document.getElementById('app-content').classList.remove('hidden'); updateStats(); }
         function goToWelcome() { document.getElementById('app-content').classList.add('hidden'); document.getElementById('welcome-screen').classList.remove('hidden'); updateStats(); }
 
