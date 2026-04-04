@@ -387,6 +387,34 @@
             return text.trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~() ]/g,""); 
         }
 
+        function getSimilarity(s1, s2) {
+            let longer = s1; let shorter = s2;
+            if (s1.length < s2.length) { longer = s2; shorter = s1; }
+            let longerLength = longer.length;
+            if (longerLength === 0) return 1.0;
+            return (longerLength - editDistance(longer, shorter)) / parseFloat(longerLength);
+        }
+
+        function editDistance(s1, s2) {
+            s1 = s1.toLowerCase(); s2 = s2.toLowerCase();
+            let costs = new Array();
+            for (let i = 0; i <= s1.length; i++) {
+                let lastValue = i;
+                for (let j = 0; j <= s2.length; j++) {
+                    if (i == 0) costs[j] = j;
+                    else {
+                        if (j > 0) {
+                            let newValue = costs[j - 1];
+                            if (s1.charAt(i - 1) != s2.charAt(j - 1)) newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+                            costs[j - 1] = lastValue; lastValue = newValue;
+                        }
+                    }
+                }
+                if (i > 0) costs[s2.length] = lastValue;
+            }
+            return costs[s2.length];
+        }
+
         function goToAppMenu() { document.getElementById('welcome-screen').classList.add('hidden'); document.getElementById('app-content').classList.remove('hidden'); updateStats(); }
         function goToWelcome() { document.getElementById('app-content').classList.add('hidden'); document.getElementById('welcome-screen').classList.remove('hidden'); updateStats(); }
 
@@ -537,13 +565,14 @@
                 <div class="w-full text-center flex flex-col items-center">
                     <div class="mb-1">${getStars(word)}</div>
                     <div class="mb-6 text-4xl font-black text-white italic break-words px-4" onclick="speak('${word.en}')">${word.en}</div>
-                    <p class="text-emerald-300 text-[10px] uppercase font-bold mb-8">Լսիր և արտասանիր</p>
+                    <p class="text-emerald-300 text-[10px] uppercase font-bold mb-8 italic">Լսիր և ճիշտ արտասանիր (90%+)</p>
                     
                     <button id="mic-btn" onclick="startSpeechRecognition('${word.en}')" class="w-24 h-24 bg-emerald-600 rounded-full flex items-center justify-center text-4xl shadow-2xl border-4 border-emerald-400 transition-all active:scale-90">
                         🎤
                     </button>
                     
                     <div id="speech-status" class="mt-8 font-black text-xs uppercase tracking-widest text-emerald-400">Սպասում է...</div>
+                    <div id="accuracy-display" class="mt-2 text-[10px] font-black text-white/50 uppercase"></div>
                     <button id="next-btn" onclick="skipGeneric()" class="btn-next-step">ՀԱՋՈՐԴԸ</button>
                 </div>`;
             speak(word.en === "I" ? "eye" : word.en);
@@ -555,37 +584,50 @@
 
             const recognition = new SpeechRecognition();
             recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
             const micBtn = document.getElementById('mic-btn');
             const status = document.getElementById('speech-status');
+            const accDisp = document.getElementById('accuracy-display');
             const word = activeList[activeIndex % activeList.length];
 
             recognition.onstart = () => {
                 micBtn.classList.add('mic-active');
                 status.innerText = "Լսում եմ...";
+                accDisp.innerText = "";
             };
 
             recognition.onresult = (event) => {
                 const result = event.results[0][0].transcript.toLowerCase();
-                if (cleanText(result).includes(cleanText(targetWord))) {
-                    status.innerText = "ՃԻՇՏ Է! ✅";
-                    status.classList.replace('text-emerald-400', 'text-yellow-400');
+                const similarity = getSimilarity(cleanText(result), cleanText(targetWord));
+                const percentage = Math.round(similarity * 100);
+
+                if (percentage >= 90) {
+                    status.innerText = `ՃԻՇՏ Է! ✅ (${result})`;
+                    status.classList.remove('text-emerald-400', 'text-rose-400');
+                    status.classList.add('text-yellow-400');
+                    accDisp.innerText = `Ճշգրտություն՝ ${percentage}%`;
+                    
                     word.score = Math.min(10, word.score + 1);
                     if (word.score >= 10) {
                         word.score = 0; word.stagesCompleted.push(7);
                         if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; }
-                        setTimeout(() => { activeIndex++; initStageLogic(); }, 800);
+                        setTimeout(() => { activeIndex++; initStageLogic(); }, 1000);
                     } else {
-                        setTimeout(() => initStageLogic(), 800);
+                        setTimeout(() => initStageLogic(), 1000);
                     }
                 } else {
                     status.innerText = `Ասացիր՝ "${result}" ❌`;
-                    status.classList.replace('text-emerald-400', 'text-rose-400');
+                    status.classList.remove('text-emerald-400', 'text-yellow-400');
+                    status.classList.add('text-rose-400');
+                    accDisp.innerText = `Ճշգրտություն՝ ${percentage}% (Պահանջվում է 90%+)`;
                     word.score = Math.max(0, word.score - 1); word.errorCount++;
                 }
                 saveProgress();
             };
 
-            recognition.onerror = () => { status.innerText = "Սխալ տեղի ունեցավ..."; };
+            recognition.onerror = () => { status.innerText = "Փորձեք նորից..."; micBtn.classList.remove('mic-active'); };
             recognition.onend = () => { micBtn.classList.remove('mic-active'); };
             recognition.start();
         }
