@@ -438,74 +438,87 @@ function getWeeklyData() {
 function openStatsStage() {
     document.getElementById('app-content').classList.add('hidden');
     document.getElementById('stats-view').classList.remove('hidden');
-    const container = document.getElementById('stats-container');
-    const learnedWords = words.filter(w => isWordLearned(w));
+    const view = document.getElementById('stats-view');
+    
     const weekly = getWeeklyData();
     const maxWordVal = Math.max(...weekly.wordData, 5);
-    const maxTimeVal = 600; 
-    const goalProgress = Math.min(100, Math.round((dailyWordsCount / dailyGoal) * 100));
-
-    let stagesProgressHtml = "";
-    const stageNames = ["Ծանոթացում", "Ընտրություն", "Համապատասխանեցում", "Գրել անգլերեն", "Գրել հայերեն", "Ուղղագրություն", "Կրկնություն", "Քննություն"];
-
+    const maxTimeVal = 60; // 60 րոպե որպես մաքսիմում գրաֆիկի համար
+    
+    // Փուլերի տվյալների պատրաստում (8 փուլ)
+    const stageCounts = [];
     for (let i = 1; i <= 8; i++) {
         let count = 0;
         if (i <= 6) count = words.filter(w => w.stagesCompleted.includes(i) || w.isInstant).length;
         else if (i === 7) count = words.filter(w => w.repLevel > 0).length;
-        else count = learnedWords.length;
-        const stagePct = Math.round((count / words.length) * 100);
-        stagesProgressHtml += `
-            <div class="mb-2">
-                <div class="flex justify-between items-center mb-0.5 px-1">
-                    <div class="flex flex-col">
-                        <span class="text-[6px] font-black text-emerald-500 uppercase leading-none">ՓՈՒԼ ${i}</span>
-                        <span class="text-[9px] font-bold text-white italic leading-tight">${stageNames[i-1]}</span>
-                    </div>
-                    <span class="text-[9px] font-black text-emerald-400 italic">${count} / ${words.length}</span>
-                </div>
-                <div class="w-full bg-emerald-950 h-2 rounded-full overflow-hidden border border-emerald-800/30">
-                    <div class="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full transition-all duration-700" style="width: ${stagePct}%"></div>
-                </div>
-            </div>`;
+        else count = words.filter(w => isWordLearned(w)).length;
+        stageCounts.push(count);
     }
+    const maxStageVal = Math.max(...stageCounts, 1);
 
-    container.innerHTML = `
-        <div class="bg-emerald-900/60 p-3 rounded-[1.5rem] border border-emerald-700/50 shadow-lg mb-3">
-            <h3 class="font-black text-[8px] mb-3 uppercase text-center italic tracking-widest text-emerald-300">Փուլերի Առաջընթաց</h3>
-            <div class="grid grid-cols-1">${stagesProgressHtml}</div>
+    view.innerHTML = `
+        <div class="flex justify-between items-center px-2">
+             <button onclick="exitToMenu()" class="text-emerald-400 font-black">✕</button>
+             <h2 class="text-[12px] font-black italic tracking-widest text-emerald-100">STATISTICS</h2>
+             <div style="width:20px"></div>
         </div>
-        <div class="grid grid-cols-2 gap-2 mb-3">
-            <div class="bg-emerald-900/40 p-2 rounded-[1.2rem] border border-emerald-700/50">
-                <h3 class="font-black text-[7px] mb-2 uppercase text-center italic text-emerald-300">Բառեր</h3>
-                <div class="bar-container h-16">${weekly.wordData.map((val, i) => `<div class="bar-wrapper"><div class="bar-fill" data-val="${val}" style="height: ${(val/maxWordVal)*100}%"></div><span class="bar-label text-[6px]">${weekly.labels[i]}</span></div>`).join('')}</div>
-            </div>
-            <div class="bg-emerald-900/40 p-2 rounded-[1.2rem] border border-emerald-700/50">
-                <h3 class="font-black text-[7px] mb-2 uppercase text-center italic text-blue-300">Ժամանակ</h3>
-                <div class="bar-container h-16">${weekly.timeData.map((val, i) => `<div class="bar-wrapper"><div class="bar-fill time-bar" data-val="${val}ր" style="height: ${(val/maxTimeVal)*100}%"></div><span class="bar-label text-[6px]">${weekly.labels[i]}</span></div>`).join('')}</div>
-            </div>
-        </div>
-        <div class="bg-emerald-900 p-3 rounded-[1.5rem] border border-emerald-700 shadow-lg mb-3">
-            <div class="grid grid-cols-2 gap-3">
-                <div class="text-center">
-                    <h2 class="text-[7px] font-black mb-1 uppercase italic text-emerald-300">Նպատակ</h2>
-                    <div class="flex items-center justify-center gap-1.5">
-                        <div class="relative w-8 h-8"><svg class="w-full h-full" viewBox="0 0 36 36"><path class="text-emerald-900/50" stroke-width="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" /><path class="text-emerald-400" stroke-dasharray="${goalProgress}, 100" stroke-width="4" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" /></svg><div class="absolute inset-0 flex flex-col items-center justify-center"><span class="text-[8px] font-black">${dailyWordsCount}</span></div></div>
-                        <input type="number" value="${dailyGoal}" onchange="updateDailyGoal(this.value)" class="w-8 p-1 rounded-lg text-center font-black bg-emerald-800 border border-emerald-600 text-[8px]">
+
+        <div class="stats-section">
+            <div class="stats-title">Փուլերի առաջընթաց</div>
+            <div class="bar-container">
+                ${stageCounts.map((val, i) => `
+                    <div class="bar-wrapper">
+                        <div class="bar-fill stage-bar" data-val="${val}" style="height: ${(val/maxStageVal)*100}%"></div>
+                        <span class="bar-label">Փ${i+1}</span>
                     </div>
-                </div>
-                <div class="text-center">
-                    <h2 class="text-[7px] font-black mb-1 uppercase italic text-blue-300">Հիշեցում (ր)</h2>
-                    <input type="number" value="${reminderMinute}" onchange="updateReminder(this.value)" class="w-10 p-1 rounded-lg text-center font-black bg-emerald-800 border border-emerald-600 text-[8px]">
+                `).join('')}
+            </div>
+        </div>
+
+        <div class="stats-section">
+            <div class="stats-title">Սովորած բառեր (7 օր)</div>
+            <div class="bar-container">
+                ${weekly.wordData.map((val, i) => `
+                    <div class="bar-wrapper">
+                        <div class="bar-fill" data-val="${val}" style="height: ${(val/maxWordVal)*100}%"></div>
+                        <span class="bar-label">${weekly.labels[i]}</span>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+
+        <div class="stats-section">
+            <div class="stats-title">Անցկացրած ժամանակ (ր)</div>
+            <div class="bar-container">
+                ${weekly.timeData.map((val, i) => `
+                    <div class="bar-wrapper">
+                        <div class="bar-fill time-bar" data-val="${val}" style="height: ${(val/maxTimeVal)*100}%"></div>
+                        <span class="bar-label">${weekly.labels[i]}</span>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+
+        <div class="bottom-stats">
+            <div class="info-box">
+                <div class="circle-stat">${dailyWordsCount}</div>
+                <div class="stats-title" style="margin-bottom:0">Նպատակ (${dailyGoal})</div>
+                <input type="range" min="5" max="100" value="${dailyGoal}" 
+                    onchange="updateDailyGoal(this.value)" class="w-full mt-2 accent-emerald-500">
+            </div>
+            <div class="info-box">
+                <div class="circle-stat" style="border-color:#60a5fa">${sessionMinutes}</div>
+                <div class="stats-title" style="margin-bottom:0">Կայքում (ր)</div>
+                <div class="flex items-center gap-2 mt-2">
+                    <span class="text-[8px] font-bold">🔔</span>
+                    <input type="number" value="${reminderMinute}" 
+                        onchange="updateReminder(this.value)" class="w-10 bg-emerald-800 border-none rounded text-center text-xs font-bold">
                 </div>
             </div>
         </div>
-        <div class="bg-emerald-900 p-2 rounded-[1.2rem] border border-emerald-700">
-            <h3 class="font-black text-[8px] mb-2 uppercase italic text-center">Սովորած բառեր (${learnedWords.length})</h3>
-            <div class="max-h-32 overflow-y-auto space-y-1 custom-scroll pr-1">${learnedWords.length === 0 ? '<p class="text-center italic py-2 text-[8px] opacity-40">Դեռ բառեր չկան</p>' : learnedWords.slice(-20).reverse().map(w => `<div class="flex justify-between items-center p-1.5 bg-emerald-800/20 rounded-lg border border-emerald-700/10"><div class="max-w-[70%]"><div class="font-black text-white text-[9px] leading-tight">${w.en}</div><div class="text-[7px] text-emerald-400 font-bold">${w.hy}</div></div><div class="text-yellow-400 text-[7px]">★★★★★</div></div>`).join('')}</div>
-        </div>`;
+    `;
 }
 
-function updateDailyGoal(val) { dailyGoal = Math.max(1, Math.min(100, parseInt(val) || 20)); saveProgress(); openStatsStage(); }
+function updateDailyGoal(val) { dailyGoal = parseInt(val); saveProgress(); openStatsStage(); }
 function updateReminder(val) { reminderMinute = Math.max(1, parseInt(val) || 10); saveProgress(); }
 
 function openExam() {
