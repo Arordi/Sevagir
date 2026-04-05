@@ -96,6 +96,7 @@
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #059669; border-radius: 10px; }
 
+        /* Stats Optimization */
         #stats-view { height: 100vh; width: 100%; position: fixed; inset: 0; background-color: #064e3b; z-index: 60; display: flex; flex-direction: column; }
         .bar-container { display: flex; align-items: flex-end; justify-content: space-between; height: 70px; gap: 4px; padding-top: 12px; }
         .bar-wrapper { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; }
@@ -197,7 +198,7 @@
     </div>
 
     <div id="delete-modal" class="hidden fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-6 backdrop-blur-md">
-        <div class="bg-emerald-900 p-8 rounded-[2.5rem] w-full max-sm text-center shadow-2xl border border-emerald-700">
+        <div class="bg-emerald-900 p-8 rounded-[2.5rem] w-full max-w-sm text-center shadow-2xl border border-emerald-700">
             <h2 class="text-lg font-black text-white mb-4 uppercase">Ջնջել ամբողջը</h2>
             <p class="text-emerald-300 text-xs mb-6">Գրիր <b class="text-white">DELETE</b> հաստատելու համար</p>
             <input type="text" id="delete-confirm-input" class="w-full p-4 border-2 border-emerald-700 rounded-2xl text-center mb-6 uppercase outline-none focus:border-emerald-400 transition-all">
@@ -377,11 +378,7 @@
             return html + '</div>';
         }
 
-        function cleanText(text) { 
-            if (!text) return "";
-            return text.toString().trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()\s]/g, ""); 
-        }
-
+        function cleanText(text) { return text.trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,""); }
         function goToAppMenu() { document.getElementById('welcome-screen').classList.add('hidden'); document.getElementById('app-content').classList.remove('hidden'); updateStats(); }
         function goToWelcome() { document.getElementById('app-content').classList.add('hidden'); document.getElementById('welcome-screen').classList.remove('hidden'); updateStats(); }
 
@@ -414,13 +411,8 @@
                 if(smartMode === 'difficult') activeList = words.filter(w => w.errorCount >= 5 && !isWordLearned(w)).slice(0, 10);
                 else { const today = new Date().toISOString().split('T')[0]; activeList = words.filter(w => isWordLearned(w) && w.nextRepDate && w.nextRepDate <= today).slice(0, 10); }
                 activeList.forEach(w => w.score = 0);
-            } else if (activeStage === 1) {
-                activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
-                activeList.forEach(w => w.score = 0); // Միավորները զրոյացնել նոր փուլի համար
-            } else {
-                activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(activeStage)).slice(0, 10);
-                activeList.forEach(w => w.score = 0); // Միավորները զրոյացնել նոր փուլի համար
-            }
+            } else if (activeStage === 1) activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
+            else activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(activeStage)).slice(0, 10);
 
             if (activeList.length === 0) return renderFinish();
             if (activeStage === 1) renderStage1();
@@ -453,12 +445,8 @@
             const w = activeList[activeIndex];
             w.isSeen = true;
             if (!w.stagesCompleted.includes(1)) w.stagesCompleted.push(1);
-            if(known) { 
-                w.isInstant = true; 
-                w.learnedDate = new Date().toISOString().split('T')[0]; 
-                setNextRep(w); 
-                dailyWordsCount++; 
-            } 
+            if(known) { w.isInstant = true; w.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(w); dailyWordsCount++; } 
+            else w.score = 0;
             saveProgress();
             activeIndex++; 
             if (activeIndex >= activeList.length) renderFinish(); else renderStage1();
@@ -527,17 +515,9 @@
                     <div class="mb-1">${getStars(word)}</div>
                     <div class="mb-6 text-3xl font-black text-white italic break-words px-4" onclick="speak('${word.en === "I" ? "eye" : word.en}')">${question}</div>
                     <input type="text" id="stage-input" autofocus class="w-full p-5 border-4 border-emerald-800 rounded-[2rem] text-center text-xl outline-none focus:border-emerald-400 transition-all shadow-inner" placeholder="..." autocomplete="off">
-                    <div class="h-10"></div>
+                    <button id="check-btn" onclick="checkGeneric('${answer}')" class="btn-primary mt-6">ՍՏՈՒԳԵԼ</button>
                     <button id="next-btn" onclick="skipGeneric()" class="btn-next-step">ՀԱՋՈՐԴԸ</button>
                 </div>`;
-            
-            const inputEl = document.getElementById('stage-input');
-            inputEl.addEventListener('input', (e) => {
-                if(cleanText(e.target.value) === cleanText(answer)) {
-                    checkGeneric(answer, true);
-                }
-            });
-
             if(activeStage !== 4) speak(word.en === "I" ? "eye" : word.en);
             setTimeout(() => document.getElementById('stage-input')?.focus(), 50);
         }
@@ -573,11 +553,13 @@
                 word.score = Math.min(10, word.score + 1);
                 if(activeStage !== 7 && word.score >= 10) { 
                     word.score = 0; word.stagesCompleted.push(2); 
-                    if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; }
+                    if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; } 
                 } else if (activeStage === 7 && word.score >= 10) {
                     if(smartMode === 'repetition') setNextRep(word);
+                    setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
+                } else if (activeStage === 7) {
+                    setTimeout(() => initStageLogic(), 600);
                 }
-                setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
             } else { 
                 btn.classList.add('choice-wrong');
                 buttons.forEach(b => { if(cleanText(b.innerText) === cleanText(correct)) b.classList.add('choice-correct'); });
@@ -586,7 +568,7 @@
             saveProgress(); 
         }
 
-        function checkGeneric(correct, isAuto = false) {
+        function checkGeneric(correct) {
             const input = document.getElementById('stage-input');
             const word = activeList[activeIndex % activeList.length];
             if(cleanText(input.value) === cleanText(correct)) {
@@ -602,12 +584,18 @@
                     } else {
                         if (smartMode === 'repetition') setNextRep(word);
                     }
+                    setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
+                } else {
+                    setTimeout(() => { 
+                        if(activeStage === 7) initStageLogic(); 
+                        else { activeIndex++; initStageLogic(); }
+                    }, 400);
                 }
-                setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
-            } else if (!isAuto) {
+            } else {
                 word.score = Math.max(0, word.score - 1); word.errorCount++;
                 input.className = "w-full p-5 border-4 border-rose-600 bg-rose-900 text-white rounded-[2rem] text-center text-xl outline-none";
                 input.value = correct;
+                document.getElementById('check-btn').classList.add('hidden');
             }
             saveProgress();
         }
@@ -689,19 +677,13 @@
 
         function openExam() {
             activeList = [...words].sort(() => 0.5 - Math.random()).slice(0, 50);
-            activeIndex = 0; 
-            let examCorrectCount = 0;
-            document.getElementById('app-content').classList.add('hidden'); 
-            document.getElementById('view').classList.remove('hidden');
-            document.getElementById('view-title').innerText = 'Փուլ 8: Քննություն';
-            renderExamStep(examCorrectCount);
+            activeIndex = 0; smartMode = null;
+            document.getElementById('app-content').classList.add('hidden'); document.getElementById('view').classList.remove('hidden');
+            renderExamStep(0);
         }
 
         function renderExamStep(correctCount) {
-            if(activeIndex >= activeList.length) {
-                const percentage = Math.round((correctCount/activeList.length)*100);
-                return renderFinish(`Արդյունք: ${percentage}% (${correctCount}/${activeList.length})`);
-            }
+            if(activeIndex >= activeList.length) return renderFinish(`Արդյունք: ${Math.round((correctCount/activeList.length)*100)}%`);
             const word = activeList[activeIndex];
             document.getElementById('content').innerHTML = `
                 <div class="w-full text-center flex flex-col items-center">
@@ -710,29 +692,8 @@
                     <input type="text" id="exam-in" autofocus class="w-full p-5 border-4 border-emerald-800 rounded-3xl text-center text-lg mb-6 outline-none" placeholder="..." autocomplete="off">
                     <button id="ex-btn" class="btn-next-step">ՀԱՋՈՐԴԸ</button>
                 </div>`;
-            
-            const examIn = document.getElementById('exam-in');
-            examIn.addEventListener('input', (e) => {
-                if(cleanText(e.target.value) === cleanText(word.hy)) {
-                    examIn.className = "w-full p-5 border-4 border-emerald-500 bg-emerald-600 text-white rounded-3xl text-center text-lg mb-6 outline-none";
-                    setTimeout(() => {
-                        correctCount++;
-                        activeIndex++;
-                        renderExamStep(correctCount);
-                    }, 400);
-                }
-            });
-
             setTimeout(() => document.getElementById('exam-in').focus(), 50);
-            document.getElementById('ex-btn').onclick = () => { 
-                if(cleanText(document.getElementById('exam-in').value) === cleanText(word.hy)) {
-                    correctCount++;
-                } else {
-                    word.errorCount++;
-                }
-                activeIndex++; 
-                renderExamStep(correctCount); 
-            };
+            document.getElementById('ex-btn').onclick = () => { if(cleanText(document.getElementById('exam-in').value) === cleanText(word.hy)) correctCount++; else word.errorCount++; activeIndex++; renderExamStep(correctCount); };
         }
 
         function renderFinish(extra = "") {
@@ -758,8 +719,7 @@
 
         function speak(text) {
             window.speechSynthesis.cancel();
-            const msg = new SpeechSynthesisUtterance(text === "I" ? "eye" : text); 
-            msg.lang = 'en-US';
+            const msg = new SpeechSynthesisUtterance(text); msg.lang = 'en-US';
             window.speechSynthesis.speak(msg);
         }
 
