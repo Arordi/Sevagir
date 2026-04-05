@@ -168,6 +168,7 @@
         let sessionMinutes = 0, sessionSeconds = 0;
         let reminderMinute = 10; 
         let dailyTimeData = {}; 
+        let lastDate = ""; // Վերջին ակտիվության ամսաթիվը
 
         let touchStartX = 0;
         let touchEndX = 0;
@@ -189,6 +190,26 @@
             else if (exBtn && !exBtn.classList.contains('hidden')) exBtn.click();
         }
 
+        // Ֆունկցիա՝ Հայաստանի ժամանակով (UTC+4) ամսաթիվը ստանալու համար
+        function getArmenianDate() {
+            const now = new Date();
+            const amTime = new Date(now.getTime() + (now.getTimezoneOffset() + 240) * 60000);
+            return amTime.toISOString().split('T')[0];
+        }
+
+        // Ստուգում և զրոյացում կեսգիշերին
+        function checkDailyReset() {
+            const today = getArmenianDate();
+            if (lastDate !== "" && lastDate !== today) {
+                dailyWordsCount = 0;
+                triggerSave();
+                if (document.getElementById('stats-view').classList.contains('hidden') === false) {
+                    openStatsStage();
+                }
+            }
+            lastDate = today;
+        }
+
         async function initApp() {
             try {
                 const response = await fetch('./vocabulary.json');
@@ -199,6 +220,7 @@
                     errorCount: 0, learnedDate: null, repLevel: 0, nextRepDate: null
                 }));
                 loadProgress(); 
+                checkDailyReset(); // Ստուգել զրոյացումը բացելիս
                 updateStats();
                 startTimer();
                 document.getElementById('home-word-count').innerText = `${words.length} բառ`;
@@ -214,10 +236,11 @@
         function startTimer() {
             setInterval(() => {
                 sessionSeconds++;
+                checkDailyReset(); // Պարբերաբար ստուգել կեսգիշերի անցումը
                 if(sessionSeconds >= 60) {
                     sessionSeconds = 0;
                     sessionMinutes++;
-                    const today = new Date().toISOString().split('T')[0];
+                    const today = getArmenianDate();
                     dailyTimeData[today] = (dailyTimeData[today] || 0) + 1;
                     if(dailyTimeData[today] > 600) dailyTimeData[today] = 600; 
                     if(sessionMinutes === reminderMinute) alert(`Դուք արդեն կայքում եք ${sessionMinutes} րոպե։`);
@@ -249,11 +272,16 @@
                 dailyGoal = p.dailyGoal || 20;
                 dailyTimeData = p.dailyTimeData || {};
                 reminderMinute = p.reminderMinute || 10;
+                lastDate = p.lastDate || getArmenianDate();
             }
         }
 
         function triggerSave() {
             saveProgress(words, examScores, dailyWordsCount, dailyGoal, dailyTimeData, reminderMinute);
+            // Պահպանել նաև վերջին ամսաթիվը Reset-ի համար
+            const currentData = JSON.parse(localStorage.getItem('usanim_v3_data'));
+            currentData.lastDate = lastDate;
+            localStorage.setItem('usanim_v3_data', JSON.stringify(currentData));
         }
 
         function updateStats() {
@@ -263,7 +291,7 @@
             document.getElementById('home-bg-progress').style.width = pct + "%";
             document.getElementById('progress-bar').style.width = pct + "%";
             const diffWords = words.filter(w => w.errorCount >= 5 && !isWordLearned(w));
-            const today = new Date().toISOString().split('T')[0];
+            const today = getArmenianDate();
             const repWords = words.filter(w => isWordLearned(w) && w.nextRepDate && w.nextRepDate <= today);
             if(document.getElementById('diff-count')) document.getElementById('diff-count').innerText = diffWords.length;
             if(document.getElementById('rep-count')) document.getElementById('rep-count').innerText = repWords.length;
@@ -327,7 +355,7 @@
             container.innerHTML = "";
             if (activeStage === 7) {
                 if(smartMode === 'difficult') activeList = words.filter(w => w.errorCount >= 5 && !isWordLearned(w)).slice(0, 10);
-                else { const today = new Date().toISOString().split('T')[0]; activeList = words.filter(w => isWordLearned(w) && w.nextRepDate && w.nextRepDate <= today).slice(0, 10); }
+                else { const today = getArmenianDate(); activeList = words.filter(w => isWordLearned(w) && w.nextRepDate && w.nextRepDate <= today).slice(0, 10); }
             } else if (activeStage === 1) {
                 activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
             } else {
@@ -358,7 +386,7 @@
             w.isSeen = true;
             if (!w.stagesCompleted.includes(1)) w.stagesCompleted.push(1);
             if(known) { 
-                w.isInstant = true; w.learnedDate = new Date().toISOString().split('T')[0]; 
+                w.isInstant = true; w.learnedDate = getArmenianDate(); 
                 setNextRep(w); dailyWordsCount++; 
             } else { w.isInstant = false; }
             triggerSave(); activeIndex++; 
@@ -488,10 +516,9 @@
             const learnedWords = words.filter(w => isWordLearned(w));
             const weekly = getWeeklyData();
             
-            // Փուլերի առաջընթացի տվյալներ
             const stageLabels = ["Փ1", "Փ2", "Փ3", "Փ4", "Փ5", "Փ6", "Փ7", "Փ8"];
             const stageData = [1, 2, 3, 4, 5, 6, 7, 8].map(s => {
-                if (s === 8) return examScores.length; // Քննությունների քանակը
+                if (s === 8) return examScores.length; 
                 return words.filter(w => w.stagesCompleted && w.stagesCompleted.includes(s)).length;
             });
             const maxStageVal = Math.max(...stageData, 5);
@@ -520,10 +547,13 @@
                 <div class="bg-emerald-900 p-4 rounded-[2rem] border border-emerald-700 shadow-lg">
                     <div class="grid grid-cols-2 gap-4">
                         <div class="text-center">
-                            <h2 class="text-[8px] font-black mb-2 uppercase italic text-emerald-300 tracking-wider">Նպատակ</h2>
+                            <h2 class="text-[8px] font-black mb-2 uppercase italic text-emerald-300 tracking-wider">Նպատակ / Ընդհանուր</h2>
                             <div class="flex items-center justify-center gap-2">
                                 <div class="relative w-10 h-10"><svg class="w-full h-full" viewBox="0 0 36 36"><path class="text-emerald-900/50" stroke-width="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" /><path class="text-emerald-400" stroke-dasharray="${goalProgress}, 100" stroke-width="4" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" /></svg><div class="absolute inset-0 flex flex-col items-center justify-center"><span class="text-[10px] font-black">${dailyWordsCount}</span></div></div>
                                 <input type="number" value="${dailyGoal}" onchange="updateDailyGoal(this.value)" class="w-10 p-1 rounded-lg text-center font-black bg-emerald-800 border border-emerald-600 text-[10px]">
+                                <div class="bg-emerald-800 border border-emerald-600 rounded-lg px-2 py-1">
+                                    <span class="text-[10px] font-black text-emerald-400">${learnedWords.length}</span>
+                                </div>
                             </div>
                         </div>
                         <div class="text-center">
@@ -553,7 +583,7 @@
 
         function renderExamStep(correctCount) {
             if(activeIndex >= activeList.length) {
-                examScores.push(correctCount); // Պահում ենք քննության արդյունքը փուլ 8-ի համար
+                examScores.push(correctCount); 
                 return renderFinish(`Արդյունք: ${Math.round((correctCount/activeList.length)*100)}%`);
             }
             const word = activeList[activeIndex];
