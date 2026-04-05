@@ -452,17 +452,17 @@
             if (activeIndex >= activeList.length) renderFinish(); else renderStage1();
         }
 
+        // --- UPDATED RESTART LOGIC FOR STAGE 1 ---
         function restartStage1() {
-            if(confirm("Ցանկանու՞մ եք նորից անցնել առաջին փուլի չսովորած բառերը:")) {
-                activeIndex = 0;
-                activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
-                
-                if (activeList.length === 0) {
-                    alert("Բոլոր բառերն արդեն անցել են առաջին փուլը:");
-                    exitToMenu();
-                } else {
-                    initStageLogic();
-                }
+            activeIndex = 0;
+            // Get words that are NOT learned and HAVEN'T completed Stage 1
+            activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
+            
+            if (activeList.length === 0) {
+                alert("Բոլոր բառերն արդեն անցել են առաջին փուլը կամ սովորված են:");
+                exitToMenu();
+            } else {
+                renderStage1();
             }
         }
 
