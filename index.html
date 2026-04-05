@@ -96,7 +96,6 @@
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #059669; border-radius: 10px; }
 
-        /* Stats Optimization */
         #stats-view { height: 100vh; width: 100%; position: fixed; inset: 0; background-color: #064e3b; z-index: 60; display: flex; flex-direction: column; }
         .bar-container { display: flex; align-items: flex-end; justify-content: space-between; height: 70px; gap: 4px; padding-top: 12px; }
         .bar-wrapper { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; }
@@ -437,6 +436,11 @@
         }
 
         function skipStage1() {
+            const w = activeList[activeIndex];
+            // Skip marked as seen and passed Stage 1
+            if (!w.stagesCompleted.includes(1)) w.stagesCompleted.push(1);
+            w.isSeen = true;
+            saveProgress();
             activeIndex++;
             if (activeIndex >= activeList.length) renderFinish(); else renderStage1();
         }
@@ -444,22 +448,32 @@
         function handleStage1(known) {
             const w = activeList[activeIndex];
             w.isSeen = true;
-            if (!w.stagesCompleted.includes(1)) w.stagesCompleted.push(1);
-            if(known) { w.isInstant = true; w.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(w); dailyWordsCount++; } 
-            else w.score = 0;
+            
+            if(known) { 
+                if (!w.stagesCompleted.includes(1)) w.stagesCompleted.push(1);
+                w.isInstant = true; 
+                w.learnedDate = new Date().toISOString().split('T')[0]; 
+                setNextRep(w); 
+                dailyWordsCount++; 
+            } else {
+                // IMPORTANT: If "Don't know", DO NOT push to stagesCompleted. 
+                // This keeps the word eligible for the next Stage 1 run.
+                w.score = 0; 
+                w.isInstant = false;
+            }
+            
             saveProgress();
             activeIndex++; 
             if (activeIndex >= activeList.length) renderFinish(); else renderStage1();
         }
 
-        // --- UPDATED RESTART LOGIC FOR STAGE 1 ---
         function restartStage1() {
             activeIndex = 0;
-            // Get words that are NOT learned and HAVEN'T completed Stage 1
+            // Refilter: only those who haven't completed Stage 1 and aren't learned
             activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
             
             if (activeList.length === 0) {
-                alert("Բոլոր բառերն արդեն անցել են առաջին փուլը կամ սովորված են:");
+                alert("Բոլոր բառերն արդեն անցել են առաջին փուլը:");
                 exitToMenu();
             } else {
                 renderStage1();
