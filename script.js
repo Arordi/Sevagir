@@ -463,91 +463,88 @@ function openStatsStage() {
     const maxTimeVal = 600; 
     const goalProgress = Math.min(100, Math.round((dailyWordsCount / dailyGoal) * 100));
 
-    // Հաշվարկում ենք յուրաքանչյուր փուլի (1-8) առաջընթացը
     let stagesProgressHtml = "";
+    const stageNames = ["Ծանոթացում", "Ընտրություն", "Համապատասխանեցում", "Գրել անգլերեն", "Գրել հայերեն", "Ուղղագրություն", "Կրկնություն", "Քննություն"];
+
     for (let i = 1; i <= 8; i++) {
         let count = 0;
         if (i <= 6) {
             count = words.filter(w => w.stagesCompleted.includes(i) || w.isInstant).length;
         } else if (i === 7) {
-            // Փուլ 7-ը կրկնությունն է
             count = words.filter(w => w.repLevel > 0).length;
         } else {
-            // Փուլ 8-ը քննությունն է / ընդհանուր սովորած
             count = learnedWords.length;
         }
         
         const stagePct = Math.round((count / words.length) * 100);
-        const stageNames = ["Ծանոթացում", "Ընտրություն", "Համապատասխանեցում", "Գրել անգլերեն", "Գրել հայերեն", "Ուղղագրություն", "Կրկնություն", "Քննություն"];
 
         stagesProgressHtml += `
-            <div class="mb-3">
-                <div class="flex justify-between items-end mb-1 px-1">
-                    <div class="flex flex-col text-left">
-                        <span class="text-[7px] font-black text-emerald-500 uppercase tracking-tighter">Փուլ ${i}</span>
-                        <span class="text-[10px] font-bold text-white italic leading-tight">${stageNames[i-1]}</span>
+            <div class="mb-2">
+                <div class="flex justify-between items-center mb-0.5 px-1">
+                    <div class="flex flex-col">
+                        <span class="text-[6px] font-black text-emerald-500 uppercase leading-none">ՓՈՒԼ ${i}</span>
+                        <span class="text-[9px] font-bold text-white italic leading-tight">${stageNames[i-1]}</span>
                     </div>
-                    <span class="text-[10px] font-black text-emerald-400 italic">${count} / ${words.length}</span>
+                    <span class="text-[9px] font-black text-emerald-400 italic">${count} / ${words.length}</span>
                 </div>
-                <div class="w-full bg-emerald-950 h-2.5 rounded-full overflow-hidden border border-emerald-800/50 shadow-inner">
-                    <div class="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full transition-all duration-700 shadow-[0_0_8px_rgba(52,211,153,0.4)]" style="width: ${stagePct}%"></div>
+                <div class="w-full bg-emerald-950 h-2 rounded-full overflow-hidden border border-emerald-800/30">
+                    <div class="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full transition-all duration-700" style="width: ${stagePct}%"></div>
                 </div>
             </div>
         `;
     }
 
     container.innerHTML = `
-        <div class="bg-emerald-800 p-4 rounded-[2rem] shadow-xl border-b-4 border-emerald-500 text-center">
-            <p class="text-[8px] font-black uppercase mb-1 tracking-widest opacity-80">Ընդհանուր Առաջընթաց</p>
-            <div class="flex items-center justify-center gap-3">
-                <span class="text-4xl font-black italic text-white">${learnedWords.length}</span>
+        <div class="bg-emerald-800 p-3 rounded-[1.5rem] shadow-xl border-b-4 border-emerald-500 text-center mb-3">
+            <p class="text-[7px] font-black uppercase mb-0.5 tracking-widest opacity-80">Ընդհանուր Առաջընթաց</p>
+            <div class="flex items-center justify-center gap-2">
+                <span class="text-3xl font-black italic text-white">${learnedWords.length}</span>
                 <div class="text-left">
-                    <p class="text-emerald-400 font-black text-xl leading-none">${Math.round((learnedWords.length / words.length) * 100)}%</p>
-                    <p class="text-[7px] font-bold uppercase opacity-60">սովորած բառեր</p>
+                    <p class="text-emerald-400 font-black text-lg leading-none">${Math.round((learnedWords.length / words.length) * 100)}%</p>
+                    <p class="text-[6px] font-bold uppercase opacity-60">սովորած բառեր</p>
                 </div>
             </div>
         </div>
 
-        <div class="bg-emerald-900/60 p-4 rounded-[2rem] border border-emerald-700/50 shadow-lg">
-            <h3 class="font-black text-[9px] mb-4 uppercase text-center italic tracking-[0.2em] text-emerald-300">Փուլերի Առաջընթաց</h3>
-            <div class="grid grid-cols-1 gap-1">
+        <div class="bg-emerald-900/60 p-3 rounded-[1.5rem] border border-emerald-700/50 shadow-lg mb-3">
+            <h3 class="font-black text-[8px] mb-3 uppercase text-center italic tracking-widest text-emerald-300">Փուլերի Առաջընթաց</h3>
+            <div class="grid grid-cols-1">
                 ${stagesProgressHtml}
             </div>
         </div>
 
-        <div class="grid grid-cols-1 gap-3">
-            <div class="bg-emerald-900/40 p-3 rounded-[1.5rem] border border-emerald-700/50">
-                <h3 class="font-black text-[8px] mb-2 uppercase text-center italic tracking-widest text-emerald-300">Բառերի ակտիվություն</h3>
-                <div class="bar-container">${weekly.wordData.map((val, i) => `<div class="bar-wrapper"><div class="bar-fill" data-val="${val}" style="height: ${(val/maxWordVal)*100}%"></div><span class="bar-label">${weekly.labels[i]}</span></div>`).join('')}</div>
+        <div class="grid grid-cols-2 gap-2 mb-3">
+            <div class="bg-emerald-900/40 p-2 rounded-[1.2rem] border border-emerald-700/50">
+                <h3 class="font-black text-[7px] mb-2 uppercase text-center italic text-emerald-300">Բառեր</h3>
+                <div class="bar-container h-16">${weekly.wordData.map((val, i) => `<div class="bar-wrapper"><div class="bar-fill" data-val="${val}" style="height: ${(val/maxWordVal)*100}%"></div><span class="bar-label text-[6px]">${weekly.labels[i]}</span></div>`).join('')}</div>
             </div>
-
-            <div class="bg-emerald-900/40 p-3 rounded-[1.5rem] border border-emerald-700/50">
-                <h3 class="font-black text-[8px] mb-2 uppercase text-center italic tracking-widest text-blue-300">Ժամանակի ակտիվություն</h3>
-                <div class="bar-container">${weekly.timeData.map((val, i) => `<div class="bar-wrapper"><div class="bar-fill time-bar" data-val="${val}ր" style="height: ${(val/maxTimeVal)*100}%"></div><span class="bar-label">${weekly.labels[i]}</span></div>`).join('')}</div>
-            </div>
-        </div>
-
-        <div class="bg-emerald-900 p-4 rounded-[2rem] border border-emerald-700 shadow-lg">
-            <div class="grid grid-cols-2 gap-4">
-                <div class="text-center">
-                    <h2 class="text-[8px] font-black mb-2 uppercase italic text-emerald-300 tracking-wider">Նպատակ</h2>
-                    <div class="flex items-center justify-center gap-2">
-                        <div class="relative w-10 h-10"><svg class="w-full h-full" viewBox="0 0 36 36"><path class="text-emerald-900/50" stroke-width="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" /><path class="text-emerald-400" stroke-dasharray="${goalProgress}, 100" stroke-width="4" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" /></svg><div class="absolute inset-0 flex flex-col items-center justify-center"><span class="text-[10px] font-black">${dailyWordsCount}</span></div></div>
-                        <input type="number" value="${dailyGoal}" onchange="updateDailyGoal(this.value)" class="w-10 p-1 rounded-lg text-center font-black bg-emerald-800 border border-emerald-600 text-[10px]">
-                    </div>
-                </div>
-                <div class="text-center">
-                    <h2 class="text-[8px] font-black mb-2 uppercase italic text-blue-300 tracking-wider">Հիշեցում (ր)</h2>
-                    <div class="flex flex-col items-center justify-center h-full">
-                        <input type="number" value="${reminderMinute}" onchange="updateReminder(this.value)" class="w-12 p-1 rounded-lg text-center font-black bg-emerald-800 border border-emerald-600 text-[10px]">
-                    </div>
-                </div>
+            <div class="bg-emerald-900/40 p-2 rounded-[1.2rem] border border-emerald-700/50">
+                <h3 class="font-black text-[7px] mb-2 uppercase text-center italic text-blue-300">Ժամանակ</h3>
+                <div class="bar-container h-16">${weekly.timeData.map((val, i) => `<div class="bar-wrapper"><div class="bar-fill time-bar" data-val="${val}ր" style="height: ${(val/maxTimeVal)*100}%"></div><span class="bar-label text-[6px]">${weekly.labels[i]}</span></div>`).join('')}</div>
             </div>
         </div>
 
-        <div class="bg-emerald-900 p-3 rounded-[1.5rem] border border-emerald-700">
-            <h3 class="font-black text-[9px] mb-3 uppercase italic text-center tracking-widest">Սովորած բառեր (${learnedWords.length})</h3>
-            <div class="max-h-48 overflow-y-auto space-y-1.5 custom-scroll pr-1">${learnedWords.length === 0 ? '<p class="text-center italic py-4 text-[9px] opacity-40">Դեռ բառեր չեք սովորել</p>' : learnedWords.map(w => `<div class="flex justify-between items-center p-2 bg-emerald-800/30 rounded-xl border border-emerald-700/20 transition-all"><div class="max-w-[70%]"><div class="font-black text-white text-[10px] leading-tight">${w.en}</div><div class="text-[8px] text-emerald-400 font-bold mt-0.5">${w.hy}</div></div><div class="text-yellow-400 text-[8px] tracking-tighter">★★★★★</div></div>`).join('')}</div>
+        <div class="bg-emerald-900 p-3 rounded-[1.5rem] border border-emerald-700 shadow-lg mb-3">
+            <div class="grid grid-cols-2 gap-3">
+                <div class="text-center">
+                    <h2 class="text-[7px] font-black mb-1 uppercase italic text-emerald-300">Նպատակ</h2>
+                    <div class="flex items-center justify-center gap-1.5">
+                        <div class="relative w-8 h-8"><svg class="w-full h-full" viewBox="0 0 36 36"><path class="text-emerald-900/50" stroke-width="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" /><path class="text-emerald-400" stroke-dasharray="${goalProgress}, 100" stroke-width="4" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" /></svg><div class="absolute inset-0 flex flex-col items-center justify-center"><span class="text-[8px] font-black">${dailyWordsCount}</span></div></div>
+                        <input type="number" value="${dailyGoal}" onchange="updateDailyGoal(this.value)" class="w-8 p-1 rounded-lg text-center font-black bg-emerald-800 border border-emerald-600 text-[8px]">
+                    </div>
+                </div>
+                <div class="text-center">
+                    <h2 class="text-[7px] font-black mb-1 uppercase italic text-blue-300">Հիշեցում (ր)</h2>
+                    <div class="flex flex-col items-center justify-center">
+                        <input type="number" value="${reminderMinute}" onchange="updateReminder(this.value)" class="w-10 p-1 rounded-lg text-center font-black bg-emerald-800 border border-emerald-600 text-[8px]">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-emerald-900 p-2 rounded-[1.2rem] border border-emerald-700">
+            <h3 class="font-black text-[8px] mb-2 uppercase italic text-center">Սովորած բառեր (${learnedWords.length})</h3>
+            <div class="max-h-32 overflow-y-auto space-y-1 custom-scroll pr-1">${learnedWords.length === 0 ? '<p class="text-center italic py-2 text-[8px] opacity-40">Դեռ բառեր չկան</p>' : learnedWords.slice(-20).reverse().map(w => `<div class="flex justify-between items-center p-1.5 bg-emerald-800/20 rounded-lg border border-emerald-700/10"><div class="max-w-[70%]"><div class="font-black text-white text-[9px] leading-tight">${w.en}</div><div class="text-[7px] text-emerald-400 font-bold">${w.hy}</div></div><div class="text-yellow-400 text-[7px]">★★★★★</div></div>`).join('')}</div>
         </div>
     `;
 }
