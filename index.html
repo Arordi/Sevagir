@@ -5,97 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Usanim Pro - Լեզուների ուսուցում</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: #064e3b; user-select: none; touch-action: pan-y; color: white; overflow-x: hidden; height: 100vh; margin: 0; }
-        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .home-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; border-left: 10px solid #059669; background: #065f46; }
-        .home-card:active { transform: scale(0.96); }
-        
-        #menu {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-            gap: 8px;
-            padding: 8px;
-            height: calc(100vh - 100px);
-            box-sizing: border-box;
-        }
-
-        .stage-card { 
-            transition: all 0.2s ease; 
-            cursor: pointer; 
-            background-color: #065f46; 
-            border: 2px solid #059669; 
-            border-radius: 1rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 4px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            color: white;
-            text-align: center;
-            overflow: hidden;
-        }
-
-        .stage-card:active { transform: scale(0.95); background-color: #059669; }
-        .stage-card span:nth-child(1) { font-size: 1.5rem; margin-bottom: 2px; }
-        .stage-card span:nth-child(2) { color: white; font-weight: 800; font-size: 10px; text-transform: uppercase; line-height: 1; }
-        .stage-card .sub-label { color: #a7f3d0; font-weight: 600; font-size: 8px; text-transform: lowercase; margin-top: 2px; line-height: 1; opacity: 0.8; }
-        
-        .btn-primary { background: linear-gradient(135deg, #059669 0%, #064e3b 100%); color: white; padding: 1rem; border-radius: 1.25rem; font-weight: bold; width: 100%; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); border: none; }
-        
-        .btn-next-step { 
-            background: rgba(5, 150, 105, 0.2); 
-            color: #a7f3d0; 
-            padding: 0.5rem 1.2rem; 
-            border-radius: 1rem; 
-            font-weight: 800; 
-            font-size: 10px; 
-            text-transform: uppercase; 
-            letter-spacing: 0.1em; 
-            border: 1px solid rgba(5, 150, 105, 0.5);
-            width: auto;
-            min-width: 120px;
-            margin-top: 1rem;
-            transition: all 0.2s;
-        }
-        .btn-next-step:active { background: rgba(5, 150, 105, 0.4); transform: scale(0.98); }
-
-        .blur-text { filter: blur(8px); transition: all 0.3s ease; cursor: pointer; }
-        .blur-text.revealed { filter: blur(0); }
-        
-        .star-box { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 35px; height: 35px; }
-        .star-icon { font-size: 30px; transition: all 0.3s ease; }
-        .star-text { 
-            position: absolute; 
-            top: 55%; 
-            left: 50%; 
-            transform: translate(-50%, -50%); 
-            font-size: 10px; 
-            font-weight: 900; 
-            color: #064e3b; 
-            pointer-events: none;
-        }
-
-        .match-item { border: 2px solid #065f46; border-radius: 15px; padding: 8px; text-align: center; cursor: pointer; min-height: 55px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 600; background: #064e3b; transition: 0.2s; color: white; font-size: 14px; }
-        .match-selected { border-color: #10b981; background-color: #065f46; }
-        .match-correct { border-color: #22c55e; background-color: #14532d; color: #4ade80; }
-        .match-wrong { border-color: #ef4444; background-color: #450a0a; animation: shake 0.3s; }
-        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
-        .hidden { display: none !important; }
-        
-        .choice-btn { transition: all 0.2s; border: 2px solid #065f46; background: #065f46; color: white; font-size: 15px; }
-        .choice-btn:active { transform: scale(0.98); background: #059669; }
-        .choice-correct { background-color: #14532d !important; border-color: #22c55e !important; }
-        .choice-wrong { background-color: #450a0a !important; border-color: #ef4444 !important; }
-
-        input { background: #064e3b !important; color: white !important; border-color: #059669 !important; }
-
-        .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #059669; border-radius: 10px; }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body class="min-h-screen flex flex-col">
 
@@ -144,8 +54,12 @@
             <button onclick="openStage(1)" class="stage-card"><span>🗂️</span><span>Փուլ 1</span><span class="sub-label">ստուգում</span></button>
             <button onclick="openStage(2)" class="stage-card"><span>🔘</span><span>Փուլ 2</span><span class="sub-label">տարբերակ</span></button>
             <button onclick="openStage(3)" class="stage-card"><span>🧩</span><span>Փուլ 3</span><span class="sub-label">դասավորել</span></button>
-            <button onclick="openStage(4)" class="stage-card"><span>⌨️</span><span>Փուլ 4</span><span class="sub-label">թարգմանել EN</span></button>
-            <button onclick="openStage(5)" class="stage-card"><span>🔄</span><span>Փուլ 5</span><span class="sub-label">թարգմանել HY</span></button>
+            <button onclick="openStage(4)" class="stage-card"><span>⌨️</span><span>Փուլ 4</span><span class="sub-label">գտնել</span></button>
+            <button onclick="openStage(5)" class="stage-card"><span>🔄</span><span>Փուլ 5</span><span class="sub-label">գտնել</span></button>
+            <button onclick="openStage(6)" class="stage-card"><span>🎧</span><span>Փուլ 6</span><span class="sub-label">գտնել</span></button>
+            <button onclick="openSmartMenu()" class="stage-card"><span>🎓</span><span>Փուլ 7</span><span class="sub-label">կրկնություն</span></button>
+            <button onclick="openExam()" class="stage-card"><span>📝</span><span>Փուլ 8</span><span class="sub-label">քննություն</span></button>
+            <button onclick="openStatsStage()" class="stage-card"><span>📊</span><span>Փուլ 9</span><span class="sub-label">վիճակագրություն</span></button>
         </div>
     </div>
 
@@ -156,6 +70,32 @@
             <div class="w-10"></div>
         </div>
         <div id="content" class="flex-grow flex flex-col items-center justify-center w-full"></div>
+    </div>
+
+    <div id="smart-menu-view" class="hidden flex-grow p-6 max-w-2xl mx-auto space-y-6 text-center w-full">
+         <div class="flex justify-start mb-4">
+            <button onclick="exitToMenu()" class="font-black text-emerald-400 text-[10px] uppercase tracking-widest bg-emerald-900/50 px-3 py-1.5 rounded-full border border-emerald-700">⬅ ԵԼՔ</button>
+        </div>
+        <h2 class="text-xl font-black text-emerald-300 italic uppercase">Փուլ 7: Ընտրացանկ</h2>
+        <div class="grid grid-cols-1 gap-4 pt-2">
+            <button onclick="openSmartStage('difficult')" class="btn-primary flex items-center justify-between p-6">
+                <span>🔥 Դժվար բառեր</span>
+                <span id="diff-count" class="bg-white/20 px-3 py-1 rounded-full text-xs">0</span>
+            </button>
+            <button onclick="openSmartStage('repetition')" class="btn-primary flex items-center justify-between p-6 !bg-emerald-900 border border-emerald-700">
+                <span>⏳ Կրկնություն</span>
+                <span id="rep-count" class="bg-white/20 px-3 py-1 rounded-full text-xs">0</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="stats-view" class="hidden">
+        <div class="p-3 bg-emerald-900/80 sticky top-0 z-10 flex justify-between items-center border-b border-emerald-700 backdrop-blur-md">
+            <button onclick="exitToMenu()" class="font-black text-emerald-400 text-[9px] uppercase tracking-widest bg-emerald-900 px-3 py-1.5 rounded-full border border-emerald-700">⬅ ԵԼՔ</button>
+            <h1 class="font-black text-xs italic uppercase tracking-widest text-white">Վիճակագրություն</h1>
+            <div class="w-10"></div>
+        </div>
+        <div id="stats-container" class="flex-grow overflow-y-auto p-3 space-y-4 custom-scroll"></div>
     </div>
 
     <div id="delete-modal" class="hidden fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-6 backdrop-blur-md">
@@ -170,254 +110,6 @@
         </div>
     </div>
 
-    <script>
-        let words = [], activeStage = 1, activeIndex = 0, activeList = [];
-        let selectedEn = null, selectedHy = null;
-        let sessionMinutes = 0, sessionSeconds = 0;
-
-        async function initApp() {
-            try {
-                const response = await fetch('./vocabulary.json');
-                const data = await response.json();
-                words = data.map((item, index) => ({
-                    id: item.id || index, en: item.word, hy: item.translation,
-                    score: 0, stagesCompleted: [], isInstant: false, isSeen: false,
-                    errorCount: 0
-                }));
-                loadProgress(); 
-                updateStats();
-                startTimer();
-                document.getElementById('home-word-count').innerText = `${words.length} բառ`;
-                document.getElementById('delete-confirm-input').addEventListener('input', (e) => {
-                    const btn = document.getElementById('real-delete-btn');
-                    const isMatch = e.target.value.toUpperCase() === 'DELETE';
-                    btn.disabled = !isMatch;
-                    btn.className = isMatch ? 'flex-1 p-4 bg-rose-600 text-white rounded-2xl font-bold' : 'flex-1 p-4 bg-emerald-800 text-emerald-500 rounded-2xl font-bold';
-                });
-            } catch (e) { console.error("Error loading app:", e); }
-        }
-
-        function startTimer() {
-            setInterval(() => {
-                sessionSeconds++;
-                if(sessionSeconds >= 60) { sessionSeconds = 0; sessionMinutes++; }
-                const m = sessionMinutes < 10 ? '0' + sessionMinutes : sessionMinutes;
-                const s = sessionSeconds < 10 ? '0' + sessionSeconds : sessionSeconds;
-                document.getElementById('session-timer-display').innerText = `${m}:${s}`;
-            }, 1000);
-        }
-
-        function loadProgress() {
-            const saved = localStorage.getItem('usanim_v3_data');
-            if(saved) {
-                const p = JSON.parse(saved);
-                words.forEach(w => { if(p.words && p.words[w.id]) Object.assign(w, p.words[w.id]); });
-            }
-        }
-
-        function saveProgress() {
-            const storage = { words: {} };
-            words.forEach(w => {
-                storage.words[w.id] = { 
-                    score: w.score, stagesCompleted: w.stagesCompleted, 
-                    isInstant: w.isInstant, isSeen: w.isSeen, errorCount: w.errorCount 
-                };
-            });
-            localStorage.setItem('usanim_v3_data', JSON.stringify(storage));
-        }
-
-        function isWordLearned(w) {
-            return w.isInstant || [2, 3, 4, 5].every(s => w.stagesCompleted.includes(s));
-        }
-
-        function updateStats() {
-            const learned = words.filter(w => isWordLearned(w)).length;
-            const pct = Math.round((learned / words.length) * 100);
-            document.getElementById('home-progress-pct').innerText = pct + "%";
-            document.getElementById('home-bg-progress').style.width = pct + "%";
-            document.getElementById('progress-bar').style.width = pct + "%";
-        }
-
-        function goToAppMenu() { document.getElementById('welcome-screen').classList.add('hidden'); document.getElementById('app-content').classList.remove('hidden'); }
-        function goToWelcome() { document.getElementById('app-content').classList.add('hidden'); document.getElementById('welcome-screen').classList.remove('hidden'); }
-
-        function openStage(num) {
-            activeStage = num; activeIndex = 0;
-            document.getElementById('app-content').classList.add('hidden');
-            document.getElementById('view').classList.remove('hidden');
-            document.getElementById('view-title').innerText = `Փուլ ${num}`;
-            initStageLogic();
-        }
-
-        function initStageLogic() {
-            const container = document.getElementById('content');
-            container.innerHTML = "";
-            
-            // Filter words that haven't completed this stage
-            activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(activeStage)).slice(0, 10);
-            
-            if (activeList.length === 0) return renderFinish();
-
-            if (activeStage === 1) renderStage1();
-            else if (activeStage === 2) renderMultipleChoice();
-            else if (activeStage === 3) renderStage3();
-            else if (activeStage === 4 || activeStage === 5) renderGenericStage();
-        }
-
-        function renderStage1() {
-            const word = activeList[activeIndex];
-            document.getElementById('content').innerHTML = `
-                <div class="w-full bg-emerald-800 rounded-[2.5rem] p-6 text-center shadow-xl mb-6 border-b-8 border-emerald-500 min-h-[180px] flex flex-col justify-center">
-                    <h2 class="text-3xl font-black text-white mb-4 italic break-words" onclick="speak('${word.en}')">${word.en}</h2>
-                    <h3 onclick="this.classList.toggle('revealed')" class="text-xl font-bold text-emerald-600 blur-text italic break-words">${word.hy}</h3>
-                </div>
-                <div class="grid grid-cols-2 gap-4 w-full">
-                    <button onclick="handleStage1(true)" class="btn-primary">ԳԻՏԵՄ</button>
-                    <button onclick="handleStage1(false)" class="btn-primary !bg-emerald-900 border border-emerald-700">ՉԳԻՏԵՄ</button>
-                </div>`;
-            speak(word.en === "I" ? "eye" : word.en);
-        }
-
-        function handleStage1(known) {
-            const w = activeList[activeIndex];
-            w.isSeen = true;
-            if (known) { w.isInstant = true; w.stagesCompleted.push(1); }
-            else { if(!w.stagesCompleted.includes(1)) w.stagesCompleted.push(1); }
-            saveProgress();
-            activeIndex++;
-            if (activeIndex >= activeList.length) renderFinish(); else renderStage1();
-        }
-
-        function renderMultipleChoice() {
-            const word = activeList[activeIndex];
-            let options = [word.hy];
-            let others = words.filter(w => w.id !== word.id).sort(() => 0.5 - Math.random()).slice(0, 3).map(w => w.hy);
-            options.push(...others);
-            options.sort(() => 0.5 - Math.random());
-
-            document.getElementById('content').innerHTML = `
-                <div class="w-full text-center">
-                    <h2 class="text-3xl font-black text-white mb-8 italic" onclick="speak('${word.en}')">${word.en}</h2>
-                    <div class="grid grid-cols-1 gap-3 w-full">
-                        ${options.map(opt => `<button onclick="checkChoice(this, '${opt}', '${word.hy}')" class="choice-btn p-4 rounded-2xl font-bold">${opt}</button>`).join('')}
-                    </div>
-                </div>`;
-            speak(word.en === "I" ? "eye" : word.en);
-        }
-
-        function checkChoice(btn, selected, correct) {
-            const word = activeList[activeIndex];
-            if(selected === correct) {
-                btn.classList.add('choice-correct');
-                word.score += 2;
-                if(word.score >= 10) { word.stagesCompleted.push(2); word.score = 0; }
-                setTimeout(() => { activeIndex++; if (activeIndex >= activeList.length) renderFinish(); else renderMultipleChoice(); }, 600);
-            } else {
-                btn.classList.add('choice-wrong');
-                word.score = Math.max(0, word.score - 1);
-            }
-            saveProgress();
-        }
-
-        function renderStage3() {
-            const batch = activeList.slice(0, 5);
-            document.getElementById('content').innerHTML = `
-                <div class="grid grid-cols-2 gap-3 w-full">
-                    <div class="space-y-3" id="en-list"></div>
-                    <div class="space-y-3" id="hy-list"></div>
-                </div>`;
-            
-            const left = [...batch].sort(() => Math.random() - 0.5);
-            const right = [...batch].sort(() => Math.random() - 0.5);
-            
-            left.forEach(w => {
-                const el = document.createElement('div'); el.className = 'match-item'; el.innerText = w.en;
-                el.onclick = () => { selectMatch(el, 'en', w); speak(w.en); }; document.getElementById('en-list').appendChild(el);
-            });
-            right.forEach(w => {
-                const el = document.createElement('div'); el.className = 'match-item'; el.innerText = w.hy;
-                el.onclick = () => selectMatch(el, 'hy', w); document.getElementById('hy-list').appendChild(el);
-            });
-        }
-
-        function selectMatch(el, type, word) {
-            el.classList.add('match-selected');
-            if(type === 'en') selectedEn = { el, word }; else selectedHy = { el, word };
-            if(selectedEn && selectedHy) {
-                if(selectedEn.word.id === selectedHy.word.id) {
-                    selectedEn.el.className = 'match-item match-correct';
-                    selectedHy.el.className = 'match-item match-correct';
-                    selectedEn.word.stagesCompleted.push(3);
-                } else {
-                    selectedEn.el.classList.add('match-wrong');
-                    selectedHy.el.classList.add('match-wrong');
-                    setTimeout(() => { 
-                        selectedEn.el.classList.remove('match-wrong', 'match-selected');
-                        selectedHy.el.classList.remove('match-wrong', 'match-selected');
-                    }, 400);
-                }
-                saveProgress(); selectedEn = null; selectedHy = null;
-                if(document.querySelectorAll('.match-correct').length === 10) setTimeout(renderFinish, 1000);
-            }
-        }
-
-        function renderGenericStage() {
-            const word = activeList[activeIndex];
-            const isEnToHy = activeStage === 5;
-            const question = isEnToHy ? word.en : word.hy;
-            const answer = isEnToHy ? word.hy : word.en;
-
-            document.getElementById('content').innerHTML = `
-                <div class="w-full text-center">
-                    <h2 class="text-3xl font-black text-white mb-6 italic" onclick="speak('${word.en}')">${question}</h2>
-                    <input type="text" id="stage-input" class="w-full p-5 border-4 border-emerald-800 rounded-[2rem] text-center text-xl outline-none mb-6" placeholder="..." autocomplete="off">
-                    <button onclick="checkGeneric('${answer}')" class="btn-primary">ՍՏՈՒԳԵԼ</button>
-                </div>`;
-            if(isEnToHy) speak(word.en === "I" ? "eye" : word.en);
-            setTimeout(() => document.getElementById('stage-input').focus(), 50);
-        }
-
-        function checkGeneric(correct) {
-            const input = document.getElementById('stage-input');
-            const word = activeList[activeIndex];
-            if(input.value.trim().toLowerCase() === correct.toLowerCase()) {
-                word.stagesCompleted.push(activeStage);
-                input.className = "w-full p-5 border-4 border-emerald-500 bg-emerald-600 text-white rounded-[2rem] text-center text-xl";
-                setTimeout(() => { activeIndex++; if (activeIndex >= activeList.length) renderFinish(); else renderGenericStage(); }, 600);
-            } else {
-                input.classList.add('border-rose-600');
-                input.value = correct;
-            }
-            saveProgress();
-        }
-
-        function renderFinish() {
-            document.getElementById('content').innerHTML = `
-                <div class="text-center p-8 bg-emerald-800 rounded-[2.5rem] shadow-2xl w-full border-b-8 border-emerald-500">
-                    <div class="text-6xl mb-4">🏆</div>
-                    <h2 class="text-2xl font-black mb-2 text-white italic">Գերազանց է</h2>
-                    <button onclick="exitToMenu()" class="btn-primary mt-4">ՎԵՐԱԴԱՌՆԱԼ</button>
-                </div>`;
-            updateStats();
-        }
-
-        function exitToMenu() {
-            document.getElementById('view').classList.add('hidden');
-            document.getElementById('app-content').classList.remove('hidden');
-            window.speechSynthesis.cancel();
-        }
-
-        function speak(text) {
-            window.speechSynthesis.cancel();
-            const msg = new SpeechSynthesisUtterance(text); msg.lang = 'en-US';
-            window.speechSynthesis.speak(msg);
-        }
-
-        function showDeleteModal() { document.getElementById('delete-modal').classList.remove('hidden'); }
-        function hideDeleteModal() { document.getElementById('delete-modal').classList.add('hidden'); }
-        function confirmFinalDelete() { localStorage.removeItem('usanim_v3_data'); location.reload(); }
-
-        initApp();
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
