@@ -9,12 +9,15 @@ body {
     overflow-x: hidden; 
     height: 100vh; 
     margin: 0; 
+    display: flex;
+    flex-direction: column;
 }
 
 .glass { 
     background: rgba(255, 255, 255, 0.05); 
     backdrop-filter: blur(10px); 
     border: 1px solid rgba(255, 255, 255, 0.1); 
+    border-radius: 20px;
 }
 
 .home-card { 
@@ -237,7 +240,8 @@ input {
     border-radius: 10px; 
 }
 
-/* Stats Optimization */
+/* --- Stats View Optimization --- */
+
 #stats-view { 
     height: 100vh; 
     width: 100%; 
@@ -247,15 +251,39 @@ input {
     z-index: 60; 
     display: flex; 
     flex-direction: column; 
+    padding: 15px;
+    box-sizing: border-box;
+    gap: 15px;
+    justify-content: space-between;
+}
+
+.stats-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 20px;
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.stats-title {
+    text-align: center;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #a7f3d0;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
 }
 
 .bar-container { 
     display: flex; 
     align-items: flex-end; 
     justify-content: space-between; 
-    height: 70px; 
-    gap: 4px; 
-    padding-top: 12px; 
+    height: 80px; 
+    gap: 6px; 
 }
 
 .bar-wrapper { 
@@ -263,39 +291,73 @@ input {
     display: flex; 
     flex-direction: column; 
     align-items: center; 
-    gap: 2px; 
+    gap: 4px; 
 }
 
 .bar-fill { 
     width: 100%; 
     background: #10b981; 
-    border-top-left-radius: 4px; 
-    border-top-right-radius: 4px; 
+    border-radius: 4px 4px 0 0; 
     min-height: 2px; 
-    transition: height 0.5s ease; 
+    transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1); 
     position: relative; 
 }
 
-.bar-fill.time-bar { 
+/* Փուլերի համար տարբերվող գույն */
+.stage-bar {
+    background: #34d399;
+}
+
+.time-bar { 
     background: #60a5fa; 
 }
 
 .bar-fill::after { 
     content: attr(data-val); 
     position: absolute; 
-    top: -14px; 
+    top: -16px; 
     left: 50%; 
     transform: translateX(-50%); 
-    font-size: 8px; 
-    font-weight: 800; 
+    font-size: 9px; 
+    font-weight: 900; 
     color: white; 
-    opacity: 0.9; 
 }
 
 .bar-label { 
-    font-size: 7px; 
+    font-size: 8px; 
     font-weight: 800; 
     text-transform: uppercase; 
     color: #34d399; 
-    margin-top: 2px; 
+    margin-top: 4px; 
+}
+
+/* Ներքևի բաժինը՝ Նպատակ և Ժամանակ */
+.bottom-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    min-height: 100px;
+}
+
+.info-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 10px;
+}
+
+.circle-stat {
+    width: 50px;
+    height: 50px;
+    border: 3px solid #10b981;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 14px;
+    margin-bottom: 5px;
 }
