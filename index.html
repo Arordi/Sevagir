@@ -194,7 +194,7 @@
                 const data = await response.json();
                 words = data.map((item, index) => ({
                     id: item.id || index, en: item.word, hy: item.translation,
-                    score: 0, stagesCompleted: [], isInstant: false, isSeen: false,
+                    score: 0, stageScores: {}, stagesCompleted: [], isInstant: false, isSeen: false,
                     errorCount: 0, learnedDate: null, repLevel: 0, nextRepDate: null
                 }));
                 loadProgress(); 
@@ -237,7 +237,12 @@
             const saved = localStorage.getItem('usanim_v3_data');
             if(saved) {
                 const p = JSON.parse(saved);
-                words.forEach(w => { if(p.words && p.words[w.id]) Object.assign(w, p.words[w.id]); });
+                words.forEach(w => { 
+                    if(p.words && p.words[w.id]) {
+                        Object.assign(w, p.words[w.id]); 
+                        if (!w.stageScores) w.stageScores = {};
+                    }
+                });
                 examScores = p.examScores || [];
                 dailyWordsCount = p.dailyWordsCount || 0;
                 dailyGoal = p.dailyGoal || 20;
@@ -266,15 +271,32 @@
         function getStars(word) {
             const stages = [2, 3, 4, 5, 6];
             let html = '<div class="flex flex-col items-center mb-2"><div class="flex justify-center gap-1 mb-1">';
+            
             stages.forEach(s => {
                 const isCompleted = word.stagesCompleted.includes(s);
                 const isActive = (activeStage === s);
+                const currentScore = (word.stageScores && word.stageScores[s]) ? word.stageScores[s] : 0;
+                
                 let colorClass = isCompleted ? 'text-yellow-400' : 'text-emerald-800';
                 if (isActive && !isCompleted) colorClass = 'text-emerald-500';
-                html += `<div class="star-box"><span class="star-icon ${colorClass}">★</span>${isActive && !isCompleted ? `<span class="star-text !text-white">${word.score}</span>` : ''}${isCompleted ? `<span class="star-text">✓</span>` : ''}</div>`;
+                
+                html += `<div class="star-box">
+                            <span class="star-icon ${colorClass}">★</span>
+                            ${isActive && !isCompleted ? `<span class="star-text !text-white">${currentScore}</span>` : ''}
+                            ${isCompleted ? `<span class="star-text">✓</span>` : ''}
+                         </div>`;
             });
             html += '</div>';
-            if(activeStage === 7) html += `<div class="flex flex-col items-center mt-1"><div class="star-box"><span class="star-icon text-emerald-400">★</span><span class="star-text !text-white !text-[12px]">${word.score}</span></div></div>`;
+            
+            if(activeStage === 7) {
+                const s7Score = (word.stageScores && word.stageScores[7]) ? word.stageScores[7] : 0;
+                html += `<div class="flex flex-col items-center mt-1">
+                            <div class="star-box">
+                                <span class="star-icon text-emerald-400">★</span>
+                                <span class="star-text !text-white !text-[12px]">${s7Score}</span>
+                            </div>
+                         </div>`;
+            }
             return html + '</div>';
         }
 
@@ -305,12 +327,11 @@
             if (activeStage === 7) {
                 if(smartMode === 'difficult') activeList = words.filter(w => w.errorCount >= 5 && !isWordLearned(w)).slice(0, 10);
                 else { const today = new Date().toISOString().split('T')[0]; activeList = words.filter(w => isWordLearned(w) && w.nextRepDate && w.nextRepDate <= today).slice(0, 10); }
-                activeList.forEach(w => w.score = 0);
+                // Մաքրում ենք ընթացիկ սեսիայի միավորները միայն եթե դա պահանջվում է, բայց stageScores-ը պահպանվում է
             } else if (activeStage === 1) {
                 activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
             } else {
                 activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(activeStage)).slice(0, 10);
-                activeList.forEach(w => w.score = 0);
             }
             if (activeList.length === 0) return renderFinish();
             if (activeStage === 1) renderStage1();
@@ -339,7 +360,7 @@
             if(known) { 
                 w.isInstant = true; w.learnedDate = new Date().toISOString().split('T')[0]; 
                 setNextRep(w); dailyWordsCount++; 
-            } else { w.score = 0; w.isInstant = false; }
+            } else { w.isInstant = false; }
             triggerSave(); activeIndex++; 
             if (activeIndex >= activeList.length) renderFinish(); else renderStage1();
         }
@@ -380,7 +401,7 @@
                     if(result.learnedNew) dailyWordsCount++;
                 } else {
                     selectedEn.el.classList.add('match-wrong'); selectedHy.el.classList.add('match-wrong');
-                    handleWrongAnswer(selectedEn.word);
+                    handleWrongAnswer(selectedEn.word, 3);
                     setTimeout(() => { document.querySelectorAll('.match-wrong').forEach(i => i.classList.remove('match-wrong', 'match-selected')); }, 400);
                 }
                 triggerSave(); selectedEn = null; selectedHy = null;
@@ -424,7 +445,7 @@
             } else { 
                 btn.classList.add('choice-wrong');
                 buttons.forEach(b => { if(cleanText(b.innerText) === cleanText(correct)) b.classList.add('choice-correct'); });
-                handleWrongAnswer(word);
+                handleWrongAnswer(word, activeStage);
             }
             triggerSave(); 
         }
@@ -439,7 +460,7 @@
                 if(result.learnedNew) dailyWordsCount++;
                 setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
             } else {
-                handleWrongAnswer(word);
+                handleWrongAnswer(word, activeStage);
                 input.className = "w-full p-5 border-4 border-rose-600 bg-rose-900 text-white rounded-[2rem] text-center text-xl outline-none";
                 input.value = correct;
                 document.getElementById('check-btn').classList.add('hidden');
