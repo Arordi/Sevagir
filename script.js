@@ -121,6 +121,7 @@ function saveProgress() {
 
 function isWordLearned(w) {
     if (w.isInstant) return true;
+    // Բառը սովորած է միայն եթե 2, 3, 4, 5 և 6 փուլերը ավարտված են
     return [2, 3, 4, 5, 6].every(s => w.stagesCompleted.includes(s));
 }
 
@@ -164,7 +165,12 @@ function getStars(word) {
         const isActive = (activeStage === s);
         let colorClass = isCompleted ? 'text-yellow-400' : 'text-emerald-800';
         if (isActive && !isCompleted) colorClass = 'text-emerald-500';
-        html += `<div class="star-box"><span class="star-icon ${colorClass}">★</span>${isActive && !isCompleted ? `<span class="star-text !text-white">${word.score}</span>` : ''}${isCompleted ? `<span class="star-text">✓</span>` : ''}</div>`;
+        
+        html += `<div class="star-box">
+                    <span class="star-icon ${colorClass}">★</span>
+                    ${isActive && !isCompleted ? `<span class="star-text !text-white">${word.score}</span>` : ''}
+                    ${isCompleted ? `<span class="star-text">✓</span>` : ''}
+                 </div>`;
     });
     html += '</div>';
     
@@ -214,7 +220,6 @@ function openStage(num) {
     document.getElementById('app-content').classList.add('hidden');
     document.getElementById('view').classList.remove('hidden');
     
-    // Փոխված անվանումներ ըստ քո խնդրանքի
     let stageTitle = `Փուլ ${num}`;
     if (num === 4) stageTitle = "Գրել անգլերեն";
     else if (num === 5) stageTitle = "Գրել հայերեն";
@@ -309,8 +314,13 @@ function selectMatch(el, type, word) {
             selectedEn.el.className = 'match-item match-correct'; selectedHy.el.className = 'match-item match-correct';
             selectedEn.word.score = Math.min(10, selectedEn.word.score + 1);
             if(selectedEn.word.score >= 10) { 
-                selectedEn.word.score = 0; selectedEn.word.stagesCompleted.push(3); 
-                if(isWordLearned(selectedEn.word)) { selectedEn.word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(selectedEn.word); dailyWordsCount++; }
+                selectedEn.word.score = 0; 
+                if (activeStage !== 7) selectedEn.word.stagesCompleted.push(3); 
+                if(isWordLearned(selectedEn.word)) { 
+                    selectedEn.word.learnedDate = new Date().toISOString().split('T')[0]; 
+                    setNextRep(selectedEn.word); 
+                    dailyWordsCount++; 
+                }
             }
         } else {
             selectedEn.el.classList.add('match-wrong'); selectedHy.el.classList.add('match-wrong');
@@ -326,10 +336,9 @@ function renderGenericStage() {
     if (activeStage === 2) { renderMultipleChoice(word); return; }
     let question = word.en, answer = word.hy;
     
-    // Հարցադրումների տրամաբանությունը ըստ փուլերի
-    if(activeStage === 4) { question = word.hy; answer = word.en; } // Գրել անգլերեն
-    else if(activeStage === 5) { question = word.en; answer = word.hy; } // Գրել հայերեն
-    else if(activeStage === 6) { question = "🔊"; answer = word.en; } // Բառի ուղղագրություն
+    if(activeStage === 4) { question = word.hy; answer = word.en; } 
+    else if(activeStage === 5) { question = word.en; answer = word.hy; } 
+    else if(activeStage === 6) { question = "🔊"; answer = word.en; } 
     else if(activeStage === 7) { question = word.en; answer = word.hy; }
     
     document.getElementById('content').innerHTML = `
@@ -372,20 +381,27 @@ function checkChoice(btn, selected, correct) {
     buttons.forEach(b => b.disabled = true);
     if(cleanText(selected) === cleanText(correct)) {
         btn.classList.add('choice-correct');
-        word.score = Math.min(10, word.score + 1);
+        word.score = Math.min(10, word.score + 1); 
         if(activeStage !== 7 && word.score >= 10) { 
             word.score = 0; word.stagesCompleted.push(2); 
-            if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; } 
+            if(isWordLearned(word)) { 
+                word.learnedDate = new Date().toISOString().split('T')[0]; 
+                setNextRep(word); 
+                dailyWordsCount++; 
+            } 
+            setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
         } else if (activeStage === 7 && word.score >= 10) {
             if(smartMode === 'repetition') setNextRep(word);
             setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
-        } else if (activeStage === 7) {
+        } else {
             setTimeout(() => initStageLogic(), 600);
         }
     } else { 
         btn.classList.add('choice-wrong');
         buttons.forEach(b => { if(cleanText(b.innerText) === cleanText(correct)) b.classList.add('choice-correct'); });
-        word.score = Math.max(0, word.score - 1); word.errorCount++; 
+        word.score = Math.max(0, word.score - 1); 
+        word.errorCount++; 
+        setTimeout(() => initStageLogic(), 800);
     }
     saveProgress(); 
 }
@@ -395,29 +411,32 @@ function checkGeneric(correct) {
     const word = activeList[activeIndex % activeList.length];
     if(cleanText(input.value) === cleanText(correct)) {
         if(activeStage === 4) speak(word.en === "I" ? "eye" : word.en);
-        word.score = Math.min(10, word.score + 1);
+        word.score = Math.min(10, word.score + 1); 
         input.className = "w-full p-5 border-4 border-emerald-500 bg-emerald-600 text-white rounded-[2rem] text-center text-xl outline-none";
         
         if(word.score >= 10) {
             if(activeStage !== 7) {
                 word.score = 0;
                 word.stagesCompleted.push(activeStage);
-                if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; }
+                if(isWordLearned(word)) { 
+                    word.learnedDate = new Date().toISOString().split('T')[0]; 
+                    setNextRep(word); 
+                    dailyWordsCount++; 
+                }
             } else {
                 if (smartMode === 'repetition') setNextRep(word);
             }
             setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
         } else {
-            setTimeout(() => { 
-                if(activeStage === 7) initStageLogic(); 
-                else { activeIndex++; initStageLogic(); }
-            }, 400);
+            setTimeout(() => initStageLogic(), 400);
         }
     } else {
-        word.score = Math.max(0, word.score - 1); word.errorCount++;
+        word.score = Math.max(0, word.score - 1); 
+        word.errorCount++;
         input.className = "w-full p-5 border-4 border-rose-600 bg-rose-900 text-white rounded-[2rem] text-center text-xl outline-none";
         input.value = correct;
         document.getElementById('check-btn').classList.add('hidden');
+        setTimeout(() => initStageLogic(), 1200);
     }
     saveProgress();
 }
@@ -549,5 +568,4 @@ function showDeleteModal() { document.getElementById('delete-modal').classList.r
 function hideDeleteModal() { document.getElementById('delete-modal').classList.add('hidden'); }
 function confirmFinalDelete() { localStorage.removeItem('usanim_v3_data'); location.reload(); }
 
-// Հավելվածի մեկնարկ
 initApp();
