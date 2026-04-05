@@ -46,7 +46,8 @@ async function initApp() {
         const data = await response.json();
         words = data.map((item, index) => ({
             id: item.id || index, en: item.word, hy: item.translation,
-            score: 0, stagesCompleted: [], isInstant: false, isSeen: false,
+            stageScores: {1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0}, // Առանձին միավորներ ամեն փուլի համար
+            stagesCompleted: [], isInstant: false, isSeen: false,
             errorCount: 0, learnedDate: null, repLevel: 0, nextRepDate: null
         }));
         loadProgress(); 
@@ -98,7 +99,13 @@ function loadProgress() {
     const saved = localStorage.getItem('usanim_v3_data');
     if(saved) {
         const p = JSON.parse(saved);
-        words.forEach(w => { if(p.words && p.words[w.id]) Object.assign(w, p.words[w.id]); });
+        words.forEach(w => { 
+            if(p.words && p.words[w.id]) {
+                Object.assign(w, p.words[w.id]);
+                // Հին տվյալների համատեղելիության համար
+                if(!w.stageScores) w.stageScores = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0};
+            }
+        });
         examScores = p.examScores || [];
         dailyWordsCount = p.dailyWordsCount || 0;
         dailyGoal = p.dailyGoal || 20;
@@ -111,7 +118,7 @@ function saveProgress() {
     const storage = { words: {}, examScores, dailyWordsCount, dailyGoal, dailyTimeData, reminderMinute };
     words.forEach(w => {
         storage.words[w.id] = { 
-            score: w.score, stagesCompleted: w.stagesCompleted, isInstant: w.isInstant, 
+            stageScores: w.stageScores, stagesCompleted: w.stagesCompleted, isInstant: w.isInstant, 
             isSeen: w.isSeen, errorCount: w.errorCount, learnedDate: w.learnedDate,
             repLevel: w.repLevel, nextRepDate: w.nextRepDate
         };
@@ -165,20 +172,23 @@ function getStars(word) {
         let colorClass = isCompleted ? 'text-yellow-400' : 'text-emerald-800';
         if (isActive && !isCompleted) colorClass = 'text-emerald-500';
         
+        const currentScore = word.stageScores[s] || 0;
+
         html += `<div class="star-box">
                     <span class="star-icon ${colorClass}">★</span>
-                    ${isActive && !isCompleted ? `<span class="star-text !text-white">${word.score}</span>` : ''}
+                    ${isActive && !isCompleted ? `<span class="star-text !text-white">${currentScore}</span>` : ''}
                     ${isCompleted ? `<span class="star-text">✓</span>` : ''}
                  </div>`;
     });
     html += '</div>';
     
     if(activeStage === 7) {
+        const score7 = word.stageScores[7] || 0;
         html += `
         <div class="flex flex-col items-center mt-1">
             <div class="star-box">
                 <span class="star-icon text-emerald-400">★</span>
-                <span class="star-text !text-white !text-[12px]">${word.score}</span>
+                <span class="star-text !text-white !text-[12px]">${score7}</span>
             </div>
         </div>`;
     }
@@ -234,7 +244,7 @@ function initStageLogic() {
     if (activeStage === 7) {
         if(smartMode === 'difficult') activeList = words.filter(w => w.errorCount >= 5 && !isWordLearned(w)).slice(0, 10);
         else { const today = new Date().toISOString().split('T')[0]; activeList = words.filter(w => isWordLearned(w) && w.nextRepDate && w.nextRepDate <= today).slice(0, 10); }
-        activeList.forEach(w => w.score = 0);
+        activeList.forEach(w => w.stageScores[7] = 0);
     } else if (activeStage === 1) activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
     else activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(activeStage)).slice(0, 10);
 
@@ -270,7 +280,6 @@ function handleStage1(known) {
     w.isSeen = true;
     if (!w.stagesCompleted.includes(1)) w.stagesCompleted.push(1);
     if(known) { w.isInstant = true; w.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(w); dailyWordsCount++; } 
-    else w.score = 0;
     saveProgress();
     activeIndex++; 
     if (activeIndex >= activeList.length) renderFinish(); else renderStage1();
@@ -311,10 +320,13 @@ function selectMatch(el, type, word) {
     if(selectedEn && selectedHy) {
         if(selectedEn.word.id === selectedHy.word.id) {
             selectedEn.el.className = 'match-item match-correct'; selectedHy.el.className = 'match-item match-correct';
-            selectedEn.word.score = Math.min(10, selectedEn.word.score + 1);
-            if(selectedEn.word.score >= 10) { 
-                selectedEn.word.score = 0; 
-                if (activeStage !== 7) selectedEn.word.stagesCompleted.push(3); 
+            
+            let s = activeStage;
+            selectedEn.word.stageScores[s] = Math.min(10, (selectedEn.word.stageScores[s] || 0) + 1);
+            
+            if(selectedEn.word.stageScores[s] >= 10) { 
+                selectedEn.word.stageScores[s] = 0; 
+                if (activeStage !== 7) selectedEn.word.stagesCompleted.push(s); 
                 if(isWordLearned(selectedEn.word)) { 
                     selectedEn.word.learnedDate = new Date().toISOString().split('T')[0]; 
                     setNextRep(selectedEn.word); 
@@ -323,7 +335,9 @@ function selectMatch(el, type, word) {
             }
         } else {
             selectedEn.el.classList.add('match-wrong'); selectedHy.el.classList.add('match-wrong');
-            selectedEn.word.score = Math.max(0, selectedEn.word.score - 1); selectedEn.word.errorCount++; 
+            let s = activeStage;
+            selectedEn.word.stageScores[s] = Math.max(0, (selectedEn.word.stageScores[s] || 0) - 1);
+            selectedEn.word.errorCount++; 
             setTimeout(() => { document.querySelectorAll('.match-wrong').forEach(i => i.classList.remove('match-wrong', 'match-selected')); }, 400);
         }
         saveProgress(); selectedEn = null; selectedHy = null;
@@ -377,19 +391,23 @@ function renderMultipleChoice(word) {
 function checkChoice(btn, selected, correct) {
     const word = activeList[activeIndex % activeList.length];
     const buttons = document.querySelectorAll('.choice-btn');
+    const s = activeStage;
     buttons.forEach(b => b.disabled = true);
+    
     if(cleanText(selected) === cleanText(correct)) {
         btn.classList.add('choice-correct');
-        word.score = Math.min(10, word.score + 1); 
-        if(activeStage !== 7 && word.score >= 10) { 
-            word.score = 0; word.stagesCompleted.push(2); 
+        word.stageScores[s] = Math.min(10, (word.stageScores[s] || 0) + 1); 
+        
+        if(s !== 7 && word.stageScores[s] >= 10) { 
+            word.stageScores[s] = 0; word.stagesCompleted.push(s); 
             if(isWordLearned(word)) { 
                 word.learnedDate = new Date().toISOString().split('T')[0]; 
                 setNextRep(word); 
                 dailyWordsCount++; 
             } 
             setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
-        } else if (activeStage === 7 && word.score >= 10) {
+        } else if (s === 7 && word.stageScores[s] >= 10) {
+            word.stageScores[s] = 0;
             if(smartMode === 'repetition') setNextRep(word);
             setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
         } else {
@@ -398,7 +416,7 @@ function checkChoice(btn, selected, correct) {
     } else { 
         btn.classList.add('choice-wrong');
         buttons.forEach(b => { if(cleanText(b.innerText) === cleanText(correct)) b.classList.add('choice-correct'); });
-        word.score = Math.max(0, word.score - 1); 
+        word.stageScores[s] = Math.max(0, (word.stageScores[s] || 0) - 1); 
         word.errorCount++; 
         setTimeout(() => initStageLogic(), 800);
     }
@@ -408,21 +426,24 @@ function checkChoice(btn, selected, correct) {
 function checkGeneric(correct) {
     const input = document.getElementById('stage-input');
     const word = activeList[activeIndex % activeList.length];
+    const s = activeStage;
+
     if(cleanText(input.value) === cleanText(correct)) {
-        if(activeStage === 4) speak(word.en === "I" ? "eye" : word.en);
-        word.score = Math.min(10, word.score + 1); 
+        if(s === 4) speak(word.en === "I" ? "eye" : word.en);
+        word.stageScores[s] = Math.min(10, (word.stageScores[s] || 0) + 1); 
         input.className = "w-full p-5 border-4 border-emerald-500 bg-emerald-600 text-white rounded-[2rem] text-center text-xl outline-none";
         
-        if(word.score >= 10) {
-            if(activeStage !== 7) {
-                word.score = 0;
-                word.stagesCompleted.push(activeStage);
+        if(word.stageScores[s] >= 10) {
+            if(s !== 7) {
+                word.stageScores[s] = 0;
+                word.stagesCompleted.push(s);
                 if(isWordLearned(word)) { 
                     word.learnedDate = new Date().toISOString().split('T')[0]; 
                     setNextRep(word); 
                     dailyWordsCount++; 
                 }
             } else {
+                word.stageScores[s] = 0;
                 if (smartMode === 'repetition') setNextRep(word);
             }
             setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
@@ -430,7 +451,7 @@ function checkGeneric(correct) {
             setTimeout(() => initStageLogic(), 400);
         }
     } else {
-        word.score = Math.max(0, word.score - 1); 
+        word.stageScores[s] = Math.max(0, (word.stageScores[s] || 0) - 1); 
         word.errorCount++;
         input.className = "w-full p-5 border-4 border-rose-600 bg-rose-900 text-white rounded-[2rem] text-center text-xl outline-none";
         input.value = correct;
