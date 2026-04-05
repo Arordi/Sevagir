@@ -121,7 +121,6 @@ function saveProgress() {
 
 function isWordLearned(w) {
     if (w.isInstant) return true;
-    // Բառը սովորած է միայն եթե 2, 3, 4, 5 և 6 փուլերը ավարտված են
     return [2, 3, 4, 5, 6].every(s => w.stagesCompleted.includes(s));
 }
 
@@ -464,6 +463,39 @@ function openStatsStage() {
     const maxTimeVal = 600; 
     const goalProgress = Math.min(100, Math.round((dailyWordsCount / dailyGoal) * 100));
 
+    // Հաշվարկում ենք յուրաքանչյուր փուլի (1-8) առաջընթացը
+    let stagesProgressHtml = "";
+    for (let i = 1; i <= 8; i++) {
+        let count = 0;
+        if (i <= 6) {
+            count = words.filter(w => w.stagesCompleted.includes(i) || w.isInstant).length;
+        } else if (i === 7) {
+            // Փուլ 7-ը կրկնությունն է
+            count = words.filter(w => w.repLevel > 0).length;
+        } else {
+            // Փուլ 8-ը քննությունն է / ընդհանուր սովորած
+            count = learnedWords.length;
+        }
+        
+        const stagePct = Math.round((count / words.length) * 100);
+        const stageNames = ["Ծանոթացում", "Ընտրություն", "Համապատասխանեցում", "Գրել անգլերեն", "Գրել հայերեն", "Ուղղագրություն", "Կրկնություն", "Քննություն"];
+
+        stagesProgressHtml += `
+            <div class="mb-3">
+                <div class="flex justify-between items-end mb-1 px-1">
+                    <div class="flex flex-col text-left">
+                        <span class="text-[7px] font-black text-emerald-500 uppercase tracking-tighter">Փուլ ${i}</span>
+                        <span class="text-[10px] font-bold text-white italic leading-tight">${stageNames[i-1]}</span>
+                    </div>
+                    <span class="text-[10px] font-black text-emerald-400 italic">${count} / ${words.length}</span>
+                </div>
+                <div class="w-full bg-emerald-950 h-2.5 rounded-full overflow-hidden border border-emerald-800/50 shadow-inner">
+                    <div class="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full transition-all duration-700 shadow-[0_0_8px_rgba(52,211,153,0.4)]" style="width: ${stagePct}%"></div>
+                </div>
+            </div>
+        `;
+    }
+
     container.innerHTML = `
         <div class="bg-emerald-800 p-4 rounded-[2rem] shadow-xl border-b-4 border-emerald-500 text-center">
             <p class="text-[8px] font-black uppercase mb-1 tracking-widest opacity-80">Ընդհանուր Առաջընթաց</p>
@@ -473,6 +505,13 @@ function openStatsStage() {
                     <p class="text-emerald-400 font-black text-xl leading-none">${Math.round((learnedWords.length / words.length) * 100)}%</p>
                     <p class="text-[7px] font-bold uppercase opacity-60">սովորած բառեր</p>
                 </div>
+            </div>
+        </div>
+
+        <div class="bg-emerald-900/60 p-4 rounded-[2rem] border border-emerald-700/50 shadow-lg">
+            <h3 class="font-black text-[9px] mb-4 uppercase text-center italic tracking-[0.2em] text-emerald-300">Փուլերի Առաջընթաց</h3>
+            <div class="grid grid-cols-1 gap-1">
+                ${stagesProgressHtml}
             </div>
         </div>
 
