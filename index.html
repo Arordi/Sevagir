@@ -52,6 +52,9 @@
         .bar-fill.stage-bar { background: #facc15; }
         .bar-fill::after { content: attr(data-val); position: absolute; top: -14px; left: 50%; transform: translateX(-50%); font-size: 8px; font-weight: 800; color: white; opacity: 0.9; }
         .bar-label { font-size: 7px; font-weight: 800; text-transform: uppercase; color: #34d399; margin-top: 2px; }
+        
+        .reset-word-btn { background: #450a0a; color: #ef4444; border: 1px solid #ef4444; padding: 4px 8px; border-radius: 8px; font-size: 12px; transition: 0.2s; }
+        .reset-word-btn:active { transform: scale(0.9); background: #ef4444; color: white; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -168,7 +171,7 @@
         let sessionMinutes = 0, sessionSeconds = 0;
         let reminderMinute = 10; 
         let dailyTimeData = {}; 
-        let lastDate = ""; // Վերջին ակտիվության ամսաթիվը
+        let lastDate = ""; 
 
         let touchStartX = 0;
         let touchEndX = 0;
@@ -190,14 +193,12 @@
             else if (exBtn && !exBtn.classList.contains('hidden')) exBtn.click();
         }
 
-        // Ֆունկցիա՝ Հայաստանի ժամանակով (UTC+4) ամսաթիվը ստանալու համար
         function getArmenianDate() {
             const now = new Date();
             const amTime = new Date(now.getTime() + (now.getTimezoneOffset() + 240) * 60000);
             return amTime.toISOString().split('T')[0];
         }
 
-        // Ստուգում և զրոյացում կեսգիշերին
         function checkDailyReset() {
             const today = getArmenianDate();
             if (lastDate !== "" && lastDate !== today) {
@@ -220,7 +221,7 @@
                     errorCount: 0, learnedDate: null, repLevel: 0, nextRepDate: null
                 }));
                 loadProgress(); 
-                checkDailyReset(); // Ստուգել զրոյացումը բացելիս
+                checkDailyReset();
                 updateStats();
                 startTimer();
                 document.getElementById('home-word-count').innerText = `${words.length} բառ`;
@@ -236,7 +237,7 @@
         function startTimer() {
             setInterval(() => {
                 sessionSeconds++;
-                checkDailyReset(); // Պարբերաբար ստուգել կեսգիշերի անցումը
+                checkDailyReset(); 
                 if(sessionSeconds >= 60) {
                     sessionSeconds = 0;
                     sessionMinutes++;
@@ -278,7 +279,6 @@
 
         function triggerSave() {
             saveProgress(words, examScores, dailyWordsCount, dailyGoal, dailyTimeData, reminderMinute);
-            // Պահպանել նաև վերջին ամսաթիվը Reset-ի համար
             const currentData = JSON.parse(localStorage.getItem('usanim_v3_data'));
             currentData.lastDate = lastDate;
             localStorage.setItem('usanim_v3_data', JSON.stringify(currentData));
@@ -509,6 +509,26 @@
             return { labels: last7Days, wordData: learnedCounts, timeData: timeCounts };
         }
 
+        // --- ՍՈՎՈՐԱԾ ԲԱՌԻ ԶՐՈՅԱՑՄԱՆ ՖՈՒՆԿՑԻԱ ---
+        function resetWord(wordId) {
+            if(!confirm("Հեռացնե՞լ բառը սովորածների ցանկից և նորից սկսել ուսուցումը:")) return;
+            const w = words.find(item => item.id === wordId);
+            if(w) {
+                w.score = 0;
+                w.stageScores = {};
+                w.stagesCompleted = [];
+                w.isInstant = false;
+                w.isSeen = false;
+                w.errorCount = 0;
+                w.learnedDate = null;
+                w.repLevel = 0;
+                w.nextRepDate = null;
+                triggerSave();
+                openStatsStage(); // Թարմացնել վիճակագրության էկրանը
+                updateStats();
+            }
+        }
+
         function openStatsStage() {
             document.getElementById('app-content').classList.add('hidden');
             document.getElementById('stats-view').classList.remove('hidden');
@@ -567,7 +587,20 @@
 
                 <div class="bg-emerald-900 p-3 rounded-[1.5rem] border border-emerald-700">
                     <h3 class="font-black text-[9px] mb-3 uppercase italic text-center tracking-widest">Սովորած բառեր (${learnedWords.length})</h3>
-                    <div class="max-h-48 overflow-y-auto space-y-1.5 custom-scroll pr-1">${learnedWords.length === 0 ? '<p class="text-center italic py-4 text-[9px] opacity-40">Դեռ բառեր չեք սովորել</p>' : learnedWords.map(w => `<div class="flex justify-between items-center p-2 bg-emerald-800/30 rounded-xl border border-emerald-700/20 transition-all"><div class="max-w-[70%]"><div class="font-black text-white text-[10px] leading-tight">${w.en}</div><div class="text-[8px] text-emerald-400 font-bold mt-0.5">${w.hy}</div></div><div class="text-yellow-400 text-[8px] tracking-tighter">★★★★★</div></div>`).join('')}</div>
+                    <div class="max-h-48 overflow-y-auto space-y-1.5 custom-scroll pr-1">
+                        ${learnedWords.length === 0 ? '<p class="text-center italic py-4 text-[9px] opacity-40">Դեռ բառեր չեք սովորել</p>' : 
+                        learnedWords.map(w => `
+                            <div class="flex justify-between items-center p-2 bg-emerald-800/30 rounded-xl border border-emerald-700/20 transition-all">
+                                <div class="max-w-[60%]">
+                                    <div class="font-black text-white text-[10px] leading-tight">${w.en}</div>
+                                    <div class="text-[8px] text-emerald-400 font-bold mt-0.5">${w.hy}</div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="text-yellow-400 text-[8px] tracking-tighter">★★★★★</div>
+                                    <button onclick="resetWord(${w.id})" class="reset-word-btn">🗑️</button>
+                                </div>
+                            </div>`).join('')}
+                    </div>
                 </div>`;
         }
 
