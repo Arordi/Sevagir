@@ -447,9 +447,9 @@
         function handleStage1(known) {
             const w = activeList[activeIndex];
             w.isSeen = true;
+            if (!w.stagesCompleted.includes(1)) w.stagesCompleted.push(1);
             
             if(known) { 
-                if (!w.stagesCompleted.includes(1)) w.stagesCompleted.push(1);
                 w.isInstant = true; 
                 w.learnedDate = new Date().toISOString().split('T')[0]; 
                 setNextRep(w); 
@@ -457,7 +457,6 @@
             } else {
                 w.score = 0; 
                 w.isInstant = false;
-                // Այստեղ չենք ավելացնում stagesCompleted, որպեսզի կրկնելիս հասանելի լինի
             }
             
             saveProgress();
@@ -467,15 +466,11 @@
 
         function restartStage1() {
             activeIndex = 0;
-            // Նորից զտում ենք բառերը, որոնք դեռ չեն անցել Stage 1-ը
             activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
-            
             if (activeList.length === 0) {
-                alert("Բոլոր բառերն արդեն անցել են առաջին փուլը:");
-                exitToMenu();
-            } else {
-                renderStage1();
+                activeList = words.filter(w => !isWordLearned(w)).slice(0, 10);
             }
+            if (activeList.length === 0) exitToMenu(); else renderStage1();
         }
 
         function renderStage3() {
