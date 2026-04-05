@@ -46,7 +46,7 @@ async function initApp() {
         const data = await response.json();
         words = data.map((item, index) => ({
             id: item.id || index, en: item.word, hy: item.translation,
-            stageScores: {1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0}, // Առանձին միավորներ ամեն փուլի համար
+            stageScores: {1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0}, 
             stagesCompleted: [], isInstant: false, isSeen: false,
             errorCount: 0, learnedDate: null, repLevel: 0, nextRepDate: null
         }));
@@ -102,7 +102,6 @@ function loadProgress() {
         words.forEach(w => { 
             if(p.words && p.words[w.id]) {
                 Object.assign(w, p.words[w.id]);
-                // Հին տվյալների համատեղելիության համար
                 if(!w.stageScores) w.stageScores = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0};
             }
         });
@@ -143,19 +142,15 @@ function setNextRep(word) {
 function updateStats() {
     const learned = words.filter(w => isWordLearned(w)).length;
     const pct = Math.round((learned / words.length) * 100);
-    
     const pctEl = document.getElementById('home-progress-pct');
     const bgProgEl = document.getElementById('home-bg-progress');
     const progBarEl = document.getElementById('progress-bar');
-    
     if(pctEl) pctEl.innerText = pct + "%";
     if(bgProgEl) bgProgEl.style.width = pct + "%";
     if(progBarEl) progBarEl.style.width = pct + "%";
-    
     const diffWords = words.filter(w => w.errorCount >= 5 && !isWordLearned(w));
     const today = new Date().toISOString().split('T')[0];
     const repWords = words.filter(w => isWordLearned(w) && w.nextRepDate && w.nextRepDate <= today);
-    
     const diffCountEl = document.getElementById('diff-count');
     const repCountEl = document.getElementById('rep-count');
     if(diffCountEl) diffCountEl.innerText = diffWords.length;
@@ -164,35 +159,20 @@ function updateStats() {
 
 function getStars(word) {
     const stages = [2, 3, 4, 5, 6];
-    let html = '<div class="flex flex-col items-center mb-2">';
-    html += '<div class="flex justify-center gap-1 mb-1">';
+    let html = '<div class="flex flex-col items-center mb-2"><div class="flex justify-center gap-1 mb-1">';
     stages.forEach(s => {
         const isCompleted = word.stagesCompleted.includes(s);
         const isActive = (activeStage === s);
         let colorClass = isCompleted ? 'text-yellow-400' : 'text-emerald-800';
         if (isActive && !isCompleted) colorClass = 'text-emerald-500';
-        
         const currentScore = word.stageScores[s] || 0;
-
-        html += `<div class="star-box">
-                    <span class="star-icon ${colorClass}">★</span>
-                    ${isActive && !isCompleted ? `<span class="star-text !text-white">${currentScore}</span>` : ''}
-                    ${isCompleted ? `<span class="star-text">✓</span>` : ''}
-                 </div>`;
+        html += `<div class="star-box"><span class="star-icon ${colorClass}">★</span>${isActive && !isCompleted ? `<span class="star-text !text-white">${currentScore}</span>` : ''}${isCompleted ? `<span class="star-text">✓</span>` : ''}</div>`;
     });
     html += '</div>';
-    
     if(activeStage === 7) {
         const score7 = word.stageScores[7] || 0;
-        html += `
-        <div class="flex flex-col items-center mt-1">
-            <div class="star-box">
-                <span class="star-icon text-emerald-400">★</span>
-                <span class="star-text !text-white !text-[12px]">${score7}</span>
-            </div>
-        </div>`;
+        html += `<div class="flex flex-col items-center mt-1"><div class="star-box"><span class="star-icon text-emerald-400">★</span><span class="star-text !text-white !text-[12px]">${score7}</span></div></div>`;
     }
-    
     return html + '</div>';
 }
 
@@ -228,12 +208,10 @@ function openStage(num) {
     activeStage = num; activeIndex = 0; smartMode = null;
     document.getElementById('app-content').classList.add('hidden');
     document.getElementById('view').classList.remove('hidden');
-    
     let stageTitle = `Փուլ ${num}`;
     if (num === 4) stageTitle = "Գրել անգլերեն";
     else if (num === 5) stageTitle = "Գրել հայերեն";
     else if (num === 6) stageTitle = "Բառի ուղղագրություն";
-    
     document.getElementById('view-title').innerText = stageTitle;
     initStageLogic();
 }
@@ -247,7 +225,6 @@ function initStageLogic() {
         activeList.forEach(w => w.stageScores[7] = 0);
     } else if (activeStage === 1) activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
     else activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(activeStage)).slice(0, 10);
-
     if (activeList.length === 0) return renderFinish();
     if (activeStage === 1) renderStage1();
     else if (activeStage === 3) renderStage3();
@@ -316,14 +293,11 @@ function selectMatch(el, type, word) {
     el.classList.add('match-selected');
     if(type === 'en') { selectedEn = { el, word }; speak(word.en === "I" ? "eye" : word.en); }
     else selectedHy = { el, word };
-    
     if(selectedEn && selectedHy) {
         if(selectedEn.word.id === selectedHy.word.id) {
             selectedEn.el.className = 'match-item match-correct'; selectedHy.el.className = 'match-item match-correct';
-            
             let s = activeStage;
             selectedEn.word.stageScores[s] = Math.min(10, (selectedEn.word.stageScores[s] || 0) + 1);
-            
             if(selectedEn.word.stageScores[s] >= 10) { 
                 selectedEn.word.stageScores[s] = 0; 
                 if (activeStage !== 7) selectedEn.word.stagesCompleted.push(s); 
@@ -348,12 +322,10 @@ function renderGenericStage() {
     const word = activeList[activeIndex % activeList.length];
     if (activeStage === 2) { renderMultipleChoice(word); return; }
     let question = word.en, answer = word.hy;
-    
     if(activeStage === 4) { question = word.hy; answer = word.en; } 
     else if(activeStage === 5) { question = word.en; answer = word.hy; } 
     else if(activeStage === 6) { question = "🔊"; answer = word.en; } 
     else if(activeStage === 7) { question = word.en; answer = word.hy; }
-    
     document.getElementById('content').innerHTML = `
         <div class="w-full text-center flex flex-col items-center">
             <div class="mb-1">${getStars(word)}</div>
@@ -366,10 +338,7 @@ function renderGenericStage() {
     setTimeout(() => document.getElementById('stage-input')?.focus(), 50);
 }
 
-function skipGeneric() {
-    activeIndex++;
-    initStageLogic();
-}
+function skipGeneric() { activeIndex++; initStageLogic(); }
 
 function renderMultipleChoice(word) {
     let options = [word.hy];
@@ -393,11 +362,9 @@ function checkChoice(btn, selected, correct) {
     const buttons = document.querySelectorAll('.choice-btn');
     const s = activeStage;
     buttons.forEach(b => b.disabled = true);
-    
     if(cleanText(selected) === cleanText(correct)) {
         btn.classList.add('choice-correct');
         word.stageScores[s] = Math.min(10, (word.stageScores[s] || 0) + 1); 
-        
         if(s !== 7 && word.stageScores[s] >= 10) { 
             word.stageScores[s] = 0; word.stagesCompleted.push(s); 
             if(isWordLearned(word)) { 
@@ -410,9 +377,7 @@ function checkChoice(btn, selected, correct) {
             word.stageScores[s] = 0;
             if(smartMode === 'repetition') setNextRep(word);
             setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
-        } else {
-            setTimeout(() => initStageLogic(), 600);
-        }
+        } else { setTimeout(() => initStageLogic(), 600); }
     } else { 
         btn.classList.add('choice-wrong');
         buttons.forEach(b => { if(cleanText(b.innerText) === cleanText(correct)) b.classList.add('choice-correct'); });
@@ -427,12 +392,10 @@ function checkGeneric(correct) {
     const input = document.getElementById('stage-input');
     const word = activeList[activeIndex % activeList.length];
     const s = activeStage;
-
     if(cleanText(input.value) === cleanText(correct)) {
         if(s === 4) speak(word.en === "I" ? "eye" : word.en);
         word.stageScores[s] = Math.min(10, (word.stageScores[s] || 0) + 1); 
         input.className = "w-full p-5 border-4 border-emerald-500 bg-emerald-600 text-white rounded-[2rem] text-center text-xl outline-none";
-        
         if(word.stageScores[s] >= 10) {
             if(s !== 7) {
                 word.stageScores[s] = 0;
@@ -447,9 +410,7 @@ function checkGeneric(correct) {
                 if (smartMode === 'repetition') setNextRep(word);
             }
             setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
-        } else {
-            setTimeout(() => initStageLogic(), 400);
-        }
+        } else { setTimeout(() => initStageLogic(), 400); }
     } else {
         word.stageScores[s] = Math.max(0, (word.stageScores[s] || 0) - 1); 
         word.errorCount++;
@@ -489,16 +450,10 @@ function openStatsStage() {
 
     for (let i = 1; i <= 8; i++) {
         let count = 0;
-        if (i <= 6) {
-            count = words.filter(w => w.stagesCompleted.includes(i) || w.isInstant).length;
-        } else if (i === 7) {
-            count = words.filter(w => w.repLevel > 0).length;
-        } else {
-            count = learnedWords.length;
-        }
-        
+        if (i <= 6) count = words.filter(w => w.stagesCompleted.includes(i) || w.isInstant).length;
+        else if (i === 7) count = words.filter(w => w.repLevel > 0).length;
+        else count = learnedWords.length;
         const stagePct = Math.round((count / words.length) * 100);
-
         stagesProgressHtml += `
             <div class="mb-2">
                 <div class="flex justify-between items-center mb-0.5 px-1">
@@ -511,29 +466,14 @@ function openStatsStage() {
                 <div class="w-full bg-emerald-950 h-2 rounded-full overflow-hidden border border-emerald-800/30">
                     <div class="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full transition-all duration-700" style="width: ${stagePct}%"></div>
                 </div>
-            </div>
-        `;
+            </div>`;
     }
 
     container.innerHTML = `
-        <div class="bg-emerald-800 p-3 rounded-[1.5rem] shadow-xl border-b-4 border-emerald-500 text-center mb-3">
-            <p class="text-[7px] font-black uppercase mb-0.5 tracking-widest opacity-80">Ընդհանուր Առաջընթաց</p>
-            <div class="flex items-center justify-center gap-2">
-                <span class="text-3xl font-black italic text-white">${learnedWords.length}</span>
-                <div class="text-left">
-                    <p class="text-emerald-400 font-black text-lg leading-none">${Math.round((learnedWords.length / words.length) * 100)}%</p>
-                    <p class="text-[6px] font-bold uppercase opacity-60">սովորած բառեր</p>
-                </div>
-            </div>
-        </div>
-
         <div class="bg-emerald-900/60 p-3 rounded-[1.5rem] border border-emerald-700/50 shadow-lg mb-3">
             <h3 class="font-black text-[8px] mb-3 uppercase text-center italic tracking-widest text-emerald-300">Փուլերի Առաջընթաց</h3>
-            <div class="grid grid-cols-1">
-                ${stagesProgressHtml}
-            </div>
+            <div class="grid grid-cols-1">${stagesProgressHtml}</div>
         </div>
-
         <div class="grid grid-cols-2 gap-2 mb-3">
             <div class="bg-emerald-900/40 p-2 rounded-[1.2rem] border border-emerald-700/50">
                 <h3 class="font-black text-[7px] mb-2 uppercase text-center italic text-emerald-300">Բառեր</h3>
@@ -544,7 +484,6 @@ function openStatsStage() {
                 <div class="bar-container h-16">${weekly.timeData.map((val, i) => `<div class="bar-wrapper"><div class="bar-fill time-bar" data-val="${val}ր" style="height: ${(val/maxTimeVal)*100}%"></div><span class="bar-label text-[6px]">${weekly.labels[i]}</span></div>`).join('')}</div>
             </div>
         </div>
-
         <div class="bg-emerald-900 p-3 rounded-[1.5rem] border border-emerald-700 shadow-lg mb-3">
             <div class="grid grid-cols-2 gap-3">
                 <div class="text-center">
@@ -556,18 +495,14 @@ function openStatsStage() {
                 </div>
                 <div class="text-center">
                     <h2 class="text-[7px] font-black mb-1 uppercase italic text-blue-300">Հիշեցում (ր)</h2>
-                    <div class="flex flex-col items-center justify-center">
-                        <input type="number" value="${reminderMinute}" onchange="updateReminder(this.value)" class="w-10 p-1 rounded-lg text-center font-black bg-emerald-800 border border-emerald-600 text-[8px]">
-                    </div>
+                    <input type="number" value="${reminderMinute}" onchange="updateReminder(this.value)" class="w-10 p-1 rounded-lg text-center font-black bg-emerald-800 border border-emerald-600 text-[8px]">
                 </div>
             </div>
         </div>
-
         <div class="bg-emerald-900 p-2 rounded-[1.2rem] border border-emerald-700">
             <h3 class="font-black text-[8px] mb-2 uppercase italic text-center">Սովորած բառեր (${learnedWords.length})</h3>
             <div class="max-h-32 overflow-y-auto space-y-1 custom-scroll pr-1">${learnedWords.length === 0 ? '<p class="text-center italic py-2 text-[8px] opacity-40">Դեռ բառեր չկան</p>' : learnedWords.slice(-20).reverse().map(w => `<div class="flex justify-between items-center p-1.5 bg-emerald-800/20 rounded-lg border border-emerald-700/10"><div class="max-w-[70%]"><div class="font-black text-white text-[9px] leading-tight">${w.en}</div><div class="text-[7px] text-emerald-400 font-bold">${w.hy}</div></div><div class="text-yellow-400 text-[7px]">★★★★★</div></div>`).join('')}</div>
-        </div>
-    `;
+        </div>`;
 }
 
 function updateDailyGoal(val) { dailyGoal = Math.max(1, Math.min(100, parseInt(val) || 20)); saveProgress(); openStatsStage(); }
