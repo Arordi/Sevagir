@@ -49,6 +49,7 @@
         .bar-wrapper { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; }
         .bar-fill { width: 100%; background: #10b981; border-top-left-radius: 4px; border-top-right-radius: 4px; min-height: 2px; transition: height 0.5s ease; position: relative; }
         .bar-fill.time-bar { background: #60a5fa; }
+        .bar-fill.stage-bar { background: #facc15; }
         .bar-fill::after { content: attr(data-val); position: absolute; top: -14px; left: 50%; transform: translateX(-50%); font-size: 8px; font-weight: 800; color: white; opacity: 0.9; }
         .bar-label { font-size: 7px; font-weight: 800; text-transform: uppercase; color: #34d399; margin-top: 2px; }
     </style>
@@ -327,7 +328,6 @@
             if (activeStage === 7) {
                 if(smartMode === 'difficult') activeList = words.filter(w => w.errorCount >= 5 && !isWordLearned(w)).slice(0, 10);
                 else { const today = new Date().toISOString().split('T')[0]; activeList = words.filter(w => isWordLearned(w) && w.nextRepDate && w.nextRepDate <= today).slice(0, 10); }
-                // Մաքրում ենք ընթացիկ սեսիայի միավորները միայն եթե դա պահանջվում է, բայց stageScores-ը պահպանվում է
             } else if (activeStage === 1) {
                 activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
             } else {
@@ -487,24 +487,28 @@
             const container = document.getElementById('stats-container');
             const learnedWords = words.filter(w => isWordLearned(w));
             const weekly = getWeeklyData();
+            
+            // Փուլերի առաջընթացի տվյալներ
+            const stageLabels = ["Փ1", "Փ2", "Փ3", "Փ4", "Փ5", "Փ6", "Փ7", "Փ8"];
+            const stageData = [1, 2, 3, 4, 5, 6, 7, 8].map(s => {
+                if (s === 8) return examScores.length; // Քննությունների քանակը
+                return words.filter(w => w.stagesCompleted && w.stagesCompleted.includes(s)).length;
+            });
+            const maxStageVal = Math.max(...stageData, 5);
+
             const maxWordVal = Math.max(...weekly.wordData, 5);
             const maxTimeVal = 600; 
             const goalProgress = Math.min(100, Math.round((dailyWordsCount / dailyGoal) * 100));
 
             container.innerHTML = `
-                <div class="bg-emerald-800 p-4 rounded-[2rem] shadow-xl border-b-4 border-emerald-500 text-center">
-                    <p class="text-[8px] font-black uppercase mb-1 tracking-widest opacity-80">Ընդհանուր Առաջընթաց</p>
-                    <div class="flex items-center justify-center gap-3">
-                        <span class="text-4xl font-black italic text-white">${learnedWords.length}</span>
-                        <div class="text-left">
-                            <p class="text-emerald-400 font-black text-xl leading-none">${Math.round((learnedWords.length / words.length) * 100)}%</p>
-                            <p class="text-[7px] font-bold uppercase opacity-60">սովորած բառեր</p>
-                        </div>
-                    </div>
+                <div class="bg-emerald-900/60 p-4 rounded-[2rem] border border-emerald-700 shadow-xl">
+                    <h3 class="font-black text-[8px] mb-2 uppercase text-center italic tracking-widest text-emerald-300">Փուլերի առաջընթաց (բառեր)</h3>
+                    <div class="bar-container">${stageData.map((val, i) => `<div class="bar-wrapper"><div class="bar-fill stage-bar" data-val="${val}" style="height: ${(val/maxStageVal)*100}%"></div><span class="bar-label">${stageLabels[i]}</span></div>`).join('')}</div>
                 </div>
+
                 <div class="grid grid-cols-1 gap-3">
                     <div class="bg-emerald-900/40 p-3 rounded-[1.5rem] border border-emerald-700/50">
-                        <h3 class="font-black text-[8px] mb-2 uppercase text-center italic tracking-widest text-emerald-300">Բառերի ակտիվություն</h3>
+                        <h3 class="font-black text-[8px] mb-2 uppercase text-center italic tracking-widest text-emerald-300">Բառերի ակտիվություն (շաբաթական)</h3>
                         <div class="bar-container">${weekly.wordData.map((val, i) => `<div class="bar-wrapper"><div class="bar-fill" data-val="${val}" style="height: ${(val/maxWordVal)*100}%"></div><span class="bar-label">${weekly.labels[i]}</span></div>`).join('')}</div>
                     </div>
                     <div class="bg-emerald-900/40 p-3 rounded-[1.5rem] border border-emerald-700/50">
@@ -512,6 +516,7 @@
                         <div class="bar-container">${weekly.timeData.map((val, i) => `<div class="bar-wrapper"><div class="bar-fill time-bar" data-val="${val}ր" style="height: ${(val/maxTimeVal)*100}%"></div><span class="bar-label">${weekly.labels[i]}</span></div>`).join('')}</div>
                     </div>
                 </div>
+
                 <div class="bg-emerald-900 p-4 rounded-[2rem] border border-emerald-700 shadow-lg">
                     <div class="grid grid-cols-2 gap-4">
                         <div class="text-center">
@@ -529,6 +534,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="bg-emerald-900 p-3 rounded-[1.5rem] border border-emerald-700">
                     <h3 class="font-black text-[9px] mb-3 uppercase italic text-center tracking-widest">Սովորած բառեր (${learnedWords.length})</h3>
                     <div class="max-h-48 overflow-y-auto space-y-1.5 custom-scroll pr-1">${learnedWords.length === 0 ? '<p class="text-center italic py-4 text-[9px] opacity-40">Դեռ բառեր չեք սովորել</p>' : learnedWords.map(w => `<div class="flex justify-between items-center p-2 bg-emerald-800/30 rounded-xl border border-emerald-700/20 transition-all"><div class="max-w-[70%]"><div class="font-black text-white text-[10px] leading-tight">${w.en}</div><div class="text-[8px] text-emerald-400 font-bold mt-0.5">${w.hy}</div></div><div class="text-yellow-400 text-[8px] tracking-tighter">★★★★★</div></div>`).join('')}</div>
@@ -546,7 +552,10 @@
         }
 
         function renderExamStep(correctCount) {
-            if(activeIndex >= activeList.length) return renderFinish(`Արդյունք: ${Math.round((correctCount/activeList.length)*100)}%`);
+            if(activeIndex >= activeList.length) {
+                examScores.push(correctCount); // Պահում ենք քննության արդյունքը փուլ 8-ի համար
+                return renderFinish(`Արդյունք: ${Math.round((correctCount/activeList.length)*100)}%`);
+            }
             const word = activeList[activeIndex];
             document.getElementById('content').innerHTML = `<div class="w-full text-center flex flex-col items-center"><p class="text-[10px] font-bold text-emerald-400 mb-4 uppercase tracking-widest">${activeIndex+1} / ${activeList.length}</p><h2 class="text-3xl font-black text-white mb-8 italic break-words px-4">${word.en}</h2><input type="text" id="exam-in" autofocus class="w-full p-5 border-4 border-emerald-800 rounded-3xl text-center text-lg mb-6 outline-none" placeholder="..." autocomplete="off"><button id="ex-btn" class="btn-next-step">ՀԱՋՈՐԴԸ</button></div>`;
             setTimeout(() => document.getElementById('exam-in').focus(), 50);
