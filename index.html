@@ -406,12 +406,18 @@
         function initStageLogic() {
             const container = document.getElementById('content');
             container.innerHTML = "";
+            
             if (activeStage === 7) {
                 if(smartMode === 'difficult') activeList = words.filter(w => w.errorCount >= 5 && !isWordLearned(w)).slice(0, 10);
                 else { const today = new Date().toISOString().split('T')[0]; activeList = words.filter(w => isWordLearned(w) && w.nextRepDate && w.nextRepDate <= today).slice(0, 10); }
                 activeList.forEach(w => w.score = 0);
-            } else if (activeStage === 1) activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
-            else activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(activeStage)).slice(0, 10);
+            } else if (activeStage === 1) {
+                activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
+            } else {
+                activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(activeStage)).slice(0, 10);
+                // Փոփոխություն՝ զրոյացնում ենք միավորները հենց նոր փուլ սկսելիս
+                activeList.forEach(w => w.score = 0);
+            }
 
             if (activeList.length === 0) return renderFinish();
             if (activeStage === 1) renderStage1();
@@ -573,6 +579,8 @@
                     setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
                 } else if (activeStage === 7) {
                     setTimeout(() => initStageLogic(), 600);
+                } else {
+                    setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
                 }
             } else { 
                 btn.classList.add('choice-wrong');
