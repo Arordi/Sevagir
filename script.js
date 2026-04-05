@@ -213,7 +213,14 @@ function openStage(num) {
     activeStage = num; activeIndex = 0; smartMode = null;
     document.getElementById('app-content').classList.add('hidden');
     document.getElementById('view').classList.remove('hidden');
-    document.getElementById('view-title').innerText = `Փուլ ${num}`;
+    
+    // Փոխված անվանումներ ըստ քո խնդրանքի
+    let stageTitle = `Փուլ ${num}`;
+    if (num === 4) stageTitle = "Գրել անգլերեն";
+    else if (num === 5) stageTitle = "Գրել հայերեն";
+    else if (num === 6) stageTitle = "Բառի ուղղագրություն";
+    
+    document.getElementById('view-title').innerText = stageTitle;
     initStageLogic();
 }
 
@@ -318,9 +325,11 @@ function renderGenericStage() {
     const word = activeList[activeIndex % activeList.length];
     if (activeStage === 2) { renderMultipleChoice(word); return; }
     let question = word.en, answer = word.hy;
-    if(activeStage === 4) { question = word.hy; answer = word.en; }
-    else if(activeStage === 5) { question = word.en; answer = word.hy; }
-    else if(activeStage === 6) { question = "🔊"; answer = word.en; }
+    
+    // Հարցադրումների տրամաբանությունը ըստ փուլերի
+    if(activeStage === 4) { question = word.hy; answer = word.en; } // Գրել անգլերեն
+    else if(activeStage === 5) { question = word.en; answer = word.hy; } // Գրել հայերեն
+    else if(activeStage === 6) { question = "🔊"; answer = word.en; } // Բառի ուղղագրություն
     else if(activeStage === 7) { question = word.en; answer = word.hy; }
     
     document.getElementById('content').innerHTML = `
