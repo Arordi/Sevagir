@@ -255,8 +255,17 @@ function skipStage1() {
 function handleStage1(known) {
     const w = activeList[activeIndex];
     w.isSeen = true;
-    if (!w.stagesCompleted.includes(1)) w.stagesCompleted.push(1);
-    if(known) { w.isInstant = true; w.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(w); dailyWordsCount++; } 
+    if(known) { 
+        if (!w.stagesCompleted.includes(1)) w.stagesCompleted.push(1);
+        w.isInstant = true; 
+        w.learnedDate = new Date().toISOString().split('T')[0]; 
+        setNextRep(w); 
+        dailyWordsCount++; 
+    } else {
+        // Եթե սեղմվել է "ՉԳԻՏԵՄ", հեռացնում ենք Stage 1-ի ավարտված լինելու նշումը, որպեսզի կրկնելիս նորից հայտնվի
+        w.stagesCompleted = w.stagesCompleted.filter(s => s !== 1);
+        w.isInstant = false;
+    }
     saveProgress();
     activeIndex++; 
     if (activeIndex >= activeList.length) renderFinish(); else renderStage1();
@@ -265,6 +274,7 @@ function handleStage1(known) {
 function restartStage1() {
     if(confirm("Ցանկանու՞մ եք կրկնել չսովորած բառերը։")) {
         activeIndex = 0;
+        // Կրկին կանչում ենք տրամաբանությունը, որը կֆիլտրի միայն այն բառերը, որոնց Stage 1-ը completed չէ
         initStageLogic();
     }
 }
