@@ -453,14 +453,17 @@
         }
 
         function restartStage1() {
-            activeIndex = 0;
-            // Ֆիլտրում ենք այն բառերը, որոնք դեռ սովորված չեն կամ չեն անցել Stage 1-ը
-            activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
-            
-            if (activeList.length === 0) {
-                exitToMenu();
-            } else {
-                initStageLogic();
+            if(confirm("Ցանկանու՞մ եք նորից անցնել առաջին փուլի չսովորած բառերը:")) {
+                activeIndex = 0;
+                // Ֆիլտրում ենք այն բառերը, որոնք դեռ սովորված չեն և չեն անցել Stage 1-ը
+                activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
+                
+                if (activeList.length === 0) {
+                    alert("Բոլոր բառերն արդեն անցել են առաջին փուլը:");
+                    exitToMenu();
+                } else {
+                    initStageLogic();
+                }
             }
         }
 
