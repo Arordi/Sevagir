@@ -415,7 +415,7 @@
                 activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
             } else {
                 activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(activeStage)).slice(0, 10);
-                // Փոփոխություն՝ զրոյացնում ենք միավորները հենց նոր փուլ սկսելիս
+                // Յուրաքանչյուր բառի համար միավորը զրոյացնում ենք փուլը սկսելիս
                 activeList.forEach(w => w.score = 0);
             }
 
@@ -571,14 +571,15 @@
             if(cleanText(selected) === cleanText(correct)) {
                 btn.classList.add('choice-correct');
                 word.score = Math.min(10, word.score + 1);
-                if(activeStage !== 7 && word.score >= 10) { 
-                    word.score = 0; word.stagesCompleted.push(2); 
-                    if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; } 
-                } else if (activeStage === 7 && word.score >= 10) {
-                    if(smartMode === 'repetition') setNextRep(word);
+                if(word.score >= 10) { 
+                    if(activeStage !== 7) {
+                        word.score = 0; 
+                        word.stagesCompleted.push(2); 
+                        if(isWordLearned(word)) { word.learnedDate = new Date().toISOString().split('T')[0]; setNextRep(word); dailyWordsCount++; } 
+                    } else {
+                        if(smartMode === 'repetition') setNextRep(word);
+                    }
                     setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
-                } else if (activeStage === 7) {
-                    setTimeout(() => initStageLogic(), 600);
                 } else {
                     setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
                 }
@@ -608,10 +609,7 @@
                     }
                     setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
                 } else {
-                    setTimeout(() => { 
-                        if(activeStage === 7) initStageLogic(); 
-                        else { activeIndex++; initStageLogic(); }
-                    }, 400);
+                    setTimeout(() => { activeIndex++; initStageLogic(); }, 400);
                 }
             } else {
                 word.score = Math.max(0, word.score - 1); word.errorCount++;
