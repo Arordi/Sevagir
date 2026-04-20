@@ -150,7 +150,13 @@
 
     <div id="delete-modal" class="hidden fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-6 backdrop-blur-md">
         <div class="bg-emerald-900 p-8 rounded-[2.5rem] w-full max-w-sm text-center shadow-2xl border border-emerald-700">
-            <h2 class="text-lg font-black text-white mb-4 uppercase">Ջնջել ամբողջը</h2>
+            <h2 class="text-lg font-black text-white mb-4 uppercase">Կառավարում</h2>
+            <div class="space-y-3 mb-6">
+                 <button onclick="initApp()" class="w-full p-4 bg-emerald-500 text-white rounded-2xl font-bold">ԹԱՐՄԱՑՆԵԼ ԲԱՌԵՐԸ</button>
+                 <p class="text-[10px] text-emerald-400">Սեղմեք JSON-ից նոր բառերը կարդալու համար</p>
+            </div>
+            <hr class="border-emerald-800 mb-6">
+            <h2 class="text-sm font-black text-white mb-4 uppercase">Ջնջել ամբողջը</h2>
             <p class="text-emerald-300 text-xs mb-6">Գրիր <b class="text-white">DELETE</b> հաստատելու համար</p>
             <input type="text" id="delete-confirm-input" class="w-full p-4 border-2 border-emerald-700 rounded-2xl text-center mb-6 uppercase outline-none focus:border-emerald-400 transition-all">
             <div class="flex gap-3">
@@ -211,28 +217,73 @@
             lastDate = today;
         }
 
+        // --- ՆՈՐԱՑՎԱԾ ՖՈՒՆԿՑԻԱՆԵՐ ---
         async function initApp() {
             try {
-                const response = await fetch('./vocabulary.json');
+                // Ավելացնում ենք timestamp (?t=...), որպեսզի քեշից չկարդա
+                const response = await fetch('./vocabulary.json?t=' + Date.now());
                 const data = await response.json();
+                
+                // Նախնական բառերի ցանկը ստեղծում ենք JSON-ից
                 words = data.map((item, index) => ({
-                    id: item.id || index, en: item.word, hy: item.translation,
+                    id: item.id || index, 
+                    en: item.word, 
+                    hy: item.translation,
                     score: 0, stageScores: {}, stagesCompleted: [], isInstant: false, isSeen: false,
                     errorCount: 0, learnedDate: null, repLevel: 0, nextRepDate: null
                 }));
-                loadProgress(); 
+
+                loadProgress(); // Վերականգնում ենք առաջընթացը
                 checkDailyReset();
                 updateStats();
                 startTimer();
+                
                 document.getElementById('home-word-count').innerText = `${words.length} բառ`;
+                hideDeleteModal(); // Եթե կանչվել էր մենյուից
+                
                 document.getElementById('delete-confirm-input').addEventListener('input', function(e) {
                     const btn = document.getElementById('real-delete-btn');
                     const isMatch = e.target.value.toUpperCase() === 'DELETE';
                     btn.disabled = !isMatch;
                     btn.className = isMatch ? 'flex-1 p-4 bg-rose-600 text-white rounded-2xl font-bold' : 'flex-1 p-4 bg-emerald-800 text-emerald-500 rounded-2xl font-bold';
                 });
-            } catch (e) { console.error("Error loading app:", e); }
+            } catch (e) { 
+                console.error("Error loading app:", e);
+                alert("Չհաջողվեց կարդալ vocabulary.json ֆայլը:");
+            }
         }
+
+        function loadProgress() {
+            const saved = localStorage.getItem('usanim_v3_data');
+            if(saved) {
+                const p = JSON.parse(saved);
+                
+                words.forEach(w => { 
+                    if(p.words && p.words[w.id]) {
+                        const savedWord = p.words[w.id];
+                        // ԿԱՐԵՎՈՐ: Միայն առաջընթացի տվյալներն ենք վերցնում, 
+                        // բայց 'en' և 'hy' թողնում ենք JSON-ի նոր տարբերակը
+                        w.score = savedWord.score || 0;
+                        w.stageScores = savedWord.stageScores || {};
+                        w.stagesCompleted = savedWord.stagesCompleted || [];
+                        w.isInstant = savedWord.isInstant || false;
+                        w.isSeen = savedWord.isSeen || false;
+                        w.errorCount = savedWord.errorCount || 0;
+                        w.learnedDate = savedWord.learnedDate || null;
+                        w.repLevel = savedWord.repLevel || 0;
+                        w.nextRepDate = savedWord.nextRepDate || null;
+                    }
+                });
+                
+                examScores = p.examScores || [];
+                dailyWordsCount = p.dailyWordsCount || 0;
+                dailyGoal = p.dailyGoal || 20;
+                dailyTimeData = p.dailyTimeData || {};
+                reminderMinute = p.reminderMinute || 10;
+                lastDate = p.lastDate || getArmenianDate();
+            }
+        }
+        // -----------------------------
 
         function startTimer() {
             setInterval(() => {
@@ -256,25 +307,6 @@
             const s = sessionSeconds < 10 ? '0' + sessionSeconds : sessionSeconds;
             const display = document.getElementById('session-timer-display');
             if(display) display.innerText = `${m}:${s}`;
-        }
-
-        function loadProgress() {
-            const saved = localStorage.getItem('usanim_v3_data');
-            if(saved) {
-                const p = JSON.parse(saved);
-                words.forEach(w => { 
-                    if(p.words && p.words[w.id]) {
-                        Object.assign(w, p.words[w.id]); 
-                        if (!w.stageScores) w.stageScores = {};
-                    }
-                });
-                examScores = p.examScores || [];
-                dailyWordsCount = p.dailyWordsCount || 0;
-                dailyGoal = p.dailyGoal || 20;
-                dailyTimeData = p.dailyTimeData || {};
-                reminderMinute = p.reminderMinute || 10;
-                lastDate = p.lastDate || getArmenianDate();
-            }
         }
 
         function triggerSave() {
@@ -384,8 +416,6 @@
         function handleStage1(known) {
             const w = activeList[activeIndex];
             w.isSeen = true;
-            
-            // Կանչում ենք scoring.js-ի փոփոխված ֆունկցիաները
             let result;
             if(known) { 
                 result = handleCorrectAnswer(w, 1);
@@ -393,12 +423,8 @@
             } else { 
                 result = handleWrongAnswer(w, 1);
             }
-
-            // Ավտոմատ բացում ենք թարգմանությունը
             const hyText = document.getElementById('stage1-hy');
             if (hyText) hyText.classList.add('revealed');
-
-            // Սպասում ենք 1.5 վայրկյան և անցնում հաջորդին
             setTimeout(() => {
                 activeIndex++; 
                 triggerSave(); 
@@ -423,13 +449,7 @@
                 let currentScore = (w.stageScores && w.stageScores[3]) ? w.stageScores[3] : 0;
                 const el = document.createElement('div'); 
                 el.className = 'match-item flex-row gap-2'; 
-                el.innerHTML = `
-                    <div class="star-box scale-75">
-                        <span class="star-icon text-yellow-400">★</span>
-                        <span class="star-text !text-[10px] font-black">${currentScore}</span>
-                    </div>
-                    <span class="break-words px-1">${w.en}</span>
-                `;
+                el.innerHTML = `<div class="star-box scale-75"><span class="star-icon text-yellow-400">★</span><span class="star-text !text-[10px] font-black">${currentScore}</span></div><span class="break-words px-1">${w.en}</span>`;
                 el.onclick = () => selectMatch(el, 'en', w); document.getElementById('en-list').appendChild(el);
             });
             rightSide.forEach(w => {
@@ -444,7 +464,6 @@
             el.classList.add('match-selected');
             if(type === 'en') { selectedEn = { el, word }; speak(word.en === "I" ? "eye" : word.en); }
             else selectedHy = { el, word };
-            
             if(selectedEn && selectedHy) {
                 if(selectedEn.word.id === selectedHy.word.id) {
                     selectedEn.el.className = 'match-item match-correct'; selectedHy.el.className = 'match-item match-correct';
@@ -466,7 +485,6 @@
             if(activeStage === 4) { question = word.hy; answer = word.en; }
             else if(activeStage === 5) { question = word.en; answer = word.hy; }
             else if(activeStage === 6) { question = "🔊"; answer = word.en; }
-            
             document.getElementById('content').innerHTML = `<div class="w-full text-center flex flex-col items-center"><div class="mb-1">${getStars(word)}</div><div class="mb-6 text-3xl font-black text-white italic break-words px-4" onclick="speak('${word.en === "I" ? "eye" : word.en}')">${question}</div><input type="text" id="stage-input" autofocus class="w-full p-5 border-4 border-emerald-800 rounded-[2rem] text-center text-xl outline-none focus:border-emerald-400 transition-all shadow-inner" placeholder="..." autocomplete="off"><button id="check-btn" onclick="checkGeneric('${answer}')" class="btn-primary mt-6">ՍՏՈՒԳԵԼ</button><button id="next-btn" onclick="skipGeneric()" class="btn-next-step">ՀԱՋՈՐԴԸ</button></div>`;
             if(activeStage !== 4) speak(word.en === "I" ? "eye" : word.en);
             setTimeout(() => document.getElementById('stage-input')?.focus(), 50);
@@ -535,18 +553,9 @@
             if(!confirm("Հեռացնե՞լ բառը սովորածների ցանկից և նորից սկսել ուսուցումը:")) return;
             const w = words.find(item => item.id === wordId);
             if(w) {
-                w.score = 0;
-                w.stageScores = {};
-                w.stagesCompleted = [];
-                w.isInstant = false;
-                w.isSeen = false;
-                w.errorCount = 0;
-                w.learnedDate = null;
-                w.repLevel = 0;
-                w.nextRepDate = null;
-                triggerSave();
-                openStatsStage();
-                updateStats();
+                w.score = 0; w.stageScores = {}; w.stagesCompleted = []; w.isInstant = false; w.isSeen = false;
+                w.errorCount = 0; w.learnedDate = null; w.repLevel = 0; w.nextRepDate = null;
+                triggerSave(); openStatsStage(); updateStats();
             }
         }
 
@@ -556,14 +565,12 @@
             const container = document.getElementById('stats-container');
             const learnedWords = words.filter(w => isWordLearned(w));
             const weekly = getWeeklyData();
-            
             const stageLabels = ["Փ1", "Փ2", "Փ3", "Փ4", "Փ5", "Փ6", "Փ7", "Փ8"];
             const stageData = [1, 2, 3, 4, 5, 6, 7, 8].map(s => {
                 if (s === 8) return examScores.length; 
                 return words.filter(w => w.stagesCompleted && w.stagesCompleted.includes(s)).length;
             });
             const maxStageVal = Math.max(...stageData, 5);
-
             const maxWordVal = Math.max(...weekly.wordData, 5);
             const maxTimeVal = 600; 
             const goalProgress = Math.min(100, Math.round((dailyWordsCount / dailyGoal) * 100));
@@ -573,7 +580,6 @@
                     <h3 class="font-black text-[8px] mb-2 uppercase text-center italic tracking-widest text-emerald-300">Փուլերի առաջընթաց (բառեր)</h3>
                     <div class="bar-container">${stageData.map((val, i) => `<div class="bar-wrapper"><div class="bar-fill stage-bar" data-val="${val}" style="height: ${(val/maxStageVal)*100}%"></div><span class="bar-label">${stageLabels[i]}</span></div>`).join('')}</div>
                 </div>
-
                 <div class="grid grid-cols-1 gap-3">
                     <div class="bg-emerald-900/40 p-3 rounded-[1.5rem] border border-emerald-700/50">
                         <h3 class="font-black text-[8px] mb-2 uppercase text-center italic tracking-widest text-emerald-300">Բառերի ակտիվություն (շաբաթական)</h3>
@@ -584,7 +590,6 @@
                         <div class="bar-container">${weekly.timeData.map((val, i) => `<div class="bar-wrapper"><div class="bar-fill time-bar" data-val="${val}ր" style="height: ${(val/maxTimeVal)*100}%"></div><span class="bar-label">${weekly.labels[i]}</span></div>`).join('')}</div>
                     </div>
                 </div>
-
                 <div class="bg-emerald-900 p-4 rounded-[2rem] border border-emerald-700 shadow-lg">
                     <div class="grid grid-cols-2 gap-4">
                         <div class="text-center">
@@ -592,9 +597,7 @@
                             <div class="flex items-center justify-center gap-2">
                                 <div class="relative w-10 h-10"><svg class="w-full h-full" viewBox="0 0 36 36"><path class="text-emerald-900/50" stroke-width="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" /><path class="text-emerald-400" stroke-dasharray="${goalProgress}, 100" stroke-width="4" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" /></svg><div class="absolute inset-0 flex flex-col items-center justify-center"><span class="text-[10px] font-black">${dailyWordsCount}</span></div></div>
                                 <input type="number" value="${dailyGoal}" onchange="updateDailyGoal(this.value)" class="w-10 p-1 rounded-lg text-center font-black bg-emerald-800 border border-emerald-600 text-[10px]">
-                                <div class="bg-emerald-800 border border-emerald-600 rounded-lg px-2 py-1">
-                                    <span class="text-[10px] font-black text-emerald-400">${learnedWords.length}</span>
-                                </div>
+                                <div class="bg-emerald-800 border border-emerald-600 rounded-lg px-2 py-1"><span class="text-[10px] font-black text-emerald-400">${learnedWords.length}</span></div>
                             </div>
                         </div>
                         <div class="text-center">
@@ -605,7 +608,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="bg-emerald-900 p-3 rounded-[1.5rem] border border-emerald-700">
                     <h3 class="font-black text-[9px] mb-3 uppercase italic text-center tracking-widest">Սովորած բառեր (${learnedWords.length})</h3>
                     <div class="max-h-48 overflow-y-auto space-y-1.5 custom-scroll pr-1">
