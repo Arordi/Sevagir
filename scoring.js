@@ -3,9 +3,12 @@
 // Ստուգում է՝ արդյոք բառը համարվում է սովորած
 function isWordLearned(word) {
     if (word.isInstant) return true;
-    // Բառը սովորած է, եթե անցել է 2, 3, 4, 5, 6 փուլերը
-    // Ամեն փուլ պետք է ունենա 10 միավոր կամ լինի stagesCompleted ցուցակում
-    return [2, 3, 4, 5, 6].every(s => 
+    
+    // Բառը սովորած է, եթե անցել է 1.2, 2, 3, 4, 5, 6 փուլերը
+    // Այստեղ "1.2"-ը նշում ենք որպես առանձին ստուգում
+    const requiredStages = ["1.2", 2, 3, 4, 5, 6];
+    
+    return requiredStages.every(s => 
         word.stagesCompleted.includes(s) || (word.stageScores && word.stageScores[s] >= 10)
     );
 }
@@ -35,7 +38,7 @@ function saveProgress(words, examScores, dailyWordsCount, dailyGoal, dailyTimeDa
         storage.words[w.id] = { 
             // Պահպանում ենք անհատական միավորները ամեն փուլի աստղի համար
             stageScores: w.stageScores || {}, 
-            stagesCompleted: w.stagesCompleted, 
+            stagesCompleted: w.stagesCompleted || [], 
             isInstant: w.isInstant, 
             isSeen: w.isSeen, 
             errorCount: w.errorCount, 
@@ -49,8 +52,9 @@ function saveProgress(words, examScores, dailyWordsCount, dailyGoal, dailyTimeDa
 
 // Միավորների ավելացման ընդհանուր ֆունկցիա
 function handleCorrectAnswer(word, stage, mode = null) {
-    // ԱՎԵԼԱՑՎԱԾ Է․ Եթե 1-ին փուլն է, միանգամից հրահանգել ցույց տալ թարգմանությունը
-    if (stage === 1) {
+    
+    // Ենթափուլ 1.1-ի տրամաբանությունը (Հին Stage 1-ը)
+    if (stage === "1.1") {
         return { stageFinished: true, learnedNew: false, showTranslation: true };
     }
 
@@ -65,6 +69,7 @@ function handleCorrectAnswer(word, stage, mode = null) {
     }
 
     // Ավելացնել միավորը միայն տվյալ փուլի համար (մինչև 10)
+    // Սա վերաբերում է Stage 1.2-ին և 2-6 փուլերին
     if (word.stageScores[stage] < 10) {
         word.stageScores[stage]++;
     }
@@ -74,11 +79,15 @@ function handleCorrectAnswer(word, stage, mode = null) {
         // 7-րդ փուլը անկախ է
         if (stage !== 7) {
             // Ավելացնել ավարտված փուլերի ցուցակում, եթե չկա
+            if (!word.stagesCompleted) {
+                word.stagesCompleted = [];
+            }
+            
             if (!word.stagesCompleted.includes(stage)) {
                 word.stagesCompleted.push(stage);
             }
 
-            // Ստուգել՝ արդյոք 2-6 փուլերը փակվեցին
+            // Ստուգել՝ արդյոք բոլոր անհրաժեշտ 6 աստղերը (1.2-ից մինչև 6) փակվեցին
             if (isWordLearned(word)) {
                 // Եթե բառը նոր է համարվում սովորած
                 if (!word.learnedDate) {
@@ -112,8 +121,10 @@ function handleWrongAnswer(word, stage) {
     word.stageScores[stage] = Math.max(0, word.stageScores[stage] - 1);
     word.errorCount++;
 
-    // ԱՎԵԼԱՑՎԱԾ Է․ Եթե 1-ին փուլում սեղմվել է "Չգիտեմ", նույնպես ցույց տալ թարգմանությունը
-    if (stage === 1) {
+    // Եթե 1.1 ենթափուլում սեղմվել է "Չգիտեմ", ցույց տալ թարգմանությունը
+    if (stage === "1.1") {
         return { showTranslation: true };
     }
+    
+    return { showTranslation: false };
 }
