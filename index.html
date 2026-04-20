@@ -160,87 +160,21 @@
         </div>
     </div>
 
+    <script src="scoring.js"></script>
+
     <script>
-        // scoring.js logic integrated directly
-        function isWordLearned(word) {
-            if (word.isInstant) return true;
-            const requiredStages = ["1.2", 2, 3, 4, 5, 6];
-            return requiredStages.every(s => 
-                (word.stagesCompleted && word.stagesCompleted.includes(s)) || (word.stageScores && word.stageScores[s] >= 10)
-            );
-        }
-
-        function setNextRep(word) {
-            const intervals = [7, 30, 90];
-            const days = intervals[word.repLevel] || 90;
-            let date = new Date();
-            date.setDate(date.getDate() + days);
-            word.nextRepDate = date.toISOString().split('T')[0];
-            word.repLevel++;
-        }
-
-        function saveProgress(words, examScores, dailyWordsCount, dailyGoal, dailyTimeData, reminderMinute) {
-            const storage = { words: {}, examScores, dailyWordsCount, dailyGoal, dailyTimeData, reminderMinute };
-            words.forEach(w => {
-                storage.words[w.id] = { 
-                    stageScores: w.stageScores || {}, 
-                    stagesCompleted: w.stagesCompleted || [], 
-                    isInstant: w.isInstant, 
-                    isSeen: w.isSeen, 
-                    errorCount: w.errorCount, 
-                    learnedDate: w.learnedDate,
-                    repLevel: w.repLevel, 
-                    nextRepDate: w.nextRepDate
-                };
-            });
-            localStorage.setItem('usanim_v3_data', JSON.stringify(storage));
-        }
-
-        function handleCorrectAnswer(word, stage, mode = null) {
-            if (stage === "1.1") {
-                return { stageFinished: true, learnedNew: false, showTranslation: true };
-            }
-            if (!word.stageScores) word.stageScores = {};
-            if (word.stageScores[stage] === undefined) word.stageScores[stage] = 0;
-
-            if (word.stageScores[stage] < 10) word.stageScores[stage]++;
-            
-            if (word.stageScores[stage] >= 10) {
-                if (stage !== 7) {
-                    if (!word.stagesCompleted) word.stagesCompleted = [];
-                    if (!word.stagesCompleted.includes(stage)) word.stagesCompleted.push(stage);
-                    if (isWordLearned(word) && !word.learnedDate) {
-                        word.learnedDate = new Date().toISOString().split('T')[0];
-                        setNextRep(word);
-                        return { stageFinished: true, learnedNew: true };
-                    }
-                } else if (mode === 'repetition') {
-                    setNextRep(word);
-                }
-                return { stageFinished: true, learnedNew: false };
-            }
-            return { stageFinished: false, learnedNew: false };
-        }
-
-        function handleWrongAnswer(word, stage) {
-            if (!word.stageScores) word.stageScores = {};
-            if (word.stageScores[stage] === undefined) word.stageScores[stage] = 0;
-            word.stageScores[stage] = Math.max(0, word.stageScores[stage] - 1);
-            word.errorCount++;
-            if (stage === "1.1") return { showTranslation: true };
-            return { showTranslation: false };
-        }
-
-        // Main App Logic
         let words = [], activeStage = 1, activeIndex = 0, activeList = [], canProceed = false;
         let examScores = [], dailyWordsCount = 0, dailyGoal = 20;
         let selectedEn = null, selectedHy = null;
         let smartMode = null; 
+
         let sessionMinutes = 0, sessionSeconds = 0;
         let reminderMinute = 10; 
         let dailyTimeData = {}; 
         let lastDate = ""; 
-        let touchStartX = 0, touchEndX = 0;
+
+        let touchStartX = 0;
+        let touchEndX = 0;
 
         document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, false);
         document.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; handleSwipe(); }, false);
@@ -270,7 +204,9 @@
             if (lastDate !== "" && lastDate !== today) {
                 dailyWordsCount = 0;
                 triggerSave();
-                if (!document.getElementById('stats-view').classList.contains('hidden')) openStatsStage();
+                if (document.getElementById('stats-view').classList.contains('hidden') === false) {
+                    openStatsStage();
+                }
             }
             lastDate = today;
         }
@@ -307,6 +243,7 @@
                     sessionMinutes++;
                     const today = getArmenianDate();
                     dailyTimeData[today] = (dailyTimeData[today] || 0) + 1;
+                    if(dailyTimeData[today] > 600) dailyTimeData[today] = 600; 
                     if(sessionMinutes === reminderMinute) alert(`Դուք արդեն կայքում եք ${sessionMinutes} րոպե։`);
                     triggerSave();
                 }
@@ -328,6 +265,7 @@
                 words.forEach(w => { 
                     if(p.words && p.words[w.id]) {
                         Object.assign(w, p.words[w.id]); 
+                        if (!w.stageScores) w.stageScores = {};
                     }
                 });
                 examScores = p.examScores || [];
@@ -360,13 +298,12 @@
         }
 
         function getStars(word) {
-            // Նորացված աստղերի ցուցադրություն՝ ներառյալ 1.2-ը
-            const stages = ["1.2", 2, 3, 4, 5, 6];
+            const stages = [2, 3, 4, 5, 6];
             let html = '<div class="flex flex-col items-center mb-2"><div class="flex justify-center gap-1 mb-1">';
             
             stages.forEach(s => {
-                const isCompleted = word.stagesCompleted && word.stagesCompleted.includes(s);
-                const isActive = (activeStage == s || (activeStage == 1 && s == "1.2"));
+                const isCompleted = word.stagesCompleted.includes(s);
+                const isActive = (activeStage === s);
                 const currentScore = (word.stageScores && word.stageScores[s]) ? word.stageScores[s] : 0;
                 
                 let colorClass = isCompleted ? 'text-yellow-400' : 'text-emerald-800';
@@ -379,14 +316,32 @@
                          </div>`;
             });
             html += '</div>';
+            
+            if(activeStage === 7) {
+                const s7Score = (word.stageScores && word.stageScores[7]) ? word.stageScores[7] : 0;
+                html += `<div class="flex flex-col items-center mt-1">
+                            <div class="star-box">
+                                <span class="star-icon text-emerald-400">★</span>
+                                <span class="star-text !text-white !text-[12px]">${s7Score}</span>
+                            </div>
+                         </div>`;
+            }
             return html + '</div>';
         }
 
         function cleanText(text) { return text.trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,""); }
         function goToAppMenu() { document.getElementById('welcome-screen').classList.add('hidden'); document.getElementById('app-content').classList.remove('hidden'); updateStats(); }
         function goToWelcome() { document.getElementById('app-content').classList.add('hidden'); document.getElementById('welcome-screen').classList.remove('hidden'); updateStats(); }
+
         function openSmartMenu() { updateStats(); document.getElementById('app-content').classList.add('hidden'); document.getElementById('smart-menu-view').classList.remove('hidden'); }
-        
+        function openSmartStage(mode) {
+            smartMode = mode; activeStage = 7; activeIndex = 0;
+            document.getElementById('smart-menu-view').classList.add('hidden');
+            document.getElementById('view').classList.remove('hidden');
+            document.getElementById('view-title').innerText = mode === 'difficult' ? 'ԴԺՎԱՐ ԲԱՌԵՐ' : 'ԿՐԿՆՈՒԹՅՈՒՆ';
+            initStageLogic();
+        }
+
         function openStage(num) {
             activeStage = num; activeIndex = 0; smartMode = null;
             document.getElementById('app-content').classList.add('hidden');
@@ -398,94 +353,65 @@
         function initStageLogic() {
             const container = document.getElementById('content');
             container.innerHTML = "";
-            if (activeStage === 1) {
-                // Փուլ 1-ի համար վերցնում ենք այն բառերը, որոնք դեռ չեն անցել 1.1-ը կամ 1.2-ը
-                activeList = words.filter(w => !isWordLearned(w) && (!w.stagesCompleted.includes(1) || !w.stagesCompleted.includes("1.2"))).slice(0, 10);
-            } else if (activeStage === 7) {
+            if (activeStage === 7) {
                 if(smartMode === 'difficult') activeList = words.filter(w => w.errorCount >= 5 && !isWordLearned(w)).slice(0, 10);
                 else { const today = getArmenianDate(); activeList = words.filter(w => isWordLearned(w) && w.nextRepDate && w.nextRepDate <= today).slice(0, 10); }
+            } else if (activeStage === 1) {
+                activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
             } else {
                 activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(activeStage)).slice(0, 10);
             }
-
             if (activeList.length === 0) return renderFinish();
-            
-            // Ընտրում ենք որ ենթափուլը ցույց տալ Փուլ 1-ի ներսում
-            if (activeStage === 1) {
-                const currentWord = activeList[activeIndex];
-                if (!currentWord.stagesCompleted.includes(1)) renderStage1_1(); // Ստուգում (Գիտեմ/Չգիտեմ)
-                else renderStage1_2(); // 1.2 ենթափուլ (10 միավոր հավաքելու համար)
-            } else if (activeStage === 3) renderStage3();
+            if (activeStage === 1) renderStage1();
+            else if (activeStage === 3) renderStage3();
             else renderGenericStage();
         }
 
-        // Փուլ 1.1: Սկզբնական ստուգում
-        function renderStage1_1() {
+        function renderStage1() {
             const word = activeList[activeIndex];
-            document.getElementById('content').innerHTML = `
-                <div class="w-full bg-emerald-800 rounded-[2.5rem] p-6 text-center shadow-xl mb-6 border-b-8 border-emerald-500 min-h-[180px] flex flex-col justify-center overflow-hidden">
-                    <h2 class="text-3xl font-black text-white mb-4 italic break-words" onclick="speak('${word.en}')">${word.en}</h2>
-                    <h3 id="stage1-hy" onclick="this.classList.toggle('revealed')" class="text-xl font-bold text-emerald-600 blur-text italic break-words">${word.hy}</h3>
-                </div>
-                <div class="grid grid-cols-2 gap-4 w-full">
-                    <button onclick="handleStage1Btn(true)" class="btn-primary">ԳԻՏԵՄ</button>
-                    <button onclick="handleStage1Btn(false)" class="btn-primary !bg-emerald-900 border border-emerald-700">ՉԳԻՏԵՄ</button>
-                </div>`;
+            if (!word) return renderFinish();
+            document.getElementById('content').innerHTML = `<div class="w-full bg-emerald-800 rounded-[2.5rem] p-6 text-center shadow-xl mb-6 border-b-8 border-emerald-500 min-h-[180px] flex flex-col justify-center overflow-hidden"><h2 class="text-3xl font-black text-white mb-4 italic break-words" onclick="speak('${word.en}')">${word.en}</h2><h3 id="stage1-hy" onclick="this.classList.toggle('revealed')" class="text-xl font-bold text-emerald-600 blur-text italic break-words">${word.hy}</h3></div><div class="grid grid-cols-2 gap-4 w-full"><button onclick="handleStage1(true)" class="btn-primary">ԳԻՏԵՄ</button><button onclick="handleStage1(false)" class="btn-primary !bg-emerald-900 border border-emerald-700">ՉԳԻՏԵՄ</button></div><div class="flex justify-center w-full"><button id="next-btn" onclick="skipStage1()" class="btn-next-step">ՀԱՋՈՐԴԸ</button></div>`;
             speak(word.en === "I" ? "eye" : word.en);
         }
 
-        function handleStage1Btn(known) {
+        function skipStage1() {
+            const w = activeList[activeIndex];
+            if (!w.stagesCompleted.includes(1)) w.stagesCompleted.push(1);
+            w.isSeen = true; triggerSave(); activeIndex++;
+            if (activeIndex >= activeList.length) renderFinish(); else renderStage1();
+        }
+
+        function handleStage1(known) {
             const w = activeList[activeIndex];
             w.isSeen = true;
-            let res;
-            if(known) res = handleCorrectAnswer(w, "1.1");
-            else res = handleWrongAnswer(w, "1.1");
-
-            document.getElementById('stage1-hy').classList.add('revealed');
             
-            setTimeout(() => {
-                if(!w.stagesCompleted.includes(1)) w.stagesCompleted.push(1);
-                triggerSave();
-                initStageLogic(); // Անցնում ենք հաջորդ ենթափուլին (1.2) կամ հաջորդ բառին
-            }, 1200);
-        }
-
-        // Փուլ 1.2: Տարբերակներով ուսուցում (քանի դեռ 10 միավոր չի հավաքվել)
-        function renderStage1_2() {
-            const word = activeList[activeIndex];
-            let options = [word.hy];
-            let otherWords = words.filter(w => w.id !== word.id).sort(() => 0.5 - Math.random());
-            options.push(...otherWords.slice(0, 3).map(w => w.hy));
-            options.sort(() => 0.5 - Math.random());
-
-            document.getElementById('content').innerHTML = `
-                <div class="w-full text-center flex flex-col items-center">
-                    <div class="mb-1">${getStars(word)}</div>
-                    <div class="mb-6 text-3xl font-black text-white italic break-words px-4" onclick="speak('${word.en}')">${word.en}</div>
-                    <div class="grid grid-cols-1 gap-2 w-full max-h-[50vh] overflow-y-auto pr-1 custom-scroll">
-                        ${options.map(opt => `<button onclick="checkChoice1_2(this, '${opt}', '${word.hy}')" class="choice-btn p-4 border-2 border-emerald-800 rounded-2xl font-bold text-md">${opt}</button>`).join('')}
-                    </div>
-                </div>`;
-            speak(word.en === "I" ? "eye" : word.en);
-        }
-
-        function checkChoice1_2(btn, selected, correct) {
-            const word = activeList[activeIndex];
-            const buttons = document.querySelectorAll('.choice-btn');
-            buttons.forEach(b => b.disabled = true);
-            
-            if(cleanText(selected) === cleanText(correct)) {
-                btn.classList.add('choice-correct');
-                const result = handleCorrectAnswer(word, "1.2");
-                if(result.learnedNew) dailyWordsCount++;
-                setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
+            // Կանչում ենք scoring.js-ի փոփոխված ֆունկցիաները
+            let result;
+            if(known) { 
+                result = handleCorrectAnswer(w, 1);
+                if(result.learnedNew) dailyWordsCount++; 
             } else { 
-                btn.classList.add('choice-wrong');
-                buttons.forEach(b => { if(cleanText(b.innerText) === cleanText(correct)) b.classList.add('choice-correct'); });
-                handleWrongAnswer(word, "1.2");
-                setTimeout(() => { initStageLogic(); }, 1200);
+                result = handleWrongAnswer(w, 1);
             }
-            triggerSave(); 
+
+            // Ավտոմատ բացում ենք թարգմանությունը
+            const hyText = document.getElementById('stage1-hy');
+            if (hyText) hyText.classList.add('revealed');
+
+            // Սպասում ենք 1.5 վայրկյան և անցնում հաջորդին
+            setTimeout(() => {
+                activeIndex++; 
+                triggerSave(); 
+                if (activeIndex >= activeList.length) renderFinish(); 
+                else renderStage1();
+            }, 1500);
+        }
+
+        function restartStage1() {
+            activeIndex = 0;
+            activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
+            if (activeList.length === 0) activeList = words.filter(w => !isWordLearned(w)).slice(0, 10);
+            if (activeList.length === 0) exitToMenu(); else renderStage1();
         }
 
         function renderStage3() {
@@ -495,8 +421,15 @@
             const rightSide = [...batch].sort(() => Math.random() - 0.5);
             leftSide.forEach(w => {
                 let currentScore = (w.stageScores && w.stageScores[3]) ? w.stageScores[3] : 0;
-                const el = document.createElement('div'); el.className = 'match-item flex-row gap-2'; 
-                el.innerHTML = `<div class="star-box scale-75"><span class="star-icon text-yellow-400">★</span><span class="star-text !text-[10px] font-black">${currentScore}</span></div><span class="break-words px-1">${w.en}</span>`;
+                const el = document.createElement('div'); 
+                el.className = 'match-item flex-row gap-2'; 
+                el.innerHTML = `
+                    <div class="star-box scale-75">
+                        <span class="star-icon text-yellow-400">★</span>
+                        <span class="star-text !text-[10px] font-black">${currentScore}</span>
+                    </div>
+                    <span class="break-words px-1">${w.en}</span>
+                `;
                 el.onclick = () => selectMatch(el, 'en', w); document.getElementById('en-list').appendChild(el);
             });
             rightSide.forEach(w => {
@@ -509,7 +442,7 @@
             if(el.classList.contains('match-correct')) return;
             document.querySelectorAll(`.match-item`).forEach(i => i.classList.remove('match-selected'));
             el.classList.add('match-selected');
-            if(type === 'en') { selectedEn = { el, word }; speak(word.en); }
+            if(type === 'en') { selectedEn = { el, word }; speak(word.en === "I" ? "eye" : word.en); }
             else selectedHy = { el, word };
             
             if(selectedEn && selectedHy) {
@@ -534,8 +467,8 @@
             else if(activeStage === 5) { question = word.en; answer = word.hy; }
             else if(activeStage === 6) { question = "🔊"; answer = word.en; }
             
-            document.getElementById('content').innerHTML = `<div class="w-full text-center flex flex-col items-center"><div class="mb-1">${getStars(word)}</div><div class="mb-6 text-3xl font-black text-white italic break-words px-4" onclick="speak('${word.en}')">${question}</div><input type="text" id="stage-input" autofocus class="w-full p-5 border-4 border-emerald-800 rounded-[2rem] text-center text-xl outline-none focus:border-emerald-400 transition-all shadow-inner" placeholder="..." autocomplete="off"><button id="check-btn" onclick="checkGeneric('${answer}')" class="btn-primary mt-6">ՍՏՈՒԳԵԼ</button><button id="next-btn" onclick="skipGeneric()" class="btn-next-step">ՀԱՋՈՐԴԸ</button></div>`;
-            if(activeStage !== 4) speak(word.en);
+            document.getElementById('content').innerHTML = `<div class="w-full text-center flex flex-col items-center"><div class="mb-1">${getStars(word)}</div><div class="mb-6 text-3xl font-black text-white italic break-words px-4" onclick="speak('${word.en === "I" ? "eye" : word.en}')">${question}</div><input type="text" id="stage-input" autofocus class="w-full p-5 border-4 border-emerald-800 rounded-[2rem] text-center text-xl outline-none focus:border-emerald-400 transition-all shadow-inner" placeholder="..." autocomplete="off"><button id="check-btn" onclick="checkGeneric('${answer}')" class="btn-primary mt-6">ՍՏՈՒԳԵԼ</button><button id="next-btn" onclick="skipGeneric()" class="btn-next-step">ՀԱՋՈՐԴԸ</button></div>`;
+            if(activeStage !== 4) speak(word.en === "I" ? "eye" : word.en);
             setTimeout(() => document.getElementById('stage-input')?.focus(), 50);
         }
 
@@ -546,8 +479,8 @@
             let otherWords = words.filter(w => w.id !== word.id).sort(() => 0.5 - Math.random());
             options.push(...otherWords.slice(0, 3).map(w => w.hy));
             options.sort(() => 0.5 - Math.random());
-            document.getElementById('content').innerHTML = `<div class="w-full text-center flex flex-col items-center"><div class="mb-1">${getStars(word)}</div><div class="mb-6 text-3xl font-black text-white italic break-words px-4" onclick="speak('${word.en}')">${word.en}</div><div class="grid grid-cols-1 gap-2 w-full max-h-[50vh] overflow-y-auto pr-1 custom-scroll">${options.map(opt => `<button onclick="checkChoice(this, '${opt}', '${word.hy}')" class="choice-btn p-4 border-2 border-emerald-800 rounded-2xl font-bold text-md">${opt}</button>`).join('')}</div><button id="next-btn" onclick="skipGeneric()" class="btn-next-step">ՀԱՋՈՐԴԸ</button></div>`;
-            speak(word.en);
+            document.getElementById('content').innerHTML = `<div class="w-full text-center flex flex-col items-center"><div class="mb-1">${getStars(word)}</div><div class="mb-6 text-3xl font-black text-white italic break-words px-4" onclick="speak('${word.en === "I" ? "eye" : word.en}')">${word.en}</div><div class="grid grid-cols-1 gap-2 w-full max-h-[50vh] overflow-y-auto pr-1 custom-scroll">${options.map(opt => `<button onclick="checkChoice(this, '${opt}', '${word.hy}')" class="choice-btn p-4 border-2 border-emerald-800 rounded-2xl font-bold text-md break-words px-4">${opt}</button>`).join('')}</div><button id="next-btn" onclick="skipGeneric()" class="btn-next-step">ՀԱՋՈՐԴԸ</button></div>`;
+            speak(word.en === "I" ? "eye" : word.en);
         }
 
         function checkChoice(btn, selected, correct) {
@@ -571,7 +504,7 @@
             const input = document.getElementById('stage-input');
             const word = activeList[activeIndex % activeList.length];
             if(cleanText(input.value) === cleanText(correct)) {
-                if(activeStage === 4) speak(word.en);
+                if(activeStage === 4) speak(word.en === "I" ? "eye" : word.en);
                 input.className = "w-full p-5 border-4 border-emerald-500 bg-emerald-600 text-white rounded-[2rem] text-center text-xl outline-none";
                 const result = handleCorrectAnswer(word, activeStage, smartMode);
                 if(result.learnedNew) dailyWordsCount++;
@@ -585,7 +518,6 @@
             triggerSave();
         }
 
-        // Stats & Helpers
         function getWeeklyData() {
             const last7Days = [], learnedCounts = [], timeCounts = [], today = new Date();
             for (let i = 6; i >= 0; i--) {
@@ -599,42 +531,106 @@
             return { labels: last7Days, wordData: learnedCounts, timeData: timeCounts };
         }
 
+        function resetWord(wordId) {
+            if(!confirm("Հեռացնե՞լ բառը սովորածների ցանկից և նորից սկսել ուսուցումը:")) return;
+            const w = words.find(item => item.id === wordId);
+            if(w) {
+                w.score = 0;
+                w.stageScores = {};
+                w.stagesCompleted = [];
+                w.isInstant = false;
+                w.isSeen = false;
+                w.errorCount = 0;
+                w.learnedDate = null;
+                w.repLevel = 0;
+                w.nextRepDate = null;
+                triggerSave();
+                openStatsStage();
+                updateStats();
+            }
+        }
+
         function openStatsStage() {
             document.getElementById('app-content').classList.add('hidden');
             document.getElementById('stats-view').classList.remove('hidden');
             const container = document.getElementById('stats-container');
             const learnedWords = words.filter(w => isWordLearned(w));
             const weekly = getWeeklyData();
-            const stageLabels = ["Փ1", "Փ2", "Փ3", "Փ4", "Փ5", "Փ6", "Փ7"];
-            const stageData = [1, 2, 3, 4, 5, 6, 7].map(s => words.filter(w => w.stagesCompleted && w.stagesCompleted.includes(s)).length);
+            
+            const stageLabels = ["Փ1", "Փ2", "Փ3", "Փ4", "Փ5", "Փ6", "Փ7", "Փ8"];
+            const stageData = [1, 2, 3, 4, 5, 6, 7, 8].map(s => {
+                if (s === 8) return examScores.length; 
+                return words.filter(w => w.stagesCompleted && w.stagesCompleted.includes(s)).length;
+            });
             const maxStageVal = Math.max(...stageData, 5);
+
             const maxWordVal = Math.max(...weekly.wordData, 5);
+            const maxTimeVal = 600; 
             const goalProgress = Math.min(100, Math.round((dailyWordsCount / dailyGoal) * 100));
 
             container.innerHTML = `
                 <div class="bg-emerald-900/60 p-4 rounded-[2rem] border border-emerald-700 shadow-xl">
+                    <h3 class="font-black text-[8px] mb-2 uppercase text-center italic tracking-widest text-emerald-300">Փուլերի առաջընթաց (բառեր)</h3>
                     <div class="bar-container">${stageData.map((val, i) => `<div class="bar-wrapper"><div class="bar-fill stage-bar" data-val="${val}" style="height: ${(val/maxStageVal)*100}%"></div><span class="bar-label">${stageLabels[i]}</span></div>`).join('')}</div>
                 </div>
-                <div class="bg-emerald-900/40 p-3 rounded-[1.5rem] border border-emerald-700/50">
-                    <div class="bar-container">${weekly.wordData.map((val, i) => `<div class="bar-wrapper"><div class="bar-fill" data-val="${val}" style="height: ${(val/maxWordVal)*100}%"></div><span class="bar-label">${weekly.labels[i]}</span></div>`).join('')}</div>
+
+                <div class="grid grid-cols-1 gap-3">
+                    <div class="bg-emerald-900/40 p-3 rounded-[1.5rem] border border-emerald-700/50">
+                        <h3 class="font-black text-[8px] mb-2 uppercase text-center italic tracking-widest text-emerald-300">Բառերի ակտիվություն (շաբաթական)</h3>
+                        <div class="bar-container">${weekly.wordData.map((val, i) => `<div class="bar-wrapper"><div class="bar-fill" data-val="${val}" style="height: ${(val/maxWordVal)*100}%"></div><span class="bar-label">${weekly.labels[i]}</span></div>`).join('')}</div>
+                    </div>
+                    <div class="bg-emerald-900/40 p-3 rounded-[1.5rem] border border-emerald-700/50">
+                        <h3 class="font-black text-[8px] mb-2 uppercase text-center italic tracking-widest text-blue-300">Ժամանակի ակտիվություն</h3>
+                        <div class="bar-container">${weekly.timeData.map((val, i) => `<div class="bar-wrapper"><div class="bar-fill time-bar" data-val="${val}ր" style="height: ${(val/maxTimeVal)*100}%"></div><span class="bar-label">${weekly.labels[i]}</span></div>`).join('')}</div>
+                    </div>
                 </div>
-                <div class="bg-emerald-900 p-4 rounded-[2rem] border border-emerald-700">
-                    <div class="flex items-center justify-around">
+
+                <div class="bg-emerald-900 p-4 rounded-[2rem] border border-emerald-700 shadow-lg">
+                    <div class="grid grid-cols-2 gap-4">
                         <div class="text-center">
-                            <span class="block text-[8px] uppercase text-emerald-400">Նպատակ</span>
-                            <span class="text-xl font-black">${dailyWordsCount}/${dailyGoal}</span>
+                            <h2 class="text-[8px] font-black mb-2 uppercase italic text-emerald-300 tracking-wider">Նպատակ / Ընդհանուր</h2>
+                            <div class="flex items-center justify-center gap-2">
+                                <div class="relative w-10 h-10"><svg class="w-full h-full" viewBox="0 0 36 36"><path class="text-emerald-900/50" stroke-width="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" /><path class="text-emerald-400" stroke-dasharray="${goalProgress}, 100" stroke-width="4" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" /></svg><div class="absolute inset-0 flex flex-col items-center justify-center"><span class="text-[10px] font-black">${dailyWordsCount}</span></div></div>
+                                <input type="number" value="${dailyGoal}" onchange="updateDailyGoal(this.value)" class="w-10 p-1 rounded-lg text-center font-black bg-emerald-800 border border-emerald-600 text-[10px]">
+                                <div class="bg-emerald-800 border border-emerald-600 rounded-lg px-2 py-1">
+                                    <span class="text-[10px] font-black text-emerald-400">${learnedWords.length}</span>
+                                </div>
+                            </div>
                         </div>
                         <div class="text-center">
-                            <span class="block text-[8px] uppercase text-emerald-400">Ընդհանուր սովորած</span>
-                            <span class="text-xl font-black">${learnedWords.length}</span>
+                            <h2 class="text-[8px] font-black mb-2 uppercase italic text-blue-300 tracking-wider">Հիշեցում (ր)</h2>
+                            <div class="flex flex-col items-center justify-center h-full">
+                                <input type="number" value="${reminderMinute}" onchange="updateReminder(this.value)" class="w-12 p-1 rounded-lg text-center font-black bg-emerald-800 border border-emerald-600 text-[10px]">
+                            </div>
                         </div>
+                    </div>
+                </div>
+
+                <div class="bg-emerald-900 p-3 rounded-[1.5rem] border border-emerald-700">
+                    <h3 class="font-black text-[9px] mb-3 uppercase italic text-center tracking-widest">Սովորած բառեր (${learnedWords.length})</h3>
+                    <div class="max-h-48 overflow-y-auto space-y-1.5 custom-scroll pr-1">
+                        ${learnedWords.length === 0 ? '<p class="text-center italic py-4 text-[9px] opacity-40">Դեռ բառեր չեք սովորել</p>' : 
+                        learnedWords.map(w => `
+                            <div class="flex justify-between items-center p-2 bg-emerald-800/30 rounded-xl border border-emerald-700/20 transition-all">
+                                <div class="max-w-[60%]">
+                                    <div class="font-black text-white text-[10px] leading-tight">${w.en}</div>
+                                    <div class="text-[8px] text-emerald-400 font-bold mt-0.5">${w.hy}</div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="text-yellow-400 text-[8px] tracking-tighter">★★★★★</div>
+                                    <button onclick="resetWord(${w.id})" class="reset-word-btn">🗑️</button>
+                                </div>
+                            </div>`).join('')}
                     </div>
                 </div>`;
         }
 
+        function updateDailyGoal(val) { dailyGoal = Math.max(1, Math.min(100, parseInt(val) || 20)); triggerSave(); openStatsStage(); }
+        function updateReminder(val) { reminderMinute = Math.max(1, parseInt(val) || 10); triggerSave(); }
+
         function openExam() {
             activeList = [...words].sort(() => 0.5 - Math.random()).slice(0, 50);
-            activeIndex = 0;
+            activeIndex = 0; smartMode = null;
             document.getElementById('app-content').classList.add('hidden'); document.getElementById('view').classList.remove('hidden');
             renderExamStep(0);
         }
@@ -645,13 +641,14 @@
                 return renderFinish(`Արդյունք: ${Math.round((correctCount/activeList.length)*100)}%`);
             }
             const word = activeList[activeIndex];
-            document.getElementById('content').innerHTML = `<div class="w-full text-center flex flex-col items-center"><p class="text-[10px] font-bold text-emerald-400 mb-4 uppercase">${activeIndex+1} / ${activeList.length}</p><h2 class="text-3xl font-black text-white mb-8 italic">${word.en}</h2><input type="text" id="exam-in" autofocus class="w-full p-5 border-4 border-emerald-800 rounded-3xl text-center text-lg mb-6 outline-none" autocomplete="off"><button id="ex-btn" class="btn-next-step">ՀԱՋՈՐԴԸ</button></div>`;
+            document.getElementById('content').innerHTML = `<div class="w-full text-center flex flex-col items-center"><p class="text-[10px] font-bold text-emerald-400 mb-4 uppercase tracking-widest">${activeIndex+1} / ${activeList.length}</p><h2 class="text-3xl font-black text-white mb-8 italic break-words px-4">${word.en}</h2><input type="text" id="exam-in" autofocus class="w-full p-5 border-4 border-emerald-800 rounded-3xl text-center text-lg mb-6 outline-none" placeholder="..." autocomplete="off"><button id="ex-btn" class="btn-next-step">ՀԱՋՈՐԴԸ</button></div>`;
             setTimeout(() => document.getElementById('exam-in').focus(), 50);
-            document.getElementById('ex-btn').onclick = () => { if(cleanText(document.getElementById('exam-in').value) === cleanText(word.hy)) correctCount++; activeIndex++; renderExamStep(correctCount); };
+            document.getElementById('ex-btn').onclick = () => { if(cleanText(document.getElementById('exam-in').value) === cleanText(word.hy)) correctCount++; else word.errorCount++; activeIndex++; renderExamStep(correctCount); };
         }
 
         function renderFinish(extra = "") {
-            document.getElementById('content').innerHTML = `<div class="text-center p-8 bg-emerald-800 rounded-[2.5rem] shadow-2xl w-full border-b-8 border-emerald-500"><div class="text-6xl mb-4">🏆</div><h2 class="text-2xl font-black mb-2 text-white italic">Գերազանց է</h2><p class="text-emerald-200 mb-6 font-bold text-sm">${extra || "Բաժինը հաջողությամբ անցաք:"}</p><button onclick="exitToMenu()" class="btn-primary">ՎԵՐԱԴԱՌՆԱԼ</button></div>`;
+            const isStage1 = (activeStage === 1);
+            document.getElementById('content').innerHTML = `<div class="text-center p-8 bg-emerald-800 rounded-[2.5rem] shadow-2xl w-full border-b-8 border-emerald-500"><div class="text-6xl mb-4">🏆</div><h2 class="text-2xl font-black mb-2 text-white italic">Գերազանց է</h2><p class="text-emerald-200 mb-6 font-bold text-sm">${extra || "Բաժինը հաջողությամբ անցաք:"}</p><div class="flex flex-col gap-3">${isStage1 ? `<button onclick="restartStage1()" class="btn-primary">ԿՐԿՆԵԼ</button>` : ''}<button onclick="exitToMenu()" class="${isStage1 ? 'text-emerald-300 font-bold text-xs uppercase tracking-widest mt-2' : 'btn-primary'}">ՎԵՐԱԴԱՌՆԱԼ</button></div></div>`;
             triggerSave();
         }
 
