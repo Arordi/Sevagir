@@ -406,7 +406,8 @@
             const leftSide = [...batch].sort(() => Math.random() - 0.5);
             const rightSide = [...batch].sort(() => Math.random() - 0.5);
             leftSide.forEach(w => {
-                const el = document.createElement('div'); el.className = 'match-item'; el.innerHTML = `<span class="break-words px-1">${w.en}</span>`;
+                let currentScore = (w.stageScores && w.stageScores[3]) ? w.stageScores[3] : 0;
+                const el = document.createElement('div'); el.className = 'match-item'; el.innerHTML = `<span class="break-words px-1">⭐ ${currentScore} ${w.en}</span>`;
                 el.onclick = () => selectMatch(el, 'en', w); document.getElementById('en-list').appendChild(el);
             });
             rightSide.forEach(w => {
