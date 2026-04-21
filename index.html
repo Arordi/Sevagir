@@ -134,7 +134,7 @@
                 </div>
                 <div class="rep-setting">
                     <label>քանակ</label>
-                    <input type="number" id="stage1-rep-input" min="1" max="99" value="1" onchange="updateStage1Limit(this.value)">
+                    <input type="text" id="stage1-rep-input" readonly class="w-[35px] text-center font-black bg-transparent border-none text-white outline-none">
                 </div>
             </div>
             <div id="empty-spacer" class="w-10"></div>
@@ -301,7 +301,7 @@
                 stage1RepeatLimit = p.stage1RepeatLimit || 1;
                 stage1Mode = p.stage1Mode || 'manual';
                 if(document.getElementById('stage1-rep-input')) {
-                    document.getElementById('stage1-rep-input').value = stage1RepeatLimit;
+                    document.getElementById('stage1-rep-input').value = stage1Mode === 'manual' ? '—' : stage1RepeatLimit;
                 }
             }
         }
@@ -403,18 +403,22 @@
         function updateModeDots() {
             const dMan = document.getElementById('dot-manual');
             const dAuto = document.getElementById('dot-auto');
+            const input = document.getElementById('stage1-rep-input');
             if(!dMan || !dAuto) return;
             
             if(stage1Mode === 'manual') {
                 dMan.className = 'mode-dot active-red';
                 dAuto.className = 'mode-dot inactive';
+                if(input) input.value = '—';
             } else {
                 dMan.className = 'mode-dot inactive';
                 dAuto.className = 'mode-dot active-green';
+                if(input) input.value = stage1RepeatLimit;
             }
         }
 
         function updateStage1Limit(val) {
+            if(stage1Mode === 'manual') return;
             stage1RepeatLimit = Math.max(1, Math.min(99, parseInt(val) || 1));
             currentWordReps = 0;
             triggerSave();
@@ -443,7 +447,7 @@
             if (!word) return renderFinish();
             
             const isAuto = (stage1Mode === 'auto');
-            const repIndicator = (isAuto || stage1RepeatLimit > 1) ? `<div class="text-[10px] font-black text-emerald-400 uppercase mb-2">Կրկնություն: ${currentWordReps + 1} / ${stage1RepeatLimit}</div>` : '';
+            const repIndicator = isAuto ? `<div class="text-[10px] font-black text-emerald-400 uppercase mb-2">Կրկնություն: ${currentWordReps + 1} / ${stage1RepeatLimit}</div>` : '';
 
             document.getElementById('content').innerHTML = `
                 ${repIndicator}
@@ -477,12 +481,8 @@
                 currentWordReps = 0;
                 if (activeIndex >= activeList.length) renderFinish(); else renderStage1();
             } else {
-                // ԱՎՏՈՄԱՏ (Կանաչ) ռեժիմ
-                // Նախ բացում ենք թարգմանությունը
                 if (hyText) hyText.classList.add('revealed');
                 w.isSeen = true;
-                
-                // Սպասում ենք 1.2 վայրկյան (ինչպես կարմիրի ժամանակ), հետո նոր անցնում առաջ
                 setTimeout(() => {
                     currentWordReps++;
                     if (currentWordReps >= stage1RepeatLimit) {
@@ -500,16 +500,21 @@
             const w = activeList[activeIndex];
             w.isSeen = true;
             
-            let result;
-            if(known) { 
-                result = handleCorrectAnswer(w, 1);
-                if(result.learnedNew) dailyWordsCount++; 
-            } else { 
-                result = handleWrongAnswer(w, 1);
-            }
-
             const hyText = document.getElementById('stage1-hy');
             if (hyText) hyText.classList.add('revealed');
+
+            if(known) { 
+                // Գիտեմի դեպքում՝ սովորած բոլոր փուլերի համար
+                w.score = 5;
+                const allStages = [1, 2, 3, 4, 5, 6];
+                allStages.forEach(s => {
+                    if(!w.stagesCompleted.includes(s)) w.stagesCompleted.push(s);
+                });
+                w.learnedDate = getArmenianDate();
+                dailyWordsCount++;
+            } else { 
+                // Չգիտեմի դեպքում՝ ոչինչ չփոխել (մնում է չսովորած)
+            }
 
             setTimeout(() => {
                 activeIndex++; 
