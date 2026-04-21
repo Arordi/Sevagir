@@ -60,8 +60,7 @@
         .rep-setting label { font-size: 8px; font-weight: 900; color: #a7f3d0; text-transform: uppercase; }
         .rep-setting input { width: 35px; background: transparent !important; border: none !important; font-size: 12px; font-weight: 900; text-align: center; color: white !important; outline: none; }
 
-        /* Mode Dots */
-        .mode-dot { width: 14px; height: 14px; rounded: 50%; cursor: pointer; border: 2px solid rgba(255,255,255,0.2); border-radius: 50%; transition: 0.3s; }
+        .mode-dot { width: 14px; height: 14px; cursor: pointer; border: 2px solid rgba(255,255,255,0.2); border-radius: 50%; transition: 0.3s; }
         .mode-dot.active-red { background-color: #ef4444; border-color: white; box-shadow: 0 0 8px #ef4444; }
         .mode-dot.active-green { background-color: #22c55e; border-color: white; box-shadow: 0 0 8px #22c55e; }
         .mode-dot.inactive { background-color: #164e63; opacity: 0.4; }
@@ -468,8 +467,9 @@
 
         function handleStage1NextClick() {
             const w = activeList[activeIndex];
+            const hyText = document.getElementById('stage1-hy');
+            
             if (stage1Mode === 'manual') {
-                // Skip logic
                 if (!w.stagesCompleted.includes(1)) w.stagesCompleted.push(1);
                 w.isSeen = true;
                 triggerSave();
@@ -477,19 +477,22 @@
                 currentWordReps = 0;
                 if (activeIndex >= activeList.length) renderFinish(); else renderStage1();
             } else {
-                // Auto mode logic
-                const hyText = document.getElementById('stage1-hy');
+                // ԱՎՏՈՄԱՏ (Կանաչ) ռեժիմ
+                // Նախ բացում ենք թարգմանությունը
                 if (hyText) hyText.classList.add('revealed');
                 w.isSeen = true;
                 
-                currentWordReps++;
-                if (currentWordReps >= stage1RepeatLimit) {
-                    if (!w.stagesCompleted.includes(1)) w.stagesCompleted.push(1);
-                    activeIndex++;
-                    currentWordReps = 0;
-                }
-                triggerSave();
-                if (activeIndex >= activeList.length) renderFinish(); else renderStage1();
+                // Սպասում ենք 1.2 վայրկյան (ինչպես կարմիրի ժամանակ), հետո նոր անցնում առաջ
+                setTimeout(() => {
+                    currentWordReps++;
+                    if (currentWordReps >= stage1RepeatLimit) {
+                        if (!w.stagesCompleted.includes(1)) w.stagesCompleted.push(1);
+                        activeIndex++;
+                        currentWordReps = 0;
+                    }
+                    triggerSave();
+                    if (activeIndex >= activeList.length) renderFinish(); else renderStage1();
+                }, 1200);
             }
         }
 
