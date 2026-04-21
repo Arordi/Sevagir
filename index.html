@@ -55,6 +55,11 @@
         
         .reset-word-btn { background: #450a0a; color: #ef4444; border: 1px solid #ef4444; padding: 4px 8px; border-radius: 8px; font-size: 12px; transition: 0.2s; }
         .reset-word-btn:active { transform: scale(0.9); background: #ef4444; color: white; }
+
+        /* Նոր ոճեր քանակի կոճակի համար */
+        .rep-setting { background: #065f46; border: 1px solid #059669; border-radius: 8px; padding: 2px 6px; display: flex; align-items: center; gap: 4px; }
+        .rep-setting label { font-size: 8px; font-weight: 900; color: #a7f3d0; text-transform: uppercase; }
+        .rep-setting input { width: 35px; background: transparent !important; border: none !important; font-size: 12px; font-weight: 900; text-align: center; color: white !important; outline: none; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -117,7 +122,14 @@
         <div class="flex justify-between items-center mb-4 pt-2">
             <button onclick="exitToMenu()" class="font-black text-emerald-400 text-[10px] uppercase tracking-widest bg-emerald-900/50 px-3 py-1.5 rounded-full border border-emerald-700 whitespace-nowrap">⬅ ԵԼՔ</button>
             <div id="view-title" class="text-[9px] font-black text-emerald-300 uppercase tracking-[0.2em] text-center px-2"></div>
-            <div class="w-10"></div>
+            
+            <div id="rep-control-container" class="hidden">
+                <div class="rep-setting">
+                    <label>քանակ</label>
+                    <input type="number" id="stage1-rep-input" min="1" max="99" value="1" onchange="updateStage1Limit(this.value)">
+                </div>
+            </div>
+            <div id="empty-spacer" class="w-10"></div>
         </div>
         <div id="content" class="flex-grow flex flex-col items-center justify-center w-full"></div>
     </div>
@@ -172,6 +184,10 @@
         let reminderMinute = 10; 
         let dailyTimeData = {}; 
         let lastDate = ""; 
+
+        // Փուլ 1-ի կրկնության փոփոխականներ
+        let stage1RepeatLimit = 1;
+        let currentWordReps = 0;
 
         let touchStartX = 0;
         let touchEndX = 0;
@@ -274,6 +290,10 @@
                 dailyTimeData = p.dailyTimeData || {};
                 reminderMinute = p.reminderMinute || 10;
                 lastDate = p.lastDate || getArmenianDate();
+                stage1RepeatLimit = p.stage1RepeatLimit || 1;
+                if(document.getElementById('stage1-rep-input')) {
+                    document.getElementById('stage1-rep-input').value = stage1RepeatLimit;
+                }
             }
         }
 
@@ -281,6 +301,7 @@
             saveProgress(words, examScores, dailyWordsCount, dailyGoal, dailyTimeData, reminderMinute);
             const currentData = JSON.parse(localStorage.getItem('usanim_v3_data'));
             currentData.lastDate = lastDate;
+            currentData.stage1RepeatLimit = stage1RepeatLimit;
             localStorage.setItem('usanim_v3_data', JSON.stringify(currentData));
         }
 
@@ -344,10 +365,27 @@
 
         function openStage(num) {
             activeStage = num; activeIndex = 0; smartMode = null;
+            currentWordReps = 0; // Reset repetition counter for stage 1
             document.getElementById('app-content').classList.add('hidden');
             document.getElementById('view').classList.remove('hidden');
             document.getElementById('view-title').innerText = `Փուլ ${num}`;
+            
+            // Ցուցադրել կամ թաքցնել քանակի կոճակը
+            if (num === 1) {
+                document.getElementById('rep-control-container').classList.remove('hidden');
+                document.getElementById('empty-spacer').classList.add('hidden');
+            } else {
+                document.getElementById('rep-control-container').classList.add('hidden');
+                document.getElementById('empty-spacer').classList.remove('hidden');
+            }
+            
             initStageLogic();
+        }
+
+        function updateStage1Limit(val) {
+            stage1RepeatLimit = Math.max(1, Math.min(99, parseInt(val) || 1));
+            currentWordReps = 0;
+            triggerSave();
         }
 
         function initStageLogic() {
@@ -370,14 +408,33 @@
         function renderStage1() {
             const word = activeList[activeIndex];
             if (!word) return renderFinish();
-            document.getElementById('content').innerHTML = `<div class="w-full bg-emerald-800 rounded-[2.5rem] p-6 text-center shadow-xl mb-6 border-b-8 border-emerald-500 min-h-[180px] flex flex-col justify-center overflow-hidden"><h2 class="text-3xl font-black text-white mb-4 italic break-words" onclick="speak('${word.en}')">${word.en}</h2><h3 id="stage1-hy" onclick="this.classList.toggle('revealed')" class="text-xl font-bold text-emerald-600 blur-text italic break-words">${word.hy}</h3></div><div class="grid grid-cols-2 gap-4 w-full"><button onclick="handleStage1(true)" class="btn-primary">ԳԻՏԵՄ</button><button onclick="handleStage1(false)" class="btn-primary !bg-emerald-900 border border-emerald-700">ՉԳԻՏԵՄ</button></div><div class="flex justify-center w-full"><button id="next-btn" onclick="skipStage1()" class="btn-next-step">ՀԱՋՈՐԴԸ</button></div>`;
+            
+            // Ցուցադրել ընթացիկ կրկնության թիվը, եթե լիմիտը > 1 է
+            const repIndicator = stage1RepeatLimit > 1 ? `<div class="text-[10px] font-black text-emerald-400 uppercase mb-2">Կրկնություն: ${currentWordReps + 1} / ${stage1RepeatLimit}</div>` : '';
+
+            document.getElementById('content').innerHTML = `
+                ${repIndicator}
+                <div class="w-full bg-emerald-800 rounded-[2.5rem] p-6 text-center shadow-xl mb-6 border-b-8 border-emerald-500 min-h-[180px] flex flex-col justify-center overflow-hidden">
+                    <h2 class="text-3xl font-black text-white mb-4 italic break-words" onclick="speak('${word.en}')">${word.en}</h2>
+                    <h3 id="stage1-hy" onclick="this.classList.toggle('revealed')" class="text-xl font-bold text-emerald-600 blur-text italic break-words">${word.hy}</h3>
+                </div>
+                <div class="grid grid-cols-2 gap-4 w-full">
+                    <button onclick="handleStage1(true)" class="btn-primary">ԳԻՏԵՄ</button>
+                    <button onclick="handleStage1(false)" class="btn-primary !bg-emerald-900 border border-emerald-700">ՉԳԻՏԵՄ</button>
+                </div>
+                <div class="flex justify-center w-full">
+                    <button id="next-btn" onclick="skipStage1()" class="btn-next-step">ՀԱՋՈՐԴԸ</button>
+                </div>`;
             speak(word.en === "I" ? "eye" : word.en);
         }
 
         function skipStage1() {
             const w = activeList[activeIndex];
             if (!w.stagesCompleted.includes(1)) w.stagesCompleted.push(1);
-            w.isSeen = true; triggerSave(); activeIndex++;
+            w.isSeen = true; 
+            triggerSave(); 
+            activeIndex++;
+            currentWordReps = 0; // Հաջորդ բառին անցնելիս զրոյացնել
             if (activeIndex >= activeList.length) renderFinish(); else renderStage1();
         }
 
@@ -385,7 +442,6 @@
             const w = activeList[activeIndex];
             w.isSeen = true;
             
-            // Կանչում ենք scoring.js-ի փոփոխված ֆունկցիաները
             let result;
             if(known) { 
                 result = handleCorrectAnswer(w, 1);
@@ -394,21 +450,27 @@
                 result = handleWrongAnswer(w, 1);
             }
 
-            // Ավտոմատ բացում ենք թարգմանությունը
             const hyText = document.getElementById('stage1-hy');
             if (hyText) hyText.classList.add('revealed');
 
-            // Սպասում ենք 1.5 վայրկյան և անցնում հաջորդին
             setTimeout(() => {
-                activeIndex++; 
+                currentWordReps++;
+                
+                // Ստուգել՝ արդյոք հասել ենք լիմիտին
+                if (currentWordReps >= stage1RepeatLimit) {
+                    activeIndex++; 
+                    currentWordReps = 0;
+                }
+                
                 triggerSave(); 
                 if (activeIndex >= activeList.length) renderFinish(); 
                 else renderStage1();
-            }, 1500);
+            }, 1200);
         }
 
         function restartStage1() {
             activeIndex = 0;
+            currentWordReps = 0;
             activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
             if (activeList.length === 0) activeList = words.filter(w => !isWordLearned(w)).slice(0, 10);
             if (activeList.length === 0) exitToMenu(); else renderStage1();
