@@ -504,7 +504,7 @@
             if (hyText) hyText.classList.add('revealed');
 
             if(known) { 
-                // Գիտեմի դեպքում՝ սովորած բոլոր փուլերի համար
+                // Երբ նշում եք "Գիտեմ", բոլոր ուսումնական փուլերը (1-6) համարվում են անցած
                 w.score = 5;
                 const allStages = [1, 2, 3, 4, 5, 6];
                 allStages.forEach(s => {
@@ -513,7 +513,7 @@
                 w.learnedDate = getArmenianDate();
                 dailyWordsCount++;
             } else { 
-                // Չգիտեմի դեպքում՝ ոչինչ չփոխել (մնում է չսովորած)
+                // "Չգիտեմ" նշելիս ուղղակի բացվում է թարգմանությունը, բայց բառը չի համարվում սովորած
             }
 
             setTimeout(() => {
