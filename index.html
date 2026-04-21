@@ -56,10 +56,15 @@
         .reset-word-btn { background: #450a0a; color: #ef4444; border: 1px solid #ef4444; padding: 4px 8px; border-radius: 8px; font-size: 12px; transition: 0.2s; }
         .reset-word-btn:active { transform: scale(0.9); background: #ef4444; color: white; }
 
-        /* Նոր ոճեր քանակի կոճակի համար */
         .rep-setting { background: #065f46; border: 1px solid #059669; border-radius: 8px; padding: 2px 6px; display: flex; align-items: center; gap: 4px; }
         .rep-setting label { font-size: 8px; font-weight: 900; color: #a7f3d0; text-transform: uppercase; }
         .rep-setting input { width: 35px; background: transparent !important; border: none !important; font-size: 12px; font-weight: 900; text-align: center; color: white !important; outline: none; }
+
+        /* Mode Dots */
+        .mode-dot { width: 14px; height: 14px; rounded: 50%; cursor: pointer; border: 2px solid rgba(255,255,255,0.2); border-radius: 50%; transition: 0.3s; }
+        .mode-dot.active-red { background-color: #ef4444; border-color: white; box-shadow: 0 0 8px #ef4444; }
+        .mode-dot.active-green { background-color: #22c55e; border-color: white; box-shadow: 0 0 8px #22c55e; }
+        .mode-dot.inactive { background-color: #164e63; opacity: 0.4; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -123,7 +128,11 @@
             <button onclick="exitToMenu()" class="font-black text-emerald-400 text-[10px] uppercase tracking-widest bg-emerald-900/50 px-3 py-1.5 rounded-full border border-emerald-700 whitespace-nowrap">⬅ ԵԼՔ</button>
             <div id="view-title" class="text-[9px] font-black text-emerald-300 uppercase tracking-[0.2em] text-center px-2"></div>
             
-            <div id="rep-control-container" class="hidden">
+            <div id="rep-control-container" class="hidden flex items-center gap-2">
+                <div class="flex gap-1.5 mr-1">
+                    <div id="dot-manual" onclick="setStage1Mode('manual')" class="mode-dot"></div>
+                    <div id="dot-auto" onclick="setStage1Mode('auto')" class="mode-dot"></div>
+                </div>
                 <div class="rep-setting">
                     <label>քանակ</label>
                     <input type="number" id="stage1-rep-input" min="1" max="99" value="1" onchange="updateStage1Limit(this.value)">
@@ -185,9 +194,9 @@
         let dailyTimeData = {}; 
         let lastDate = ""; 
 
-        // Փուլ 1-ի կրկնության փոփոխականներ
         let stage1RepeatLimit = 1;
         let currentWordReps = 0;
+        let stage1Mode = 'manual'; // 'manual' (red) or 'auto' (green)
 
         let touchStartX = 0;
         let touchEndX = 0;
@@ -291,6 +300,7 @@
                 reminderMinute = p.reminderMinute || 10;
                 lastDate = p.lastDate || getArmenianDate();
                 stage1RepeatLimit = p.stage1RepeatLimit || 1;
+                stage1Mode = p.stage1Mode || 'manual';
                 if(document.getElementById('stage1-rep-input')) {
                     document.getElementById('stage1-rep-input').value = stage1RepeatLimit;
                 }
@@ -302,6 +312,7 @@
             const currentData = JSON.parse(localStorage.getItem('usanim_v3_data'));
             currentData.lastDate = lastDate;
             currentData.stage1RepeatLimit = stage1RepeatLimit;
+            currentData.stage1Mode = stage1Mode;
             localStorage.setItem('usanim_v3_data', JSON.stringify(currentData));
         }
 
@@ -365,15 +376,15 @@
 
         function openStage(num) {
             activeStage = num; activeIndex = 0; smartMode = null;
-            currentWordReps = 0; // Reset repetition counter for stage 1
+            currentWordReps = 0; 
             document.getElementById('app-content').classList.add('hidden');
             document.getElementById('view').classList.remove('hidden');
             document.getElementById('view-title').innerText = `Փուլ ${num}`;
             
-            // Ցուցադրել կամ թաքցնել քանակի կոճակը
             if (num === 1) {
                 document.getElementById('rep-control-container').classList.remove('hidden');
                 document.getElementById('empty-spacer').classList.add('hidden');
+                updateModeDots();
             } else {
                 document.getElementById('rep-control-container').classList.add('hidden');
                 document.getElementById('empty-spacer').classList.remove('hidden');
@@ -382,10 +393,33 @@
             initStageLogic();
         }
 
+        function setStage1Mode(mode) {
+            stage1Mode = mode;
+            currentWordReps = 0;
+            updateModeDots();
+            renderStage1();
+            triggerSave();
+        }
+
+        function updateModeDots() {
+            const dMan = document.getElementById('dot-manual');
+            const dAuto = document.getElementById('dot-auto');
+            if(!dMan || !dAuto) return;
+            
+            if(stage1Mode === 'manual') {
+                dMan.className = 'mode-dot active-red';
+                dAuto.className = 'mode-dot inactive';
+            } else {
+                dMan.className = 'mode-dot inactive';
+                dAuto.className = 'mode-dot active-green';
+            }
+        }
+
         function updateStage1Limit(val) {
             stage1RepeatLimit = Math.max(1, Math.min(99, parseInt(val) || 1));
             currentWordReps = 0;
             triggerSave();
+            if(activeStage === 1) renderStage1();
         }
 
         function initStageLogic() {
@@ -409,8 +443,8 @@
             const word = activeList[activeIndex];
             if (!word) return renderFinish();
             
-            // Ցուցադրել ընթացիկ կրկնության թիվը, եթե լիմիտը > 1 է
-            const repIndicator = stage1RepeatLimit > 1 ? `<div class="text-[10px] font-black text-emerald-400 uppercase mb-2">Կրկնություն: ${currentWordReps + 1} / ${stage1RepeatLimit}</div>` : '';
+            const isAuto = (stage1Mode === 'auto');
+            const repIndicator = (isAuto || stage1RepeatLimit > 1) ? `<div class="text-[10px] font-black text-emerald-400 uppercase mb-2">Կրկնություն: ${currentWordReps + 1} / ${stage1RepeatLimit}</div>` : '';
 
             document.getElementById('content').innerHTML = `
                 ${repIndicator}
@@ -418,24 +452,45 @@
                     <h2 class="text-3xl font-black text-white mb-4 italic break-words" onclick="speak('${word.en}')">${word.en}</h2>
                     <h3 id="stage1-hy" onclick="this.classList.toggle('revealed')" class="text-xl font-bold text-emerald-600 blur-text italic break-words">${word.hy}</h3>
                 </div>
-                <div class="grid grid-cols-2 gap-4 w-full">
+                
+                <div class="grid grid-cols-2 gap-4 w-full ${isAuto ? 'hidden' : ''}">
                     <button onclick="handleStage1(true)" class="btn-primary">ԳԻՏԵՄ</button>
                     <button onclick="handleStage1(false)" class="btn-primary !bg-emerald-900 border border-emerald-700">ՉԳԻՏԵՄ</button>
                 </div>
+                
                 <div class="flex justify-center w-full">
-                    <button id="next-btn" onclick="skipStage1()" class="btn-next-step">ՀԱՋՈՐԴԸ</button>
+                    <button id="next-btn" onclick="handleStage1NextClick()" class="btn-next-step ${isAuto ? 'w-full !max-w-none !py-4 !text-sm !bg-emerald-600 !text-white' : ''}">
+                        ${isAuto ? 'ՀԱՋՈՐԴԸ' : 'ԲԱՑ ԹՈՂՆԵԼ'}
+                    </button>
                 </div>`;
             speak(word.en === "I" ? "eye" : word.en);
         }
 
-        function skipStage1() {
+        function handleStage1NextClick() {
             const w = activeList[activeIndex];
-            if (!w.stagesCompleted.includes(1)) w.stagesCompleted.push(1);
-            w.isSeen = true; 
-            triggerSave(); 
-            activeIndex++;
-            currentWordReps = 0; // Հաջորդ բառին անցնելիս զրոյացնել
-            if (activeIndex >= activeList.length) renderFinish(); else renderStage1();
+            if (stage1Mode === 'manual') {
+                // Skip logic
+                if (!w.stagesCompleted.includes(1)) w.stagesCompleted.push(1);
+                w.isSeen = true;
+                triggerSave();
+                activeIndex++;
+                currentWordReps = 0;
+                if (activeIndex >= activeList.length) renderFinish(); else renderStage1();
+            } else {
+                // Auto mode logic
+                const hyText = document.getElementById('stage1-hy');
+                if (hyText) hyText.classList.add('revealed');
+                w.isSeen = true;
+                
+                currentWordReps++;
+                if (currentWordReps >= stage1RepeatLimit) {
+                    if (!w.stagesCompleted.includes(1)) w.stagesCompleted.push(1);
+                    activeIndex++;
+                    currentWordReps = 0;
+                }
+                triggerSave();
+                if (activeIndex >= activeList.length) renderFinish(); else renderStage1();
+            }
         }
 
         function handleStage1(known) {
@@ -454,14 +509,8 @@
             if (hyText) hyText.classList.add('revealed');
 
             setTimeout(() => {
-                currentWordReps++;
-                
-                // Ստուգել՝ արդյոք հասել ենք լիմիտին
-                if (currentWordReps >= stage1RepeatLimit) {
-                    activeIndex++; 
-                    currentWordReps = 0;
-                }
-                
+                activeIndex++; 
+                currentWordReps = 0;
                 triggerSave(); 
                 if (activeIndex >= activeList.length) renderFinish(); 
                 else renderStage1();
