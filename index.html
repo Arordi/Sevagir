@@ -505,11 +505,13 @@
             if (hyText) hyText.classList.add('revealed');
 
             if(known) { 
-                // ՈՒՂՂՈՒՄ։ Երբ նշում եք "Գիտեմ", բոլոր ուսումնական փուլերը (1-6) համարվում են անցած
-                w.score = 5;
+                // ՈՒՂՂՈՒՄ։ Երբ նշում եք "Գիտեմ", բառը համարվում է միանգամից սովորած և չի երևում 1-6 փուլերում։
+                w.score = 100; // Ապահովության համար բարձր միավոր
+                w.isInstant = true; // Անմիջապես սովորած ֆլագը ակտիվացված է (կօգնի scoring.js-ին)
                 const allStages = [1, 2, 3, 4, 5, 6];
                 allStages.forEach(s => {
                     if(!w.stagesCompleted.includes(s)) w.stagesCompleted.push(s);
+                    w.stageScores[s] = 1; // Ապահովագրում ենք որ միավոր ունի բոլոր փուլերում
                 });
                 w.learnedDate = getArmenianDate();
                 dailyWordsCount++;
