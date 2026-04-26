@@ -180,8 +180,6 @@
         </div>
     </div>
 
-    <script src="scoring.js"></script>
-
     <script>
         let words = [], activeStage = 1, activeIndex = 0, activeList = [], canProceed = false;
         let examScores = [], dailyWordsCount = 0, dailyGoal = 20;
@@ -234,6 +232,59 @@
             }
             lastDate = today;
         }
+
+        // -------- ՆԵՐԿԱՌՈՒՑՎԱԾ SCORING.JS ՏՐԱՄԱԲԱՆՈՒԹՅՈՒՆԸ --------
+        function isWordLearned(w) {
+            return w.stagesCompleted && w.stagesCompleted.includes(6);
+        }
+
+        function handleCorrectAnswer(word, stage) {
+            if (!word.stageScores) word.stageScores = {};
+            if (!word.stageScores[stage]) word.stageScores[stage] = 0;
+            word.stageScores[stage] += 1;
+            
+            if (word.stageScores[stage] >= 3 || stage === 7) {
+                if (!word.stagesCompleted.includes(stage)) {
+                    word.stagesCompleted.push(stage);
+                }
+                if (stage === 6 && !word.stagesCompleted.includes(6)) {
+                    word.stagesCompleted.push(6);
+                    word.learnedDate = getArmenianDate();
+                    return { learnedNew: true };
+                }
+            }
+            return { learnedNew: false };
+        }
+
+        function handleWrongAnswer(word, stage) {
+            word.errorCount = (word.errorCount || 0) + 1;
+        }
+
+        function saveProgress(wordsArr, examScrs, dailyWC, dailyGl, dailyTD, remMin) {
+            const data = {
+                words: {},
+                examScores: examScrs,
+                dailyWordsCount: dailyWC,
+                dailyGoal: dailyGl,
+                dailyTimeData: dailyTD,
+                reminderMinute: remMin
+            };
+            wordsArr.forEach(w => {
+                data.words[w.id] = {
+                    score: w.score,
+                    stageScores: w.stageScores,
+                    stagesCompleted: w.stagesCompleted,
+                    isInstant: w.isInstant,
+                    isSeen: w.isSeen,
+                    errorCount: w.errorCount,
+                    learnedDate: w.learnedDate,
+                    repLevel: w.repLevel,
+                    nextRepDate: w.nextRepDate
+                };
+            });
+            localStorage.setItem('usanim_v3_data', JSON.stringify(data));
+        }
+        // --------------------------------------------------------
 
         async function initApp() {
             try {
@@ -818,8 +869,14 @@
             window.speechSynthesis.cancel(); updateStats();
         }
 
+        // *** ՓՈԽՎԱԾ SPEAK ՖՈՒՆԿՑԻԱ ***
         function speak(text, lang = 'en-US') {
             window.speechSynthesis.cancel();
+            // Եթե հայերեն է, ջնջում ենք բոլոր նիշերը, որոնք հայերեն տառեր, բացատներ կամ գծիկ չեն:
+            if (lang === 'hy-AM') {
+                text = text.replace(/[^\u0531-\u0587\s-]/g, '').replace(/\s+/g, ' ').trim();
+                if (!text) return; // Եթե մաքրումից հետո դատարկ է, չենք արտասանում
+            }
             const msg = new SpeechSynthesisUtterance(text);
             msg.lang = lang;
             window.speechSynthesis.speak(msg);
