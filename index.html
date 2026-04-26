@@ -180,6 +180,8 @@
         </div>
     </div>
 
+    <script src="scoring.js"></script>
+
     <script>
         let words = [], activeStage = 1, activeIndex = 0, activeList = [], canProceed = false;
         let examScores = [], dailyWordsCount = 0, dailyGoal = 20;
@@ -232,59 +234,6 @@
             }
             lastDate = today;
         }
-
-        // -------- ՆԵՐԿԱՌՈՒՑՎԱԾ SCORING.JS ՏՐԱՄԱԲԱՆՈՒԹՅՈՒՆԸ --------
-        function isWordLearned(w) {
-            return w.stagesCompleted && w.stagesCompleted.includes(6);
-        }
-
-        function handleCorrectAnswer(word, stage) {
-            if (!word.stageScores) word.stageScores = {};
-            if (!word.stageScores[stage]) word.stageScores[stage] = 0;
-            word.stageScores[stage] += 1;
-            
-            if (word.stageScores[stage] >= 3 || stage === 7) {
-                if (!word.stagesCompleted.includes(stage)) {
-                    word.stagesCompleted.push(stage);
-                }
-                if (stage === 6 && !word.stagesCompleted.includes(6)) {
-                    word.stagesCompleted.push(6);
-                    word.learnedDate = getArmenianDate();
-                    return { learnedNew: true };
-                }
-            }
-            return { learnedNew: false };
-        }
-
-        function handleWrongAnswer(word, stage) {
-            word.errorCount = (word.errorCount || 0) + 1;
-        }
-
-        function saveProgress(wordsArr, examScrs, dailyWC, dailyGl, dailyTD, remMin) {
-            const data = {
-                words: {},
-                examScores: examScrs,
-                dailyWordsCount: dailyWC,
-                dailyGoal: dailyGl,
-                dailyTimeData: dailyTD,
-                reminderMinute: remMin
-            };
-            wordsArr.forEach(w => {
-                data.words[w.id] = {
-                    score: w.score,
-                    stageScores: w.stageScores,
-                    stagesCompleted: w.stagesCompleted,
-                    isInstant: w.isInstant,
-                    isSeen: w.isSeen,
-                    errorCount: w.errorCount,
-                    learnedDate: w.learnedDate,
-                    repLevel: w.repLevel,
-                    nextRepDate: w.nextRepDate
-                };
-            });
-            localStorage.setItem('usanim_v3_data', JSON.stringify(data));
-        }
-        // --------------------------------------------------------
 
         async function initApp() {
             try {
@@ -480,6 +429,7 @@
             const container = document.getElementById('content');
             container.innerHTML = "";
             
+            // ՈՒՂՂՈՒՄ։ Այժմ բոլոր փուլերը ստուգում են, թե արդյոք բառը սովորած է (isWordLearned)
             if (activeStage === 7) {
                 if(smartMode === 'difficult') activeList = words.filter(w => w.errorCount >= 5 && !isWordLearned(w)).slice(0, 10);
                 else { const today = getArmenianDate(); activeList = words.filter(w => isWordLearned(w) && w.nextRepDate && w.nextRepDate <= today).slice(0, 10); }
@@ -504,7 +454,7 @@
                 ${repIndicator}
                 <div class="w-full bg-emerald-800 rounded-[2.5rem] p-6 text-center shadow-xl mb-6 border-b-8 border-emerald-500 min-h-[180px] flex flex-col justify-center overflow-hidden">
                     <h2 class="text-3xl font-black text-white mb-4 italic break-words" onclick="speak('${word.en}')">${word.en}</h2>
-                    <h3 id="stage1-hy" onclick="this.classList.toggle('revealed'); if(this.classList.contains('revealed')) speak('${word.hy}', 'hy-AM');" class="text-xl font-bold text-emerald-600 blur-text italic break-words">${word.hy}</h3>
+                    <h3 id="stage1-hy" onclick="this.classList.toggle('revealed')" class="text-xl font-bold text-emerald-600 blur-text italic break-words">${word.hy}</h3>
                 </div>
                 
                 <div class="grid grid-cols-2 gap-4 w-full ${isAuto ? 'hidden' : ''}">
@@ -525,11 +475,6 @@
             const hyText = document.getElementById('stage1-hy');
             
             if (stage1Mode === 'manual') {
-                if (hyText && !hyText.classList.contains('revealed')) {
-                     hyText.classList.add('revealed');
-                     speak(w.hy, 'hy-AM');
-                     return; 
-                }
                 if (!w.stagesCompleted.includes(1)) w.stagesCompleted.push(1);
                 w.isSeen = true;
                 triggerSave();
@@ -537,10 +482,7 @@
                 currentWordReps = 0;
                 if (activeIndex >= activeList.length) renderFinish(); else renderStage1();
             } else {
-                if (hyText) {
-                    hyText.classList.add('revealed');
-                    speak(w.hy, 'hy-AM');
-                }
+                if (hyText) hyText.classList.add('revealed');
                 w.isSeen = true;
                 setTimeout(() => {
                     currentWordReps++;
@@ -551,7 +493,7 @@
                     }
                     triggerSave();
                     if (activeIndex >= activeList.length) renderFinish(); else renderStage1();
-                }, 1500); 
+                }, 1200);
             }
         }
 
@@ -560,18 +502,16 @@
             w.isSeen = true;
             
             const hyText = document.getElementById('stage1-hy');
-            if (hyText) {
-                hyText.classList.add('revealed');
-                speak(w.hy, 'hy-AM');
-            }
+            if (hyText) hyText.classList.add('revealed');
 
             if(known) { 
-                w.score = 100;
-                w.isInstant = true;
+                // ՈՒՂՂՈՒՄ։ Երբ նշում եք "Գիտեմ", բառը համարվում է միանգամից սովորած և չի երևում 1-6 փուլերում։
+                w.score = 100; // Ապահովության համար բարձր միավոր
+                w.isInstant = true; // Անմիջապես սովորած ֆլագը ակտիվացված է (կօգնի scoring.js-ին)
                 const allStages = [1, 2, 3, 4, 5, 6];
                 allStages.forEach(s => {
                     if(!w.stagesCompleted.includes(s)) w.stagesCompleted.push(s);
-                    w.stageScores[s] = 1;
+                    w.stageScores[s] = 1; // Ապահովագրում ենք որ միավոր ունի բոլոր փուլերում
                 });
                 w.learnedDate = getArmenianDate();
                 dailyWordsCount++;
@@ -583,12 +523,13 @@
                 triggerSave(); 
                 if (activeIndex >= activeList.length) renderFinish(); 
                 else renderStage1();
-            }, 1200);
+            }, 1000);
         }
 
         function restartStage1() {
             activeIndex = 0;
             currentWordReps = 0;
+            // Ուղղված ֆիլտր
             activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
             if (activeList.length === 0) activeList = words.filter(w => !isWordLearned(w)).slice(0, 10);
             if (activeList.length === 0) exitToMenu(); else renderStage1();
@@ -622,21 +563,12 @@
             if(el.classList.contains('match-correct')) return;
             document.querySelectorAll(`.match-item`).forEach(i => i.classList.remove('match-selected'));
             el.classList.add('match-selected');
-            if(type === 'en') { 
-                selectedEn = { el, word }; 
-                speak(word.en === "I" ? "eye" : word.en); 
-            }
-            else { 
-                selectedHy = { el, word }; 
-                speak(word.hy, 'hy-AM'); 
-            }
+            if(type === 'en') { selectedEn = { el, word }; speak(word.en === "I" ? "eye" : word.en); }
+            else selectedHy = { el, word };
             
             if(selectedEn && selectedHy) {
                 if(selectedEn.word.id === selectedHy.word.id) {
-                    selectedEn.el.classList.remove('match-selected');
-                    selectedHy.el.classList.remove('match-selected');
-                    selectedEn.el.classList.add('match-correct');
-                    selectedHy.el.classList.add('match-correct');
+                    selectedEn.el.className = 'match-item match-correct'; selectedHy.el.className = 'match-item match-correct';
                     const result = handleCorrectAnswer(selectedEn.word, 3);
                     if(result && result.learnedNew) dailyWordsCount++;
                 } else {
@@ -657,10 +589,7 @@
             else if(activeStage === 6) { question = "🔊"; answer = word.en; }
             
             document.getElementById('content').innerHTML = `<div class="w-full text-center flex flex-col items-center"><div class="mb-1">${getStars(word)}</div><div class="mb-6 text-3xl font-black text-white italic break-words px-4" onclick="speak('${word.en === "I" ? "eye" : word.en}')">${question}</div><input type="text" id="stage-input" autofocus class="w-full p-5 border-4 border-emerald-800 rounded-[2rem] text-center text-xl outline-none focus:border-emerald-400 transition-all shadow-inner" placeholder="..." autocomplete="off"><button id="check-btn" onclick="checkGeneric('${answer}')" class="btn-primary mt-6">ՍՏՈՒԳԵԼ</button><button id="next-btn" onclick="skipGeneric()" class="btn-next-step">ՀԱՋՈՐԴԸ</button></div>`;
-            
-            if(activeStage === 4) speak(word.hy, 'hy-AM');
-            else speak(word.en === "I" ? "eye" : word.en);
-            
+            if(activeStage !== 4) speak(word.en === "I" ? "eye" : word.en);
             setTimeout(() => document.getElementById('stage-input')?.focus(), 50);
         }
 
@@ -679,21 +608,20 @@
             const word = activeList[activeIndex % activeList.length];
             const buttons = document.querySelectorAll('.choice-btn');
             buttons.forEach(b => b.disabled = true);
-            
             if(cleanText(selected) === cleanText(correct)) {
-                speak(word.hy, 'hy-AM');
                 btn.classList.add('choice-correct');
                 const result = handleCorrectAnswer(word, activeStage, smartMode);
                 
+                // ՆՈՐ ՏՐԱՄԱԲԱՆՈՒԹՅՈՒՆ: Դժվար բառերի համար 10 միավորի դեպքում վերականգնում
                 if (activeStage === 7 && smartMode === 'difficult') {
                     if (word.stageScores && word.stageScores[7] >= 10) {
-                        word.errorCount = 0;
-                        delete word.stageScores[7];
+                        word.errorCount = 0; // հանում է դժվար բառերի ցանկից
+                        delete word.stageScores[7]; // վերադարձնում է նախնական վիճակին
                     }
                 }
 
                 if(result && result.learnedNew) dailyWordsCount++;
-                setTimeout(() => { activeIndex++; initStageLogic(); }, 800);
+                setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
             } else { 
                 btn.classList.add('choice-wrong');
                 buttons.forEach(b => { if(cleanText(b.innerText) === cleanText(correct)) b.classList.add('choice-correct'); });
@@ -705,21 +633,21 @@
         function checkGeneric(correct) {
             const input = document.getElementById('stage-input');
             const word = activeList[activeIndex % activeList.length];
-            
             if(cleanText(input.value) === cleanText(correct)) {
-                speak(word.hy, 'hy-AM');
+                if(activeStage === 4) speak(word.en === "I" ? "eye" : word.en);
                 input.className = "w-full p-5 border-4 border-emerald-500 bg-emerald-600 text-white rounded-[2rem] text-center text-xl outline-none";
                 const result = handleCorrectAnswer(word, activeStage, smartMode);
                 
+                // ՆՈՐ ՏՐԱՄԱԲԱՆՈՒԹՅՈՒՆ: Դժվար բառերի համար 10 միավորի դեպքում վերականգնում
                 if (activeStage === 7 && smartMode === 'difficult') {
                     if (word.stageScores && word.stageScores[7] >= 10) {
-                        word.errorCount = 0;
-                        delete word.stageScores[7];
+                        word.errorCount = 0; // հանում է դժվար բառերի ցանկից
+                        delete word.stageScores[7]; // վերադարձնում է նախնական վիճակին
                     }
                 }
 
                 if(result && result.learnedNew) dailyWordsCount++;
-                setTimeout(() => { activeIndex++; initStageLogic(); }, 800);
+                setTimeout(() => { activeIndex++; initStageLogic(); }, 600);
             } else {
                 handleWrongAnswer(word, activeStage);
                 input.className = "w-full p-5 border-4 border-rose-600 bg-rose-900 text-white rounded-[2rem] text-center text-xl outline-none";
@@ -824,8 +752,8 @@
                         learnedWords.map(w => `
                             <div class="flex justify-between items-center p-2 bg-emerald-800/30 rounded-xl border border-emerald-700/20 transition-all">
                                 <div class="max-w-[60%]">
-                                    <div class="font-black text-white text-[10px] leading-tight" onclick="speak('${w.en}')">${w.en}</div>
-                                    <div class="text-[8px] text-emerald-400 font-bold mt-0.5" onclick="speak('${w.hy}', 'hy-AM')">${w.hy}</div>
+                                    <div class="font-black text-white text-[10px] leading-tight">${w.en}</div>
+                                    <div class="text-[8px] text-emerald-400 font-bold mt-0.5">${w.hy}</div>
                                 </div>
                                 <div class="flex items-center gap-3">
                                     <div class="text-yellow-400 text-[8px] tracking-tighter">★★★★★</div>
@@ -852,9 +780,9 @@
                 return renderFinish(`Արդյունք: ${Math.round((correctCount/activeList.length)*100)}%`);
             }
             const word = activeList[activeIndex];
-            document.getElementById('content').innerHTML = `<div class="w-full text-center flex flex-col items-center"><p class="text-[10px] font-bold text-emerald-400 mb-4 uppercase tracking-widest">${activeIndex+1} / ${activeList.length}</p><h2 class="text-3xl font-black text-white mb-8 italic break-words px-4" onclick="speak('${word.en}')">${word.en}</h2><input type="text" id="exam-in" autofocus class="w-full p-5 border-4 border-emerald-800 rounded-3xl text-center text-lg mb-6 outline-none" placeholder="..." autocomplete="off"><button id="ex-btn" class="btn-next-step">ՀԱՋՈՐԴԸ</button></div>`;
+            document.getElementById('content').innerHTML = `<div class="w-full text-center flex flex-col items-center"><p class="text-[10px] font-bold text-emerald-400 mb-4 uppercase tracking-widest">${activeIndex+1} / ${activeList.length}</p><h2 class="text-3xl font-black text-white mb-8 italic break-words px-4">${word.en}</h2><input type="text" id="exam-in" autofocus class="w-full p-5 border-4 border-emerald-800 rounded-3xl text-center text-lg mb-6 outline-none" placeholder="..." autocomplete="off"><button id="ex-btn" class="btn-next-step">ՀԱՋՈՐԴԸ</button></div>`;
             setTimeout(() => document.getElementById('exam-in').focus(), 50);
-            document.getElementById('ex-btn').onclick = () => { if(cleanText(document.getElementById('exam-in').value) === cleanText(word.hy)) { correctCount++; speak(word.hy, 'hy-AM'); } else { word.errorCount++; } activeIndex++; renderExamStep(correctCount); };
+            document.getElementById('ex-btn').onclick = () => { if(cleanText(document.getElementById('exam-in').value) === cleanText(word.hy)) correctCount++; else word.errorCount++; activeIndex++; renderExamStep(correctCount); };
         }
 
         function renderFinish(extra = "") {
@@ -869,16 +797,9 @@
             window.speechSynthesis.cancel(); updateStats();
         }
 
-        // *** ՓՈԽՎԱԾ SPEAK ՖՈՒՆԿՑԻԱ ***
-        function speak(text, lang = 'en-US') {
+        function speak(text) {
             window.speechSynthesis.cancel();
-            // Եթե հայերեն է, ջնջում ենք բոլոր նիշերը, որոնք հայերեն տառեր, բացատներ կամ գծիկ չեն:
-            if (lang === 'hy-AM') {
-                text = text.replace(/[^\u0531-\u0587\s-]/g, '').replace(/\s+/g, ' ').trim();
-                if (!text) return; // Եթե մաքրումից հետո դատարկ է, չենք արտասանում
-            }
-            const msg = new SpeechSynthesisUtterance(text);
-            msg.lang = lang;
+            const msg = new SpeechSynthesisUtterance(text); msg.lang = 'en-US';
             window.speechSynthesis.speak(msg);
         }
 
