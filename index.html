@@ -568,7 +568,10 @@
             
             if(selectedEn && selectedHy) {
                 if(selectedEn.word.id === selectedHy.word.id) {
-                    selectedEn.el.className = 'match-item match-correct'; selectedHy.el.className = 'match-item match-correct';
+                    selectedEn.el.classList.remove('match-selected');
+                    selectedHy.el.classList.remove('match-selected');
+                    selectedEn.el.classList.add('match-correct');
+                    selectedHy.el.classList.add('match-correct');
                     const result = handleCorrectAnswer(selectedEn.word, 3);
                     if(result && result.learnedNew) dailyWordsCount++;
                 } else {
