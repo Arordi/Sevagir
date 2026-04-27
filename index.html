@@ -29,32 +29,33 @@
         .star-icon { font-size: 30px; transition: all 0.3s ease; }
         .star-text { position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%); font-size: 10px; font-weight: 900; color: #064e3b; pointer-events: none; }
 
-        /* ՓՈՓՈԽՎԱԾ ՈՃԵՐ ԵՐՐՈՐԴ ՓՈՒԼԻ ՀԱՄԱՐ */
+        /* ԹԱՐՄԱՑՎԱԾ ՈՃԵՐ ԵՐՐՈՐԴ ՓՈՒԼԻ ՀԱՄԱՐ */
         .match-item { 
-            border: 2px solid #065f46; 
-            border-radius: 15px; 
-            padding: 6px; 
+            border: 2px solid #059669; 
+            border-radius: 18px; 
+            padding: 8px 4px; 
             text-align: center; 
             cursor: pointer; 
-            min-height: 50px; 
-            height: auto; 
+            height: 62px; /* Ֆիքսված բարձրություն, որ չմեծանա */
             box-sizing: border-box; 
             display: flex; 
-            flex-direction: column; 
+            flex-direction: row; 
             align-items: center; 
             justify-content: center; 
-            font-weight: 600; 
-            background: #064e3b; 
-            transition: background-color 0.2s, border-color 0.2s; 
+            font-weight: 700; 
+            background: #065f46; 
+            transition: all 0.2s ease; 
             color: white; 
-            font-size: 12px; 
+            font-size: 15px; /* Մեծացված տառաչափ */
             overflow: hidden; 
             word-break: break-word;
-            line-height: 1.2;
+            line-height: 1.1;
+            width: 100%;
         }
-        .match-selected { border-color: #10b981; background-color: #065f46; }
-        .match-correct { border-color: #22c55e; background-color: #14532d; color: #4ade80; }
+        .match-selected { border-color: #34d399; background-color: #064e3b; box-shadow: 0 0 10px rgba(52, 211, 153, 0.3); }
+        .match-correct { border-color: #22c55e; background-color: #14532d; color: #4ade80; opacity: 0.6; }
         .match-wrong { border-color: #ef4444; background-color: #450a0a; animation: shake 0.3s; }
+        
         @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
         
         .choice-btn { transition: all 0.2s; border: 2px solid #065f46; background: #065f46; color: white; font-size: 15px; }
@@ -556,44 +557,72 @@
 
         function renderStage3() {
             const batch = activeList.slice(0, 5);
-            document.getElementById('content').innerHTML = `<div class="grid grid-cols-2 gap-2 w-full items-start overflow-y-auto max-h-[75vh] px-1"><div class="space-y-2" id="en-list"></div><div class="space-y-2" id="hy-list"></div></div><div class="flex justify-center w-full"><button id="next-batch-btn" onclick="initStageLogic()" class="btn-next-step">ՀԱՋՈՐԴԸ</button></div>`;
+            // Բեռնում ենք կոնտեյները, որը լրացնում է էկրանի ազատ մասը
+            document.getElementById('content').innerHTML = `
+                <div class="grid grid-cols-2 gap-3 w-full items-stretch flex-grow max-h-[70vh] px-1 overflow-hidden" style="display: grid; grid-template-rows: repeat(5, 1fr);">
+                    <div class="flex flex-col gap-2" id="en-list"></div>
+                    <div class="flex flex-col gap-2" id="hy-list"></div>
+                </div>
+                <div class="flex justify-center w-full mt-4">
+                    <button id="next-batch-btn" onclick="initStageLogic()" class="btn-next-step">ՀԱՋՈՐԴԸ</button>
+                </div>`;
+            
             const leftSide = [...batch].sort(() => Math.random() - 0.5);
             const rightSide = [...batch].sort(() => Math.random() - 0.5);
+
             leftSide.forEach(w => {
                 let currentScore = (w.stageScores && w.stageScores[3]) ? w.stageScores[3] : 0;
                 const el = document.createElement('div'); 
-                el.className = 'match-item flex-row gap-2'; 
+                el.className = 'match-item flex-grow'; 
                 el.innerHTML = `
-                    <div class="star-box scale-75 shrink-0">
+                    <div class="star-box scale-[0.6] shrink-0 mr-1">
                         <span class="star-icon text-yellow-400">★</span>
-                        <span class="star-text !text-[10px] font-black">${currentScore}</span>
+                        <span class="star-text !text-[12px] font-black">${currentScore}</span>
                     </div>
-                    <span class="break-words px-1">${w.en}</span>
+                    <span class="truncate">${w.en}</span>
                 `;
-                el.onclick = () => selectMatch(el, 'en', w); document.getElementById('en-list').appendChild(el);
+                el.onclick = () => selectMatch(el, 'en', w); 
+                document.getElementById('en-list').appendChild(el);
             });
+
             rightSide.forEach(w => {
-                const el = document.createElement('div'); el.className = 'match-item'; el.innerHTML = `<span class="break-words px-1">${w.hy}</span>`;
-                el.onclick = () => selectMatch(el, 'hy', w); document.getElementById('hy-list').appendChild(el);
+                const el = document.createElement('div'); 
+                el.className = 'match-item flex-grow'; 
+                el.innerHTML = `<span class="truncate">${w.hy}</span>`;
+                el.onclick = () => selectMatch(el, 'hy', w); 
+                document.getElementById('hy-list').appendChild(el);
             });
         }
 
         function selectMatch(el, type, word) {
             if(el.classList.contains('match-correct')) return;
-            document.querySelectorAll(`.match-item`).forEach(i => i.classList.remove('match-selected'));
+            
+            // Մաքրում ենք նախորդ ընտրվածը նույն սյունակից
+            const parent = el.parentElement;
+            parent.querySelectorAll('.match-item').forEach(i => i.classList.remove('match-selected'));
+            
             el.classList.add('match-selected');
-            if(type === 'en') { selectedEn = { el, word }; speak(word.en === "I" ? "eye" : word.en); }
+            if(type === 'en') { 
+                selectedEn = { el, word }; 
+                speak(word.en === "I" ? "eye" : word.en); 
+            }
             else selectedHy = { el, word };
             
             if(selectedEn && selectedHy) {
                 if(selectedEn.word.id === selectedHy.word.id) {
-                    selectedEn.el.className = 'match-item match-correct'; selectedHy.el.className = 'match-item match-correct';
+                    // Ճիշտ պատասխան
+                    selectedEn.el.className = 'match-item match-correct'; 
+                    selectedHy.el.className = 'match-item match-correct';
                     const result = handleCorrectAnswer(selectedEn.word, 3);
                     if(result && result.learnedNew) dailyWordsCount++;
                 } else {
-                    selectedEn.el.classList.add('match-wrong'); selectedHy.el.classList.add('match-wrong');
+                    // Սխալ պատասխան
+                    selectedEn.el.classList.add('match-wrong'); 
+                    selectedHy.el.classList.add('match-wrong');
                     handleWrongAnswer(selectedEn.word, 3);
-                    setTimeout(() => { document.querySelectorAll('.match-wrong').forEach(i => i.classList.remove('match-wrong', 'match-selected')); }, 400);
+                    setTimeout(() => { 
+                        document.querySelectorAll('.match-wrong').forEach(i => i.classList.remove('match-wrong', 'match-selected')); 
+                    }, 400);
                 }
                 triggerSave(); selectedEn = null; selectedHy = null;
             }
