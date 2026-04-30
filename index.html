@@ -256,10 +256,112 @@
         </div>
     </div>
 
-    <script src="scoring.js"></script>
-
     <script>
-        // ---------- Գլոբալ տվյալներ ----------
+        // ========== SCORING LOGIC (ներկառուցված) ==========
+        function isWordLearned(word) {
+            if (word.isInstant) return true;
+            const requiredStages = [2, 3, 4, 5, 6];
+            const stage1Completed = word.stagesCompleted.includes(1);
+            const higherStagesCompleted = requiredStages.every(s => 
+                (word.stageScores && word.stageScores[s] >= 10)
+            );
+            return stage1Completed && higherStagesCompleted;
+        }
+
+        function setNextRep(word) {
+            const intervals = [7, 30, 90];
+            const days = intervals[word.repLevel] || 90;
+            let date = new Date();
+            date.setDate(date.getDate() + days);
+            word.nextRepDate = date.toISOString().split('T')[0];
+            word.repLevel++;
+        }
+
+        function saveProgress(words, examScores, dailyWordsCount, dailyGoal, dailyTimeData, reminderMinute) {
+            const storage = {
+                words: {},
+                examScores,
+                dailyWordsCount,
+                dailyGoal,
+                dailyTimeData,
+                reminderMinute
+            };
+            words.forEach(w => {
+                storage.words[w.id] = {
+                    stageScores: w.stageScores || {},
+                    stagesCompleted: w.stagesCompleted || [],
+                    isInstant: w.isInstant || false,
+                    isSeen: w.isSeen || false,
+                    errorCount: w.errorCount || 0,
+                    learnedDate: w.learnedDate || null,
+                    repLevel: w.repLevel || 0,
+                    nextRepDate: w.nextRepDate || null
+                };
+            });
+            localStorage.setItem('usanim_v3_data_' + currentLevel, JSON.stringify(storage));
+        }
+
+        function handleCorrectAnswer(word, stage, mode = null) {
+            if (!word.stageScores) word.stageScores = {};
+            if (!word.stagesCompleted) word.stagesCompleted = [];
+
+            // Փուլ 1 (առանց միավորների)
+            if (stage === 1) {
+                if (!word.stagesCompleted.includes(1)) {
+                    word.stagesCompleted.push(1);
+                }
+                return { stageFinished: true, learnedNew: false };
+            }
+
+            // Մնացած փուլեր
+            if (word.stageScores[stage] === undefined) {
+                word.stageScores[stage] = 0;
+            }
+            if (word.stageScores[stage] < 10) {
+                word.stageScores[stage]++;
+            }
+
+            if (word.stageScores[stage] >= 10) {
+                if (stage >= 2 && stage <= 6) {
+                    if (!word.stagesCompleted.includes(stage)) {
+                        word.stagesCompleted.push(stage);
+                    }
+                    if (isWordLearned(word)) {
+                        if (!word.learnedDate) {
+                            word.learnedDate = new Date().toISOString().split('T')[0];
+                            setNextRep(word);
+                            return { stageFinished: true, learnedNew: true };
+                        }
+                    }
+                    return { stageFinished: true, learnedNew: false };
+                } else if (stage === 7) {
+                    if (mode === 'repetition') {
+                        setNextRep(word);
+                    }
+                    return { stageFinished: true, learnedNew: false };
+                }
+            }
+            return { stageFinished: false, learnedNew: false };
+        }
+
+        function handleWrongAnswer(word, stage) {
+            if (!word.stageScores) word.stageScores = {};
+            if (!word.stagesCompleted) word.stagesCompleted = [];
+
+            if (stage === 1) {
+                word.errorCount++;
+                return { showTranslation: false };
+            }
+
+            if (word.stageScores[stage] === undefined) {
+                word.stageScores[stage] = 0;
+            }
+            word.stageScores[stage] = Math.max(0, word.stageScores[stage] - 1);
+            word.errorCount++;
+            return { showTranslation: false };
+        }
+
+        // ========== MAIN APPLICATION ==========
         let currentLevel = 'A1';
         let words = [], activeStage = 1, activeIndex = 0, activeList = [], canProceed = false;
         let examScores = [], dailyWordsCount = 0, dailyGoal = 20;
@@ -314,7 +416,7 @@
             if (lastDate !== "" && lastDate !== today) {
                 dailyWordsCount = 0;
                 triggerSave();
-                if (document.getElementById('stats-view').classList.contains('hidden') === false) {
+                if (document.getElementById('stats-view') && !document.getElementById('stats-view').classList.contains('hidden')) {
                     openStatsStage();
                 }
             }
@@ -404,15 +506,17 @@
         function triggerSave() {
             saveProgress(words, examScores, dailyWordsCount, dailyGoal, dailyTimeData, reminderMinute);
             const currentData = JSON.parse(localStorage.getItem(storageKey()));
-            currentData.lastDate = lastDate;
-            currentData.stage1RepeatLimit = stage1RepeatLimit;
-            currentData.stage1Mode = stage1Mode;
-            localStorage.setItem(storageKey(), JSON.stringify(currentData));
+            if (currentData) {
+                currentData.lastDate = lastDate;
+                currentData.stage1RepeatLimit = stage1RepeatLimit;
+                currentData.stage1Mode = stage1Mode;
+                localStorage.setItem(storageKey(), JSON.stringify(currentData));
+            }
         }
 
         function updateStats() {
             const learned = words.filter(w => isWordLearned(w)).length;
-            const pct = Math.round((learned / words.length) * 100);
+            const pct = words.length ? Math.round((learned / words.length) * 100) : 0;
             const levelLower = currentLevel.toLowerCase();
             document.getElementById(`home-progress-pct-${levelLower}`).innerText = pct + "%";
             document.getElementById(`home-bg-progress-${levelLower}`).style.width = pct + "%";
@@ -571,6 +675,7 @@
             if (stage1Mode === 'manual') {
                 if (!w.stagesCompleted.includes(1)) w.stagesCompleted.push(1);
                 w.isSeen = true;
+                handleCorrectAnswer(w, 1); // առանց միավորի
                 triggerSave();
                 activeIndex++;
                 currentWordReps = 0;
@@ -582,6 +687,7 @@
                     currentWordReps++;
                     if (currentWordReps >= stage1RepeatLimit) {
                         if (!w.stagesCompleted.includes(1)) w.stagesCompleted.push(1);
+                        handleCorrectAnswer(w, 1);
                         activeIndex++;
                         currentWordReps = 0;
                     }
@@ -599,15 +705,17 @@
             if (hyText) hyText.classList.add('revealed');
 
             if(known) { 
-                w.score = 100; 
                 w.isInstant = true; 
                 const allStages = [1, 2, 3, 4, 5, 6];
                 allStages.forEach(s => {
                     if(!w.stagesCompleted.includes(s)) w.stagesCompleted.push(s);
-                    w.stageScores[s] = 1; 
+                    if(s > 1) w.stageScores[s] = 10; 
                 });
                 w.learnedDate = getArmenianDate();
                 dailyWordsCount++;
+            } else {
+                // "Չգիտեմ" – միայն errorCount, առանց միավորի
+                handleWrongAnswer(w, 1);
             }
 
             setTimeout(() => {
@@ -907,16 +1015,24 @@
             window.speechSynthesis.cancel(); updateStats();
         }
 
+        // ---------- ՁԱՅՆ (ուղղված) ----------
         function speak(text, audioUrl = null) {
             window.speechSynthesis.cancel();
             if (audioUrl) {
                 const audio = new Audio(audioUrl);
-                audio.play().catch(e => console.log("Audio play error:", e));
-            } else {
-                const msg = new SpeechSynthesisUtterance(text);
-                msg.lang = 'en-US';
-                window.speechSynthesis.speak(msg);
+                audio.play().then(() => {}).catch(e => {
+                    console.warn('mp3 fail, using TTS:', e);
+                    speakViaTTS(text);
+                });
+                return;
             }
+            speakViaTTS(text);
+        }
+
+        function speakViaTTS(text) {
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.lang = 'en-US';
+            window.speechSynthesis.speak(msg);
         }
 
         function showDeleteModal() { document.getElementById('delete-modal').classList.remove('hidden'); }
