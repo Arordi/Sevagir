@@ -130,6 +130,40 @@
                 <div class="z-10 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white shadow-md">➔</div>
                 <div id="home-bg-progress-a2" class="absolute left-0 bottom-0 h-1 bg-blue-400 transition-all duration-1000" style="width: 0%"></div>
             </div>
+
+            <!-- B1 մակարդակ -->
+            <div onclick="goToLevel('B1')" class="home-card glass p-6 rounded-[2rem] shadow-xl flex items-center justify-between relative overflow-hidden a2-card">
+                <div class="flex items-center gap-4 z-10">
+                    <div class="w-14 h-14 bg-blue-900/50 rounded-xl flex items-center justify-center text-2xl border border-blue-700">🇺🇸</div>
+                    <div>
+                        <h2 class="text-xl font-black text-white leading-tight">B1 Մակարդակ</h2>
+                        <div class="flex items-center gap-2 mt-1">
+                            <p id="home-word-count-b1" class="text-blue-300 text-[10px] font-bold uppercase">...</p>
+                            <span class="text-blue-700">|</span>
+                            <p id="home-progress-pct-b1" class="text-blue-400 text-[10px] font-black">0%</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="z-10 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white shadow-md">➔</div>
+                <div id="home-bg-progress-b1" class="absolute left-0 bottom-0 h-1 bg-blue-400 transition-all duration-1000" style="width: 0%"></div>
+            </div>
+
+            <!-- B2 մակարդակ -->
+            <div onclick="goToLevel('B2')" class="home-card glass p-6 rounded-[2rem] shadow-xl flex items-center justify-between relative overflow-hidden a2-card">
+                <div class="flex items-center gap-4 z-10">
+                    <div class="w-14 h-14 bg-blue-900/50 rounded-xl flex items-center justify-center text-2xl border border-blue-700">🇺🇸</div>
+                    <div>
+                        <h2 class="text-xl font-black text-white leading-tight">B2 Մակարդակ</h2>
+                        <div class="flex items-center gap-2 mt-1">
+                            <p id="home-word-count-b2" class="text-blue-300 text-[10px] font-bold uppercase">...</p>
+                            <span class="text-blue-700">|</span>
+                            <p id="home-progress-pct-b2" class="text-blue-400 text-[10px] font-black">0%</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="z-10 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white shadow-md">➔</div>
+                <div id="home-bg-progress-b2" class="absolute left-0 bottom-0 h-1 bg-blue-400 transition-all duration-1000" style="width: 0%"></div>
+            </div>
         </div>
     </div>
 
@@ -931,6 +965,36 @@
                 } catch(e) {}
             } else {
                 document.getElementById('home-word-count-a2').innerText = `0 բառ`;
+            }
+            // B1
+            const savedB1 = localStorage.getItem('usanim_v3_data_B1');
+            if (savedB1) {
+                try {
+                    const p = JSON.parse(savedB1);
+                    const totalWords = p.words ? Object.keys(p.words).length : 0;
+                    const learnedCount = p.words ? Object.values(p.words).filter(w => w.stagesCompleted && w.stagesCompleted.length >= 6).length : 0;
+                    document.getElementById('home-word-count-b1').innerText = `${totalWords || 0} բառ`;
+                    const pct = Math.round((learnedCount / (totalWords || 1)) * 100);
+                    document.getElementById('home-progress-pct-b1').innerText = pct + "%";
+                    document.getElementById('home-bg-progress-b1').style.width = pct + "%";
+                } catch(e) {}
+            } else {
+                document.getElementById('home-word-count-b1').innerText = `0 բառ`;
+            }
+            // B2
+            const savedB2 = localStorage.getItem('usanim_v3_data_B2');
+            if (savedB2) {
+                try {
+                    const p = JSON.parse(savedB2);
+                    const totalWords = p.words ? Object.keys(p.words).length : 0;
+                    const learnedCount = p.words ? Object.values(p.words).filter(w => w.stagesCompleted && w.stagesCompleted.length >= 6).length : 0;
+                    document.getElementById('home-word-count-b2').innerText = `${totalWords || 0} բառ`;
+                    const pct = Math.round((learnedCount / (totalWords || 1)) * 100);
+                    document.getElementById('home-progress-pct-b2').innerText = pct + "%";
+                    document.getElementById('home-bg-progress-b2').style.width = pct + "%";
+                } catch(e) {}
+            } else {
+                document.getElementById('home-word-count-b2').innerText = `0 բառ`;
             }
         })();
     </script>
