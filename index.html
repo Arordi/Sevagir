@@ -38,7 +38,7 @@
             padding: 8px 4px; 
             text-align: center; 
             cursor: pointer; 
-            height: 62px; /* Ֆիքսված բարձրություն, որ չմեծանա */
+            height: 62px; 
             box-sizing: border-box; 
             display: flex; 
             flex-direction: row; 
@@ -48,7 +48,7 @@
             background: #065f46; 
             transition: all 0.2s ease; 
             color: white; 
-            font-size: 15px; /* Մեծացված տառաչափ */
+            font-size: 15px; 
             overflow: hidden; 
             word-break: break-word;
             line-height: 1.1;
@@ -632,7 +632,6 @@
 
         function renderStage3() {
             const batch = activeList.slice(0, 5);
-            // Բեռնում ենք կոնտեյները, որը լրացնում է էկրանի ազատ մասը
             document.getElementById('content').innerHTML = `
                 <div class="grid grid-cols-2 gap-3 w-full items-stretch flex-grow max-h-[70vh] px-1 overflow-hidden" style="display: grid; grid-template-rows: repeat(5, 1fr);">
                     <div class="flex flex-col gap-2" id="en-list"></div>
@@ -672,7 +671,6 @@
         function selectMatch(el, type, word) {
             if(el.classList.contains('match-correct')) return;
             
-            // Մաքրում ենք նախորդ ընտրվածը նույն սյունակից
             const parent = el.parentElement;
             parent.querySelectorAll('.match-item').forEach(i => i.classList.remove('match-selected'));
             
@@ -685,13 +683,11 @@
             
             if(selectedEn && selectedHy) {
                 if(selectedEn.word.id === selectedHy.word.id) {
-                    // Ճիշտ պատասխան
                     selectedEn.el.className = 'match-item match-correct'; 
                     selectedHy.el.className = 'match-item match-correct';
                     const result = handleCorrectAnswer(selectedEn.word, 3);
                     if(result && result.learnedNew) dailyWordsCount++;
                 } else {
-                    // Սխալ պատասխան
                     selectedEn.el.classList.add('match-wrong'); 
                     selectedHy.el.classList.add('match-wrong');
                     handleWrongAnswer(selectedEn.word, 3);
@@ -915,13 +911,11 @@
         }
 
         function speak(text, audioUrl = null) {
-            window.speechSynthesis.cancel(); // կանգնեցնել հնարավոր նախորդ speech-ը
+            window.speechSynthesis.cancel();
             if (audioUrl) {
-                // Եթե ունենք mp3 հղում, նվագարկում ենք այն
                 const audio = new Audio(audioUrl);
                 audio.play().catch(e => console.log("Audio play error:", e));
             } else {
-                // Հակառակ դեպքում՝ speechSynthesis
                 const msg = new SpeechSynthesisUtterance(text);
                 msg.lang = 'en-US';
                 window.speechSynthesis.speak(msg);
@@ -933,11 +927,8 @@
         function confirmFinalDelete() { localStorage.removeItem(storageKey()); location.reload(); }
 
         // ---------- Սկզբնավորում ----------
-        // Լռելյայն ցույց ենք տալիս welcome էկրանը, առանց JSON բեռնելու
-        // (մակարդակի ընտրության ժամանակ է կատարվում initApp)
-        // Սկզբում թարմացնում ենք A1-ի ցուցանիշները, եթե առկա են պահպանված տվյալներ
         (function() {
-            // Ստուգում ենք A1-ի պահպանված տվյալները և ցուցադրում home-ում
+            // A1
             const savedA1 = localStorage.getItem('usanim_v3_data_A1');
             if (savedA1) {
                 try {
@@ -952,6 +943,7 @@
             } else {
                 document.getElementById('home-word-count-a1').innerText = `896 բառ`;
             }
+            // A2
             const savedA2 = localStorage.getItem('usanim_v3_data_A2');
             if (savedA2) {
                 try {
