@@ -264,6 +264,7 @@
                 const data = await response.json();
                 words = data.map((item, index) => ({
                     id: item.id || index, en: item.word, hy: item.translation,
+                    audio: item.audio || null,
                     score: 0, stageScores: {}, stagesCompleted: [], isInstant: false, isSeen: false,
                     errorCount: 0, learnedDate: null, repLevel: 0, nextRepDate: null
                 }));
@@ -475,7 +476,7 @@
             document.getElementById('content').innerHTML = `
                 ${repIndicator}
                 <div class="w-full bg-emerald-800 rounded-[2.5rem] p-6 text-center shadow-xl mb-6 border-b-8 border-emerald-500 min-h-[180px] flex flex-col justify-center overflow-hidden">
-                    <h2 class="text-3xl font-black text-white mb-4 italic break-words" onclick="speak('${word.en}')">${word.en}</h2>
+                    <h2 class="text-3xl font-black text-white mb-4 italic break-words" onclick="speak('${word.en === "I" ? "eye" : word.en}', '${word.audio || ""}')">${word.en}</h2>
                     <h3 id="stage1-hy" onclick="this.classList.toggle('revealed')" class="text-xl font-bold text-emerald-600 blur-text italic break-words">${word.hy}</h3>
                 </div>
                 
@@ -489,7 +490,7 @@
                         ${isAuto ? 'ՀԱՋՈՐԴԸ' : 'ԲԱՑ ԹՈՂՆԵԼ'}
                     </button>
                 </div>`;
-            speak(word.en === "I" ? "eye" : word.en);
+            speak(word.en === "I" ? "eye" : word.en, word.audio);
         }
 
         function handleStage1NextClick() {
@@ -604,7 +605,7 @@
             el.classList.add('match-selected');
             if(type === 'en') { 
                 selectedEn = { el, word }; 
-                speak(word.en === "I" ? "eye" : word.en); 
+                speak(word.en === "I" ? "eye" : word.en, word.audio); 
             }
             else selectedHy = { el, word };
             
@@ -636,8 +637,8 @@
             else if(activeStage === 5) { question = word.en; answer = word.hy; }
             else if(activeStage === 6) { question = "🔊"; answer = word.en; }
             
-            document.getElementById('content').innerHTML = `<div class="w-full text-center flex flex-col items-center"><div class="mb-1">${getStars(word)}</div><div class="mb-6 text-3xl font-black text-white italic break-words px-4" onclick="speak('${word.en === "I" ? "eye" : word.en}')">${question}</div><input type="text" id="stage-input" autofocus class="w-full p-5 border-4 border-emerald-800 rounded-[2rem] text-center text-xl outline-none focus:border-emerald-400 transition-all shadow-inner" placeholder="..." autocomplete="off"><button id="check-btn" onclick="checkGeneric('${answer}')" class="btn-primary mt-6">ՍՏՈՒԳԵԼ</button><button id="next-btn" onclick="skipGeneric()" class="btn-next-step">ՀԱՋՈՐԴԸ</button></div>`;
-            if(activeStage !== 4) speak(word.en === "I" ? "eye" : word.en);
+            document.getElementById('content').innerHTML = `<div class="w-full text-center flex flex-col items-center"><div class="mb-1">${getStars(word)}</div><div class="mb-6 text-3xl font-black text-white italic break-words px-4" onclick="speak('${word.en === "I" ? "eye" : word.en}', '${word.audio || ""}')">${question}</div><input type="text" id="stage-input" autofocus class="w-full p-5 border-4 border-emerald-800 rounded-[2rem] text-center text-xl outline-none focus:border-emerald-400 transition-all shadow-inner" placeholder="..." autocomplete="off"><button id="check-btn" onclick="checkGeneric('${answer}')" class="btn-primary mt-6">ՍՏՈՒԳԵԼ</button><button id="next-btn" onclick="skipGeneric()" class="btn-next-step">ՀԱՋՈՐԴԸ</button></div>`;
+            if(activeStage !== 4) speak(word.en === "I" ? "eye" : word.en, word.audio);
             setTimeout(() => document.getElementById('stage-input')?.focus(), 50);
         }
 
@@ -648,8 +649,8 @@
             let otherWords = words.filter(w => w.id !== word.id).sort(() => 0.5 - Math.random());
             options.push(...otherWords.slice(0, 3).map(w => w.hy));
             options.sort(() => 0.5 - Math.random());
-            document.getElementById('content').innerHTML = `<div class="w-full text-center flex flex-col items-center"><div class="mb-1">${getStars(word)}</div><div class="mb-6 text-3xl font-black text-white italic break-words px-4" onclick="speak('${word.en === "I" ? "eye" : word.en}')">${word.en}</div><div class="grid grid-cols-1 gap-2 w-full max-h-[50vh] overflow-y-auto pr-1 custom-scroll">${options.map(opt => `<button onclick="checkChoice(this, '${opt}', '${word.hy}')" class="choice-btn p-4 border-2 border-emerald-800 rounded-2xl font-bold text-md break-words px-4">${opt}</button>`).join('')}</div><button id="next-btn" onclick="skipGeneric()" class="btn-next-step">ՀԱՋՈՐԴԸ</button></div>`;
-            speak(word.en === "I" ? "eye" : word.en);
+            document.getElementById('content').innerHTML = `<div class="w-full text-center flex flex-col items-center"><div class="mb-1">${getStars(word)}</div><div class="mb-6 text-3xl font-black text-white italic break-words px-4" onclick="speak('${word.en === "I" ? "eye" : word.en}', '${word.audio || ""}')">${word.en}</div><div class="grid grid-cols-1 gap-2 w-full max-h-[50vh] overflow-y-auto pr-1 custom-scroll">${options.map(opt => `<button onclick="checkChoice(this, '${opt}', '${word.hy}')" class="choice-btn p-4 border-2 border-emerald-800 rounded-2xl font-bold text-md break-words px-4">${opt}</button>`).join('')}</div><button id="next-btn" onclick="skipGeneric()" class="btn-next-step">ՀԱՋՈՐԴԸ</button></div>`;
+            speak(word.en === "I" ? "eye" : word.en, word.audio);
         }
 
         function checkChoice(btn, selected, correct) {
@@ -679,7 +680,7 @@
             const input = document.getElementById('stage-input');
             const word = activeList[activeIndex % activeList.length];
             if(cleanText(input.value) === cleanText(correct)) {
-                if(activeStage === 4) speak(word.en === "I" ? "eye" : word.en);
+                if(activeStage === 4) speak(word.en === "I" ? "eye" : word.en, word.audio);
                 input.className = "w-full p-5 border-4 border-emerald-500 bg-emerald-600 text-white rounded-[2rem] text-center text-xl outline-none";
                 const result = handleCorrectAnswer(word, activeStage, smartMode);
                 if (activeStage === 7 && smartMode === 'difficult') {
@@ -839,10 +840,18 @@
             window.speechSynthesis.cancel(); updateStats();
         }
 
-        function speak(text) {
-            window.speechSynthesis.cancel();
-            const msg = new SpeechSynthesisUtterance(text); msg.lang = 'en-US';
-            window.speechSynthesis.speak(msg);
+        function speak(text, audioUrl = null) {
+            window.speechSynthesis.cancel(); // կանգնեցնել հնարավոր նախորդ speech-ը
+            if (audioUrl) {
+                // Եթե ունենք mp3 հղում, նվագարկում ենք այն
+                const audio = new Audio(audioUrl);
+                audio.play().catch(e => console.log("Audio play error:", e));
+            } else {
+                // Հակառակ դեպքում՝ speechSynthesis
+                const msg = new SpeechSynthesisUtterance(text);
+                msg.lang = 'en-US';
+                window.speechSynthesis.speak(msg);
+            }
         }
 
         function showDeleteModal() { document.getElementById('delete-modal').classList.remove('hidden'); }
