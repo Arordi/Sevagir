@@ -10,6 +10,8 @@
         .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .home-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; border-left: 10px solid #059669; background: #065f46; }
         .home-card:active { transform: scale(0.96); }
+        .a2-card { border-left: 10px solid #3b82f6; background: #1e3a5f; }
+        .a2-card:active { transform: scale(0.96); }
         
         #menu { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: 8px; padding: 8px; height: calc(100vh - 100px); box-sizing: border-box; }
         .stage-card { transition: all 0.2s ease; cursor: pointer; background-color: #065f46; border: 2px solid #059669; border-radius: 1rem; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); color: white; text-align: center; overflow: hidden; }
@@ -97,20 +99,36 @@
             <p class="text-emerald-500 font-bold tracking-[0.3em] uppercase text-xs">Premium Learning</p>
         </div>
         <div class="space-y-4">
-            <div onclick="goToAppMenu()" class="home-card glass p-6 rounded-[2rem] shadow-xl flex items-center justify-between relative overflow-hidden">
+            <div onclick="goToLevel('A1')" class="home-card glass p-6 rounded-[2rem] shadow-xl flex items-center justify-between relative overflow-hidden">
                 <div class="flex items-center gap-4 z-10">
                     <div class="w-14 h-14 bg-emerald-900/50 rounded-xl flex items-center justify-center text-2xl border border-emerald-700">🇬🇧</div>
                     <div>
                         <h2 class="text-xl font-black text-white leading-tight">A1 Մակարդակ</h2>
                         <div class="flex items-center gap-2 mt-1">
-                            <p id="home-word-count" class="text-emerald-300 text-[10px] font-bold uppercase">...</p>
+                            <p id="home-word-count-a1" class="text-emerald-300 text-[10px] font-bold uppercase">...</p>
                             <span class="text-emerald-700">|</span>
-                            <p id="home-progress-pct" class="text-emerald-400 text-[10px] font-black">0%</p>
+                            <p id="home-progress-pct-a1" class="text-emerald-400 text-[10px] font-black">0%</p>
                         </div>
                     </div>
                 </div>
                 <div class="z-10 w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-md">➔</div>
-                <div id="home-bg-progress" class="absolute left-0 bottom-0 h-1 bg-emerald-400 transition-all duration-1000" style="width: 0%"></div>
+                <div id="home-bg-progress-a1" class="absolute left-0 bottom-0 h-1 bg-emerald-400 transition-all duration-1000" style="width: 0%"></div>
+            </div>
+
+            <div onclick="goToLevel('A2')" class="home-card glass p-6 rounded-[2rem] shadow-xl flex items-center justify-between relative overflow-hidden a2-card">
+                <div class="flex items-center gap-4 z-10">
+                    <div class="w-14 h-14 bg-blue-900/50 rounded-xl flex items-center justify-center text-2xl border border-blue-700">🇺🇸</div>
+                    <div>
+                        <h2 class="text-xl font-black text-white leading-tight">A2 Մակարդակ</h2>
+                        <div class="flex items-center gap-2 mt-1">
+                            <p id="home-word-count-a2" class="text-blue-300 text-[10px] font-bold uppercase">...</p>
+                            <span class="text-blue-700">|</span>
+                            <p id="home-progress-pct-a2" class="text-blue-400 text-[10px] font-black">0%</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="z-10 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white shadow-md">➔</div>
+                <div id="home-bg-progress-a2" class="absolute left-0 bottom-0 h-1 bg-blue-400 transition-all duration-1000" style="width: 0%"></div>
             </div>
         </div>
     </div>
@@ -120,7 +138,7 @@
             <div class="max-w-4xl mx-auto flex justify-between items-center mb-2">
                 <div onclick="goToWelcome()" class="cursor-pointer flex items-center gap-2">
                     <span class="text-lg">🏠</span>
-                    <h1 class="font-bold text-base leading-none italic uppercase tracking-tighter">Usanim A1</h1>
+                    <h1 id="level-title" class="font-bold text-base leading-none italic uppercase tracking-tighter">Usanim A1</h1>
                 </div>
                 <div class="flex items-center gap-2">
                     <div id="session-timer-display" class="text-[9px] font-bold bg-black/20 px-2 py-1 rounded-lg border border-emerald-700">00:00</div>
@@ -206,6 +224,8 @@
     <script src="scoring.js"></script>
 
     <script>
+        // ---------- Գլոբալ տվյալներ ----------
+        let currentLevel = 'A1';                     // ակտիվ մակարդակը
         let words = [], activeStage = 1, activeIndex = 0, activeList = [], canProceed = false;
         let examScores = [], dailyWordsCount = 0, dailyGoal = 20;
         let selectedEn = null, selectedHy = null;
@@ -222,6 +242,16 @@
 
         let touchStartX = 0;
         let touchEndX = 0;
+
+        // ---------- localStorage բանալի ըստ մակարդակի ----------
+        function storageKey(level = currentLevel) {
+            return `usanim_v3_data_${level}`;
+        }
+
+        // ---------- JSON URL ըստ մակարդակի ----------
+        function jsonUrl(level = currentLevel) {
+            return `./vocabulary_${level.toLowerCase()}.json`;
+        }
 
         document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, false);
         document.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; handleSwipe(); }, false);
@@ -258,9 +288,19 @@
             lastDate = today;
         }
 
+        // ---------- Մակարդակի ընտրություն ----------
+        async function goToLevel(level) {
+            currentLevel = level;
+            // Թարմացնել UI-ն
+            document.getElementById('level-title').innerText = `Usanim ${level}`;
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('app-content').classList.remove('hidden');
+            await initApp();
+        }
+
         async function initApp() {
             try {
-                const response = await fetch('./vocabulary_a1.json');
+                const response = await fetch(jsonUrl());
                 const data = await response.json();
                 words = data.map((item, index) => ({
                     id: item.id || index, en: item.word, hy: item.translation,
@@ -272,7 +312,7 @@
                 checkDailyReset();
                 updateStats();
                 startTimer();
-                document.getElementById('home-word-count').innerText = `${words.length} բառ`;
+                document.getElementById(`home-word-count-${currentLevel.toLowerCase()}`).innerText = `${words.length} բառ`;
                 document.getElementById('delete-confirm-input').addEventListener('input', function(e) {
                     const btn = document.getElementById('real-delete-btn');
                     const isMatch = e.target.value.toUpperCase() === 'DELETE';
@@ -307,7 +347,7 @@
         }
 
         function loadProgress() {
-            const saved = localStorage.getItem('usanim_v3_data');
+            const saved = localStorage.getItem(storageKey());
             if(saved) {
                 const p = JSON.parse(saved);
                 words.forEach(w => { 
@@ -332,18 +372,19 @@
 
         function triggerSave() {
             saveProgress(words, examScores, dailyWordsCount, dailyGoal, dailyTimeData, reminderMinute);
-            const currentData = JSON.parse(localStorage.getItem('usanim_v3_data'));
+            const currentData = JSON.parse(localStorage.getItem(storageKey()));
             currentData.lastDate = lastDate;
             currentData.stage1RepeatLimit = stage1RepeatLimit;
             currentData.stage1Mode = stage1Mode;
-            localStorage.setItem('usanim_v3_data', JSON.stringify(currentData));
+            localStorage.setItem(storageKey(), JSON.stringify(currentData));
         }
 
         function updateStats() {
             const learned = words.filter(w => isWordLearned(w)).length;
             const pct = Math.round((learned / words.length) * 100);
-            document.getElementById('home-progress-pct').innerText = pct + "%";
-            document.getElementById('home-bg-progress').style.width = pct + "%";
+            const levelLower = currentLevel.toLowerCase();
+            document.getElementById(`home-progress-pct-${levelLower}`).innerText = pct + "%";
+            document.getElementById(`home-bg-progress-${levelLower}`).style.width = pct + "%";
             document.getElementById('progress-bar').style.width = pct + "%";
             const diffWords = words.filter(w => w.errorCount >= 5 && !isWordLearned(w));
             const today = getArmenianDate();
@@ -385,7 +426,6 @@
         }
 
         function cleanText(text) { return text.trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,""); }
-        function goToAppMenu() { document.getElementById('welcome-screen').classList.add('hidden'); document.getElementById('app-content').classList.remove('hidden'); updateStats(); }
         function goToWelcome() { document.getElementById('app-content').classList.add('hidden'); document.getElementById('welcome-screen').classList.remove('hidden'); updateStats(); }
 
         function openSmartMenu() { updateStats(); document.getElementById('app-content').classList.add('hidden'); document.getElementById('smart-menu-view').classList.remove('hidden'); }
@@ -856,9 +896,43 @@
 
         function showDeleteModal() { document.getElementById('delete-modal').classList.remove('hidden'); }
         function hideDeleteModal() { document.getElementById('delete-modal').classList.add('hidden'); }
-        function confirmFinalDelete() { localStorage.removeItem('usanim_v3_data'); location.reload(); }
+        function confirmFinalDelete() { localStorage.removeItem(storageKey()); location.reload(); }
 
-        initApp();
+        // ---------- Սկզբնավորում ----------
+        // Լռելյայն ցույց ենք տալիս welcome էկրանը, առանց JSON բեռնելու
+        // (մակարդակի ընտրության ժամանակ է կատարվում initApp)
+        // Սկզբում թարմացնում ենք A1-ի ցուցանիշները, եթե առկա են պահպանված տվյալներ
+        (function() {
+            // Ստուգում ենք A1-ի պահպանված տվյալները և ցուցադրում home-ում
+            const savedA1 = localStorage.getItem('usanim_v3_data_A1');
+            if (savedA1) {
+                try {
+                    const p = JSON.parse(savedA1);
+                    const totalWords = p.words ? Object.keys(p.words).length : 0;
+                    const learnedCount = p.words ? Object.values(p.words).filter(w => w.stagesCompleted && w.stagesCompleted.length >= 6).length : 0;
+                    document.getElementById('home-word-count-a1').innerText = `${totalWords || 896} բառ`;
+                    const pct = Math.round((learnedCount / (totalWords || 896)) * 100);
+                    document.getElementById('home-progress-pct-a1').innerText = pct + "%";
+                    document.getElementById('home-bg-progress-a1').style.width = pct + "%";
+                } catch(e) {}
+            } else {
+                document.getElementById('home-word-count-a1').innerText = `896 բառ`;
+            }
+            const savedA2 = localStorage.getItem('usanim_v3_data_A2');
+            if (savedA2) {
+                try {
+                    const p = JSON.parse(savedA2);
+                    const totalWords = p.words ? Object.keys(p.words).length : 0;
+                    const learnedCount = p.words ? Object.values(p.words).filter(w => w.stagesCompleted && w.stagesCompleted.length >= 6).length : 0;
+                    document.getElementById('home-word-count-a2').innerText = `${totalWords || 0} բառ`;
+                    const pct = Math.round((learnedCount / (totalWords || 1)) * 100);
+                    document.getElementById('home-progress-pct-a2').innerText = pct + "%";
+                    document.getElementById('home-bg-progress-a2').style.width = pct + "%";
+                } catch(e) {}
+            } else {
+                document.getElementById('home-word-count-a2').innerText = `0 բառ`;
+            }
+        })();
     </script>
 </body>
 </html>
