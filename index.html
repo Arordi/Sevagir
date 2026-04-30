@@ -36,7 +36,7 @@
             padding: 8px 4px; 
             text-align: center; 
             cursor: pointer; 
-            height: 62px; 
+            height: 62px; /* Ֆիքսված բարձրություն, որ չմեծանա */
             box-sizing: border-box; 
             display: flex; 
             flex-direction: row; 
@@ -46,7 +46,7 @@
             background: #065f46; 
             transition: all 0.2s ease; 
             color: white; 
-            font-size: 15px; 
+            font-size: 15px; /* Մեծացված տառաչափ */
             overflow: hidden; 
             word-break: break-word;
             line-height: 1.1;
@@ -218,7 +218,7 @@
 
         let stage1RepeatLimit = 1;
         let currentWordReps = 0;
-        let stage1Mode = 'manual';
+        let stage1Mode = 'manual'; // 'manual' (red) or 'auto' (green)
 
         let touchStartX = 0;
         let touchEndX = 0;
@@ -260,8 +260,7 @@
 
         async function initApp() {
             try {
-                // Փոխված է ա1 ջսոնի համար
-                const response = await fetch('./a1.json');
+                const response = await fetch('./vocabulary.json');
                 const data = await response.json();
                 words = data.map((item, index) => ({
                     id: item.id || index, en: item.word, hy: item.translation,
@@ -558,6 +557,7 @@
 
         function renderStage3() {
             const batch = activeList.slice(0, 5);
+            // Բեռնում ենք կոնտեյները, որը լրացնում է էկրանի ազատ մասը
             document.getElementById('content').innerHTML = `
                 <div class="grid grid-cols-2 gap-3 w-full items-stretch flex-grow max-h-[70vh] px-1 overflow-hidden" style="display: grid; grid-template-rows: repeat(5, 1fr);">
                     <div class="flex flex-col gap-2" id="en-list"></div>
@@ -596,21 +596,27 @@
 
         function selectMatch(el, type, word) {
             if(el.classList.contains('match-correct')) return;
+            
+            // Մաքրում ենք նախորդ ընտրվածը նույն սյունակից
             const parent = el.parentElement;
             parent.querySelectorAll('.match-item').forEach(i => i.classList.remove('match-selected'));
+            
             el.classList.add('match-selected');
             if(type === 'en') { 
                 selectedEn = { el, word }; 
                 speak(word.en === "I" ? "eye" : word.en); 
             }
             else selectedHy = { el, word };
+            
             if(selectedEn && selectedHy) {
                 if(selectedEn.word.id === selectedHy.word.id) {
+                    // Ճիշտ պատասխան
                     selectedEn.el.className = 'match-item match-correct'; 
                     selectedHy.el.className = 'match-item match-correct';
                     const result = handleCorrectAnswer(selectedEn.word, 3);
                     if(result && result.learnedNew) dailyWordsCount++;
                 } else {
+                    // Սխալ պատասխան
                     selectedEn.el.classList.add('match-wrong'); 
                     selectedHy.el.classList.add('match-wrong');
                     handleWrongAnswer(selectedEn.word, 3);
@@ -629,6 +635,7 @@
             if(activeStage === 4) { question = word.hy; answer = word.en; }
             else if(activeStage === 5) { question = word.en; answer = word.hy; }
             else if(activeStage === 6) { question = "🔊"; answer = word.en; }
+            
             document.getElementById('content').innerHTML = `<div class="w-full text-center flex flex-col items-center"><div class="mb-1">${getStars(word)}</div><div class="mb-6 text-3xl font-black text-white italic break-words px-4" onclick="speak('${word.en === "I" ? "eye" : word.en}')">${question}</div><input type="text" id="stage-input" autofocus class="w-full p-5 border-4 border-emerald-800 rounded-[2rem] text-center text-xl outline-none focus:border-emerald-400 transition-all shadow-inner" placeholder="..." autocomplete="off"><button id="check-btn" onclick="checkGeneric('${answer}')" class="btn-primary mt-6">ՍՏՈՒԳԵԼ</button><button id="next-btn" onclick="skipGeneric()" class="btn-next-step">ՀԱՋՈՐԴԸ</button></div>`;
             if(activeStage !== 4) speak(word.en === "I" ? "eye" : word.en);
             setTimeout(() => document.getElementById('stage-input')?.focus(), 50);
@@ -730,12 +737,14 @@
             const container = document.getElementById('stats-container');
             const learnedWords = words.filter(w => isWordLearned(w));
             const weekly = getWeeklyData();
+            
             const stageLabels = ["Փ1", "Փ2", "Փ3", "Փ4", "Փ5", "Փ6", "Փ7", "Փ8"];
             const stageData = [1, 2, 3, 4, 5, 6, 7, 8].map(s => {
                 if (s === 8) return examScores.length; 
                 return words.filter(w => w.stagesCompleted && w.stagesCompleted.includes(s)).length;
             });
             const maxStageVal = Math.max(...stageData, 5);
+
             const maxWordVal = Math.max(...weekly.wordData, 5);
             const maxTimeVal = 600; 
             const goalProgress = Math.min(100, Math.round((dailyWordsCount / dailyGoal) * 100));
@@ -745,6 +754,7 @@
                     <h3 class="font-black text-[8px] mb-2 uppercase text-center italic tracking-widest text-emerald-300">Փուլերի առաջընթաց (բառեր)</h3>
                     <div class="bar-container">${stageData.map((val, i) => `<div class="bar-wrapper"><div class="bar-fill stage-bar" data-val="${val}" style="height: ${(val/maxStageVal)*100}%"></div><span class="bar-label">${stageLabels[i]}</span></div>`).join('')}</div>
                 </div>
+
                 <div class="grid grid-cols-1 gap-3">
                     <div class="bg-emerald-900/40 p-3 rounded-[1.5rem] border border-emerald-700/50">
                         <h3 class="font-black text-[8px] mb-2 uppercase text-center italic tracking-widest text-emerald-300">Բառերի ակտիվություն (շաբաթական)</h3>
@@ -755,6 +765,7 @@
                         <div class="bar-container">${weekly.timeData.map((val, i) => `<div class="bar-wrapper"><div class="bar-fill time-bar" data-val="${val}ր" style="height: ${(val/maxTimeVal)*100}%"></div><span class="bar-label">${weekly.labels[i]}</span></div>`).join('')}</div>
                     </div>
                 </div>
+
                 <div class="bg-emerald-900 p-4 rounded-[2rem] border border-emerald-700 shadow-lg">
                     <div class="grid grid-cols-2 gap-4">
                         <div class="text-center">
@@ -775,6 +786,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="bg-emerald-900 p-3 rounded-[1.5rem] border border-emerald-700">
                     <h3 class="font-black text-[9px] mb-3 uppercase italic text-center tracking-widest">Սովորած բառեր (${learnedWords.length})</h3>
                     <div class="max-h-48 overflow-y-auto space-y-1.5 custom-scroll pr-1">
