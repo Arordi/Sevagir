@@ -260,7 +260,7 @@
 
         async function initApp() {
             try {
-                const response = await fetch('./vocabulary.json');
+                const response = await fetch('./vocabulary_a1.json');
                 const data = await response.json();
                 words = data.map((item, index) => ({
                     id: item.id || index, en: item.word, hy: item.translation,
