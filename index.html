@@ -96,7 +96,7 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <div id="welcome-screen" class="flex-grow flex flex-col p-6 max-w-lg mx-auto w-full">
+    <div id="welcome-screen" class="flex-grow flex flex-col p-6 w-full">
         <div class="mt-16 mb-8 text-center">
             <h1 class="text-5xl font-black text-emerald-400 tracking-tight mb-2 italic">Usanim</h1>
             <p class="text-emerald-500 font-bold tracking-[0.3em] uppercase text-xs">Premium Learning</p>
@@ -104,7 +104,7 @@
         <div class="space-y-4">
             <div onclick="goToLevel('A1')" class="home-card glass p-6 rounded-[2rem] shadow-xl flex items-center justify-between relative overflow-hidden">
                 <div class="flex items-center gap-4 z-10">
-                    <div class="w-14 h-14 bg-emerald-900/50 rounded-xl flex items-center justify-center text-2xl border border-emerald-700">🇬🇧</div>
+                    <div class="w-14 h-14 bg-emerald-900/50 rounded-xl flex items-center justify-center text-2xl border border-emerald-700">🇺🇸</div>
                     <div>
                         <h2 class="text-xl font-black text-white leading-tight">A1 Մակարդակ</h2>
                         <div class="flex items-center gap-2 mt-1">
@@ -210,7 +210,7 @@
                 </div>
                 <div class="rep-setting">
                     <label>քանակ</label>
-                    <input type="text" id="stage1-rep-input" readonly class="w-[35px] text-center font-black bg-transparent border-none text-white outline-none">
+                    <input type="text" id="stage1-rep-input" class="w-[35px] text-center font-black bg-transparent border-none text-white outline-none" onchange="updateStage1Limit(this.value)">
                 </div>
             </div>
             <div id="empty-spacer" class="w-10"></div>
@@ -608,11 +608,17 @@
             if(stage1Mode === 'manual') {
                 dMan.className = 'mode-dot active-red';
                 dAuto.className = 'mode-dot inactive';
-                if(input) input.value = '—';
+                if(input) {
+                    input.value = '—';
+                    input.readOnly = true;
+                }
             } else {
                 dMan.className = 'mode-dot inactive';
                 dAuto.className = 'mode-dot active-green';
-                if(input) input.value = stage1RepeatLimit;
+                if(input) {
+                    input.value = stage1RepeatLimit;
+                    input.readOnly = false;
+                }
             }
         }
 
@@ -620,6 +626,9 @@
             if(stage1Mode === 'manual') return;
             stage1RepeatLimit = Math.max(1, Math.min(99, parseInt(val) || 1));
             currentWordReps = 0;
+            if(document.getElementById('stage1-rep-input')) {
+                document.getElementById('stage1-rep-input').value = stage1RepeatLimit;
+            }
             triggerSave();
             if(activeStage === 1) renderStage1();
         }
@@ -632,9 +641,7 @@
                 if(smartMode === 'difficult') activeList = words.filter(w => w.errorCount >= 5 && !isWordLearned(w)).slice(0, 10);
                 else { const today = getArmenianDate(); activeList = words.filter(w => isWordLearned(w) && w.nextRepDate && w.nextRepDate <= today).slice(0, 10); }
             } else if (activeStage === 1) {
-                // Նախ ընտրում ենք այն բառերը, որոնք դեռ ոչ մի անգամ չեն տեսնվել (!w.isSeen)
                 activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1) && !w.isSeen).slice(0, 10);
-                // Եթե բոլորն արդեն տեսել են, ընտրում ենք տեսած, բայց դեռ չսովորած բառերը
                 if (activeList.length === 0) {
                     activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
                 }
@@ -734,7 +741,6 @@
         function restartStage1() {
             activeIndex = 0;
             currentWordReps = 0;
-            // Նույն տրամաբանությունը, ինչ initStageLogic-ում
             activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1) && !w.isSeen).slice(0, 10);
             if (activeList.length === 0) {
                  activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
