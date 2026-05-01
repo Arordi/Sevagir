@@ -693,13 +693,12 @@
                 triggerSave();
                 if (activeIndex >= activeList.length) renderFinish(); else renderStage1();
             } else {
+                // Auto mode – միայն ցուցադրում, առանց stage 1 ավելացնելու
                 if (hyText) hyText.classList.add('revealed');
                 w.isSeen = true;
                 setTimeout(() => {
                     currentWordReps++;
                     if (currentWordReps >= stage1RepeatLimit) {
-                        if (!w.stagesCompleted.includes(1)) w.stagesCompleted.push(1);
-                        handleCorrectAnswer(w, 1);
                         activeIndex++;
                         currentWordReps = 0;
                     }
