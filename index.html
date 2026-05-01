@@ -641,8 +641,10 @@
                 if(smartMode === 'difficult') activeList = words.filter(w => w.errorCount >= 5 && !isWordLearned(w)).slice(0, 10);
                 else { const today = getArmenianDate(); activeList = words.filter(w => isWordLearned(w) && w.nextRepDate && w.nextRepDate <= today).slice(0, 10); }
             } else if (activeStage === 1) {
-                // ԱՆԿԱԽ ՓՈՒԼ 1 – ցուցադրում է միայն չսովորած բառերը
-                activeList = words.filter(w => !isWordLearned(w)).slice(0, 10);
+                activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1) && !w.isSeen).slice(0, 10);
+                if (activeList.length === 0) {
+                    activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
+                }
             } else {
                 activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(activeStage)).slice(0, 10);
             }
@@ -685,16 +687,15 @@
             const hyText = document.getElementById('stage1-hy');
             
             if (stage1Mode === 'manual') {
-                // Manual «Բաց թողնել» – ցույց է տալիս, բայց չի փոխում isSeen, stage1
                 if (hyText) hyText.classList.add('revealed');
-                // w.isSeen = true; (հեռացված)
+                w.isSeen = true;
                 activeIndex++;
                 triggerSave();
                 if (activeIndex >= activeList.length) renderFinish(); else renderStage1();
             } else {
-                // Auto – միայն ցուցադրում, ոչ մի փոփոխություն (isSeen, stagesCompleted)
+                // Auto mode – միայն ցուցադրում, առանց stage 1 ավելացնելու
                 if (hyText) hyText.classList.add('revealed');
-                // w.isSeen = true; (հեռացված)
+                w.isSeen = true;
                 setTimeout(() => {
                     currentWordReps++;
                     if (currentWordReps >= stage1RepeatLimit) {
@@ -709,8 +710,8 @@
 
         function handleStage1(known) {
             const w = activeList[activeIndex];
-            // w.isSeen = true; (Manual «Գիտեմ»/«Չգիտեմ» – isSeen-ը թողել ենք, ինչպես կար)
-            w.isSeen = true; // կարող ենք թողնել, Phase 1-ում isSeen-ը չի ազդում, քանի որ filter-ը միայն !isWordLearned
+            w.isSeen = true;
+            
             const hyText = document.getElementById('stage1-hy');
             if (hyText) hyText.classList.add('revealed');
 
@@ -739,8 +740,11 @@
         function restartStage1() {
             activeIndex = 0;
             currentWordReps = 0;
-            // Ամբողջովին անկախ – ցույց է տալիս բոլոր !isWordLearned բառերը
-            activeList = words.filter(w => !isWordLearned(w)).slice(0, 10);
+            activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1) && !w.isSeen).slice(0, 10);
+            if (activeList.length === 0) {
+                 activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
+            }
+            if (activeList.length === 0) activeList = words.filter(w => !isWordLearned(w)).slice(0, 10);
             if (activeList.length === 0) exitToMenu(); else renderStage1();
         }
 
