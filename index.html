@@ -595,7 +595,7 @@
             stage1Mode = mode;
             currentWordReps = 0;
             updateModeDots();
-            renderStage1();
+            initStageLogic();
             triggerSave();
         }
 
@@ -641,9 +641,14 @@
                 if(smartMode === 'difficult') activeList = words.filter(w => w.errorCount >= 5 && !isWordLearned(w)).slice(0, 10);
                 else { const today = getArmenianDate(); activeList = words.filter(w => isWordLearned(w) && w.nextRepDate && w.nextRepDate <= today).slice(0, 10); }
             } else if (activeStage === 1) {
-                activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1) && !w.isSeen).slice(0, 10);
-                if (activeList.length === 0) {
-                    activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
+                if (stage1Mode === 'auto') {
+                    // Ավտո ռեժիմում բառերը միայն չսովորած են և անկախ այլ փուլերից
+                    activeList = words.filter(w => !isWordLearned(w)).slice(0, 10);
+                } else {
+                    activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1) && !w.isSeen).slice(0, 10);
+                    if (activeList.length === 0) {
+                        activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
+                    }
                 }
             } else {
                 activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(activeStage)).slice(0, 10);
@@ -660,9 +665,11 @@
             if (!word) return renderFinish();
             
             const isAuto = (stage1Mode === 'auto');
+            const wordCountDisplay = isAuto ? `<div class="text-[12px] font-black text-blue-300 uppercase mb-1 tracking-widest">Բառ ${activeIndex + 1} / ${activeList.length}</div>` : '';
             const repIndicator = isAuto ? `<div class="text-[10px] font-black text-emerald-400 uppercase mb-2">Կրկնություն: ${currentWordReps + 1} / ${stage1RepeatLimit}</div>` : '';
 
             document.getElementById('content').innerHTML = `
+                ${wordCountDisplay}
                 ${repIndicator}
                 <div class="w-full bg-emerald-800 rounded-[2.5rem] p-6 text-center shadow-xl mb-6 border-b-8 border-emerald-500 min-h-[180px] flex flex-col justify-center overflow-hidden">
                     <h2 class="text-3xl font-black text-white mb-4 italic break-words" onclick="speak('${word.en === "I" ? "eye" : word.en}', '${word.audio || ""}')">${word.en}</h2>
@@ -693,9 +700,8 @@
                 triggerSave();
                 if (activeIndex >= activeList.length) renderFinish(); else renderStage1();
             } else {
-                // Auto mode – միայն ցուցադրում, առանց stage 1 ավելացնելու
+                // Ավտո ռեժիմ - տեսած լինելը (isSeen) չի հաշվում, որպեսզի չազդի մեխանիկական ռեժիմի վրա
                 if (hyText) hyText.classList.add('revealed');
-                w.isSeen = true;
                 setTimeout(() => {
                     currentWordReps++;
                     if (currentWordReps >= stage1RepeatLimit) {
@@ -740,11 +746,17 @@
         function restartStage1() {
             activeIndex = 0;
             currentWordReps = 0;
-            activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1) && !w.isSeen).slice(0, 10);
-            if (activeList.length === 0) {
-                 activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
+            
+            if (stage1Mode === 'auto') {
+                activeList = words.filter(w => !isWordLearned(w)).slice(0, 10);
+            } else {
+                activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1) && !w.isSeen).slice(0, 10);
+                if (activeList.length === 0) {
+                     activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
+                }
+                if (activeList.length === 0) activeList = words.filter(w => !isWordLearned(w)).slice(0, 10);
             }
-            if (activeList.length === 0) activeList = words.filter(w => !isWordLearned(w)).slice(0, 10);
+            
             if (activeList.length === 0) exitToMenu(); else renderStage1();
         }
 
