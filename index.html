@@ -631,6 +631,13 @@
             if (activeStage === 7) {
                 if(smartMode === 'difficult') activeList = words.filter(w => w.errorCount >= 5 && !isWordLearned(w)).slice(0, 10);
                 else { const today = getArmenianDate(); activeList = words.filter(w => isWordLearned(w) && w.nextRepDate && w.nextRepDate <= today).slice(0, 10); }
+            } else if (activeStage === 1) {
+                // Նախ ընտրում ենք այն բառերը, որոնք դեռ ոչ մի անգամ չեն տեսնվել (!w.isSeen)
+                activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1) && !w.isSeen).slice(0, 10);
+                // Եթե բոլորն արդեն տեսել են, ընտրում ենք տեսած, բայց դեռ չսովորած բառերը
+                if (activeList.length === 0) {
+                    activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
+                }
             } else {
                 activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(activeStage)).slice(0, 10);
             }
@@ -668,20 +675,17 @@
             speak(word.en === "I" ? "eye" : word.en, word.audio);
         }
 
-        // ** ԱՅՍՏԵՂ Է ՓՈՓՈԽՈՒԹՅՈՒՆԸ **
         function handleStage1NextClick() {
             const w = activeList[activeIndex];
             const hyText = document.getElementById('stage1-hy');
             
             if (stage1Mode === 'manual') {
-                // «Բաց թողնել» - ցույց տալ թարգմանությունը, բայց ՉԱՎԵԼԱՑՆԵԼ 1-ը stagesCompleted-ում
                 if (hyText) hyText.classList.add('revealed');
                 w.isSeen = true;
                 activeIndex++;
                 triggerSave();
                 if (activeIndex >= activeList.length) renderFinish(); else renderStage1();
             } else {
-                // ավտոմատ ռեժիմ - նույնը, ինչ առաջ
                 if (hyText) hyText.classList.add('revealed');
                 w.isSeen = true;
                 setTimeout(() => {
@@ -715,7 +719,6 @@
                 w.learnedDate = getArmenianDate();
                 dailyWordsCount++;
             } else {
-                // "Չգիտեմ" – միայն errorCount, առանց 1-ը ավելացնելու
                 handleWrongAnswer(w, 1);
             }
 
@@ -731,8 +734,11 @@
         function restartStage1() {
             activeIndex = 0;
             currentWordReps = 0;
-            // Ֆիլտրում ենք բառերը, որոնք դեռ սովորած չեն և չունեն 1-ը ավարտված (այսինքն «Բաց թողնել»-ով կամ «Չգիտեմ»-ով անցածները)
-            activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
+            // Նույն տրամաբանությունը, ինչ initStageLogic-ում
+            activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1) && !w.isSeen).slice(0, 10);
+            if (activeList.length === 0) {
+                 activeList = words.filter(w => !isWordLearned(w) && !w.stagesCompleted.includes(1)).slice(0, 10);
+            }
             if (activeList.length === 0) activeList = words.filter(w => !isWordLearned(w)).slice(0, 10);
             if (activeList.length === 0) exitToMenu(); else renderStage1();
         }
