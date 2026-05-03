@@ -1,4 +1,3 @@
-```json
 [
   {"id": 1, "word": "a, an", "translation": "անորոշ հոդ (a՝ բաղաձայնից առաջ, an՝ ձայնավորից առաջ)", "audio": "audio/a_an.mp3"},
   {"id": 2, "word": "about", "translation": "մոտ, մասին", "audio": "audio/about.mp3"},
