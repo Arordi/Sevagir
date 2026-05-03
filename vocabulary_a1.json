@@ -298,7 +298,7 @@
   {"id": 297, "word": "food", "translation": "սնունդ", "audio": "audio/food.mp3"},
   {"id": 298, "word": "foot", "translation": "ոտնաթաթ, ֆուտ", "audio": "audio/foot.mp3"},
   {"id": 299, "word": "football", "translation": "ֆուտբոլ", "audio": "audio/football.mp3"},
-  {"id": 300, "word": "for", "translation": "համար", "audio": "audio/for.[
+  {"id": 300, "word": "for", "translation": "համար", "audio": "audio/for.mp3"},
   {"id": 301, "word": "forget", "translation": "մոռանալ", "audio": "audio/forget.mp3"},
   {"id": 302, "word": "form (n.)", "translation": "ձև, ձևաթուղթ", "audio": "audio/form_n.mp3"},
   {"id": 303, "word": "form (v.)", "translation": "ձևավորել, կազմել", "audio": "audio/form_v.mp3"},
@@ -498,7 +498,7 @@
   {"id": 497, "word": "mom", "translation": "մայրիկ", "audio": "audio/mom.mp3"},
   {"id": 498, "word": "moment", "translation": "պահ", "audio": "audio/moment.mp3"},
   {"id": 499, "word": "Monday", "translation": "երկուշաբթի", "audio": "audio/monday.mp3"},
-  {"id": 500, "word": "money", "translation": "փող", "audio": "audio/money.mp3"}
+  {"id": 500, "word": "money", "translation": "փող", "audio": "audio/money.mp3"},
   {"id": 501, "word": "month", "translation": "ամիս", "audio": "audio/month.mp3"},
   {"id": 502, "word": "more (det./pron.)", "translation": "ավելի շատ", "audio": "audio/more_det.mp3"},
   {"id": 503, "word": "more (adv.)", "translation": "ավելի", "audio": "audio/more_adv.mp3"},
