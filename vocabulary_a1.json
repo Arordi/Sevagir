@@ -1,5 +1,5 @@
 [
-  {"id": 1, "word": "a, an", "translation": "անորոշ հոդ (a՝ բաղաձայնից առաջ, an՝ ձայնավորից առաջ)", "audio": "audio/a_an.mp3"},
+  {"id": 1, "word": "a, an", "translation": "անորոշ հոդ", "audio": "audio/a_an.mp3"},
   {"id": 2, "word": "about", "translation": "մոտ, մասին", "audio": "audio/about.mp3"},
   {"id": 3, "word": "above", "translation": "վերևում", "audio": "audio/above.mp3"},
   {"id": 4, "word": "across", "translation": "միջով, հակառակ կողմում", "audio": "audio/across.mp3"},
@@ -356,7 +356,7 @@
   {"id": 355, "word": "hate", "translation": "ատել", "audio": "audio/hate.mp3"},
   {"id": 356, "word": "have", "translation": "ունենալ", "audio": "audio/have.mp3"},
   {"id": 357, "word": "have to", "translation": "պետք է", "audio": "audio/have_to.mp3"},
-  {"id": 358, "word": "he", "translation": "նա (տղա)", "audio": "audio/he.mp3"},
+  {"id": 358, "word": "he", "translation": "նա (արական)", "audio": "audio/he.mp3"},
   {"id": 359, "word": "head", "translation": "գլուխ", "audio": "audio/head.mp3"},
   {"id": 360, "word": "health", "translation": "առողջություն", "audio": "audio/health.mp3"},
   {"id": 361, "word": "healthy", "translation": "առողջ", "audio": "audio/healthy.mp3"},
