@@ -724,9 +724,7 @@
   {"id":723,"word":"wrap","translation":"փաթեթավորել, փաթաթել","audio":"audio/wrap.mp3"},
   {"id":724,"word":"wrong (n.)","translation":"սխալ, անարդարություն","audio":"audio/wrong_n.mp3"},
   {"id":725,"word":"yet (conj.)","translation":"բայց, սակայն","audio":"audio/yet_conj.mp3"},
-  {"id":726,"word":"zone","translation":"գոտի, տարածք","audio":"audio/zone.mp3"}
-]
-[
+  {"id":726,"word":"zone","translation":"գոտի, տարածք","audio":"audio/zone.mp3"},
   {"id":1,"word":"absorb","translation":"կլանել, ներծծել","audio":"audio/absorb.mp3"},
   {"id":2,"word":"abstract","translation":"վերացական, համառոտ","audio":"audio/abstract.mp3"},
   {"id":3,"word":"accent","translation":"շեշտ, արտասանություն","audio":"audio/accent.mp3"},
